@@ -1,1 +1,7 @@
-/django_commands.txt
+django_commands.txt
+db.sqlite3
+register\migrations\__pycache__
+todoapp\__pycache__
+main\migrations\__pycache__
+main\__pycache__
+
