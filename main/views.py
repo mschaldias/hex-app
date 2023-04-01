@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from .models import ToDoList, Item
 from .forms import CreateNewList
@@ -13,16 +14,16 @@ def index(request, id):
     if ls:
         if request.method == "POST":
             print(request.POST)
-            if request.POST.get("save"):
-                for item in ls.item_set.all():
-                    if request.POST.get("c" + str(item.id)) == "clicked":
-                        item.complete = True
-                    else:
-                        item.complete = False
-                    
-                    item.save()
+            # if request.POST.get("save"):
+            for item in ls.item_set.all():
+                if request.POST.get("c" + str(item.id)) == "clicked":
+                    item.complete = True
+                else:
+                    item.complete = False
+
+                item.save()
                 
-            elif request.POST.get("newItem"):
+            if request.POST.get("newItem"):
                 text = request.POST.get("newText")
 
                 if len(text) > 2:
@@ -30,6 +31,10 @@ def index(request, id):
                 else:
                     print("invalid input")
 
+            elif request.POST.get("removeItem"):
+                id = ''.join([n for n in request.POST.get("removeItem") if n.isdigit()])
+                ls.item_set.filter(id=id).delete()
+ 
         return render(request,"main/list.html",{"ls": ls})
     else:
         return redirect("/")
