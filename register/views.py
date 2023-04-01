@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import RegisterForm
-# from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate
 # from django.contrib.auth.forms import UserCreationForm
 
 
@@ -11,8 +11,14 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
+            print("REQUEST: ", request.POST)
+            username = request.POST['username']
+            password = request.POST['password1']
+            user = authenticate(request, username=username, password=password)
 
-            return redirect("/")
+            if user is not None:
+                login(request,user)
+                return redirect("/")
     
     else:
         form = RegisterForm()
