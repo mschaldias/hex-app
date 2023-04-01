@@ -5,33 +5,39 @@
 {% block content %}
 
     <h1>{{ls.name}}</h1>
-    <form method = "post" action = "">
-        {% csrf_token %}
-
+        <form id = "listform" method="post" action="">
+            {% csrf_token %}
             {% for item in ls.item_set.all %}
-            <div class = "input-group mb-3">
-                <div class = "input-group-prepend">
-                    <div class= "input-group-text" >
-                        {% if item.complete == True %}
-                            <input type="checkbox", value = "clicked", name = "c{{item.id}}" checked>
-                        {%else%}
-                            <input type="checkbox", value = "clicked", name = "c{{item.id}}">
-                        {%endif%}
+                
+                <div class = "input-group mb-3">
+                    <div class = "input-group-prepend">
+                        <div class= "input-group-text" >
+                            
+                            {% if item.complete == True %}
+                                <input type="checkbox", value = "clicked", name = "c{{item.id}}" onchange="document.getElementById('listform').submit()" checked>
+                            {%else%}
+                                <input type="checkbox", value = "clicked", name = "c{{item.id}}" onchange="document.getElementById('listform').submit()">
+                            {%endif%}
+        
+                        </div>
+                    </div>
+                    <input type="text", value = "{{item.text}}" name = "e{{item.id}}" class = "form-control" onchange="document.getElementById('listform').submit()">
+                    <div class = "input-group-append">
+                        <button type="submit", name = "removeItem", value = "r{{item.id}}", class="btn btn-danger"><i class="fa fa-minus"></i></button>
                     </div>
                 </div>
-                <input type="text", value = {{item.text}} class = "form-control">
+                
+                {%endfor%}  
+        
+            <div class = "input-group mb-3">
+                <input type="text", class = "form-control" name = "newText", placeholder="New Item">
+                <div class = "input-group-append">
+                    
+                    <button type = "submit", name = "newItem", value = "newItem", class = "btn btn-success" ><i class="fa fa-plus"></i></button>
+                </div>
+                
             </div>
-            
-            {%endfor%}  
-     
-        <div class = "input-group mb-3">
-            <div class = "input-group-prepend">
-                <button type = "submit", name = "newItem", value = "newItem", class = "btn btn-success">Add Item</button>
-            </div>
-            <input type="text", name = "newText">
-        </div>
 
-        <button type = "submit", name = "save", value = "save", class = "btn btn-success">Save</button>
+        </form>
 
-    </form>
 {% endblock %}

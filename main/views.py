@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from .models import ToDoList, Item
 from .forms import CreateNewList
@@ -11,25 +12,36 @@ def index(request, id):
     ls = request.user.todolist_set.filter(id=id).first()
 
     if ls:
+
+        for k in request.POST:
+            if k.startswith("e") and any(str.isdigit(c) for c in k):
+                id = ''.join([n for n in k if n.isdigit()])
+                newText = request.POST.get(k)
+                item = Item.objects.get(id=id)
+                item.text = newText
+                item.save()
+
+
         if request.method == "POST":
             print(request.POST)
-            if request.POST.get("save"):
-                for item in ls.item_set.all():
-                    if request.POST.get("c" + str(item.id)) == "clicked":
-                        item.complete = True
-                    else:
-                        item.complete = False
-                    
-                    item.save()
-                
-            elif request.POST.get("newItem"):
-                text = request.POST.get("newText")
-
-                if len(text) > 2:
-                    ls.item_set.create(text = text, complete = False)
+            # if request.POST.get("save"):
+            for item in ls.item_set.all():
+                if request.POST.get("c" + str(item.id)) == "clicked":
+                    item.complete = True
                 else:
-                    print("invalid input")
+                    item.complete = False
 
+                item.save()
+                
+            if request.POST.get("newItem"):
+                text = request.POST.get("newText")
+                ls.item_set.create(text = text, complete = False)
+
+
+            elif request.POST.get("removeItem"):
+                id = ''.join([n for n in request.POST.get("removeItem") if n.isdigit()])
+                ls.item_set.filter(id=id).delete()       
+ 
         return render(request,"main/list.html",{"ls": ls})
     else:
         return redirect("/")
