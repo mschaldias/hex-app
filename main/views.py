@@ -12,6 +12,16 @@ def index(request, id):
     ls = request.user.todolist_set.filter(id=id).first()
 
     if ls:
+
+        for k in request.POST:
+            if k.startswith("e") and any(str.isdigit(c) for c in k):
+                id = ''.join([n for n in k if n.isdigit()])
+                newText = request.POST.get(k)
+                item = Item.objects.get(id=id)
+                item.text = newText
+                item.save()
+
+
         if request.method == "POST":
             print(request.POST)
             # if request.POST.get("save"):

@@ -21,7 +21,7 @@
         
                         </div>
                     </div>
-                    <input type="text", value = "{{item.text}}" class = "form-control">
+                    <input type="text", value = "{{item.text}}" name = "e{{item.id}}" class = "form-control" onchange="document.getElementById('listform').submit()">
                     <div class = "input-group-append">
                         <button type="submit", name = "removeItem", value = "r{{item.id}}", class="btn btn-danger">-</button>
                     </div>
