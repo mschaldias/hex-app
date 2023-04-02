@@ -35,15 +35,12 @@ def index(request, id):
                 
             if request.POST.get("newItem"):
                 text = request.POST.get("newText")
+                ls.item_set.create(text = text, complete = False)
 
-                if len(text) > 2:
-                    ls.item_set.create(text = text, complete = False)
-                else:
-                    print("invalid input")
 
             elif request.POST.get("removeItem"):
                 id = ''.join([n for n in request.POST.get("removeItem") if n.isdigit()])
-                ls.item_set.filter(id=id).delete()
+                ls.item_set.filter(id=id).delete()       
  
         return render(request,"main/list.html",{"ls": ls})
     else:
