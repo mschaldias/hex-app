@@ -3,7 +3,8 @@
 {% block title %}View List{% endblock %}
 
 {% block content %}
-
+<div class = "row justify-content-center">
+    <div class = "col-8 mt-5">
     <h1>{{ls.name}}</h1>
         <form id = "listform" method="post" action="">
             {% csrf_token %}
@@ -39,5 +40,7 @@
             </div>
 
         </form>
+        </div>
+    </div>
 
 {% endblock %}

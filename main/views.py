@@ -6,8 +6,6 @@ from .forms import CreateNewList
 # Create your views here.
 
 def index(request, id):
-    # item = ls.item_set.get(id = 1) 
-    # return HttpResponse("%s<br></br><p>%s</p>" %(ls.name, item.text))
 
     ls = request.user.todolist_set.filter(id=id).first()
 
@@ -24,7 +22,6 @@ def index(request, id):
 
         if request.method == "POST":
             print(request.POST)
-            # if request.POST.get("save"):
             for item in ls.item_set.all():
                 if request.POST.get("c" + str(item.id)) == "clicked":
                     item.complete = True
@@ -50,22 +47,45 @@ def home(request):
     return render(request,"main/home.html",{})
 
 
-def create(request):
-
+def view(request):
     if request.method=="POST":
         form = CreateNewList(request.POST)
         if form.is_valid():
             name = form.cleaned_data["name"]
-            toDoList = request.user.todolist_set.create(name=name)
+            request.user.todolist_set.create(name=name)
+
+        elif request.POST.get("removeList"):
+            id = ''.join([n for n in request.POST.get("removeList") if n.isdigit()])
+            request.user.todolist_set.filter(id=id).delete() 
+    
+    form = CreateNewList()
+    return render(request, "main/view.html",{"form":form})
+
+
+def week(request):
+    if request.method=="POST":
+        print(request.POST)
+        list_id = [''.join([n for n in i if n.isdigit()]) for i in request.POST.get("list-id").split(",") if i][0]
+        item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.get("item-id").split(",") if i] 
+        ls = request.user.todolist_set.filter(id=list_id).first()
+ 
+        if request.POST.get("action-id") == "add":
+            for id in item_ids:
+                item = Item.objects.all().filter(id=id).first()
+                item.todolist = ls
+                item.save()
         
-        return redirect("/%i" %toDoList.id)
+        position = 0
+        for id in item_ids:
+            item = Item.objects.all().filter(id=id,todolist__id=ls.id).first()
+            item.position = position
+            item.save()
+            position+=1
+        return redirect("/week")
 
     else:
-        form = CreateNewList()
+        return render(request, "main/viewgrid.html",{})
 
-    return render(request,"main/create.html",{"form": form})
 
-def view(request):
-    return render(request, "main/view.html",{})
 
 

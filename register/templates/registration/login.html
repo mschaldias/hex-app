@@ -7,11 +7,16 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <form method="post" class = "form-group">
-       {% csrf_token %}
-       {{form|crispy}}
-       <p><a href="/register">Create new account</a></p>
-       <button type="submit" class="btn btn-success">Login</button>
-    </form>
+
+<div class = "row justify-content-center mt-5">
+    <div class = "col-8">
+        <form method="post" class = "form-group">
+        {% csrf_token %}
+        {{form|crispy}}
+        <p><a href="/register">Create new account</a></p>
+        <button type="submit" class="btn btn-success">Login</button>
+        </form> 
+    </div>
+</div>
     
 {% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+    Week View
+{% endblock %}
+
+{% block style %}
+<script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
+<style>
+    .list-group{
+        word-break: break-all;
+     }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div>
+    <h1 class="mt-4">Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">Primary Card</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">Warning Card</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">Success Card</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">Danger Card</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <form id="positionForm" method="post" action = "">
+            {% csrf_token %}
+        <input type="hidden" id = "item-id" name = "item-id" value = "" >
+        <input type="hidden" id = "list-id" name = "list-id" value = "" >
+        <input type="hidden" id = "action-id" name = "action-id" value = "" >
+        </form>
+
+            <div class = "container-fluid px-4">
+                <div class = "row mt-5">
+                {% for list in user.todolist_set.all %}
+                    <ul class="list-group col-3 mb-3" id="list{{list.id}}"> 
+                        <h5 class = "list-group-item list-group-item-success ">{{list.name}}--{{list.id}}</h4>
+                            {% for item in list.item_set.all %}
+                                <li class="list-group-item list-group-item-action draggable" id = "item{{item.id}}">{{item.text}}--{{item.id}}--{{item.position}}</li>
+                            {% endfor %}
+                    </ul>
+
+                {%endfor%}
+                </div>
+
+        {% for list in user.todolist_set.all %}  
+        <script>
+
+            var list1 = document.getElementById('list{{list.id}}');
+            list1 = Sortable.create(list1, {
+                
+                animation: 100,
+                group: 'list-1',
+                draggable: '.draggable',
+                handle: '.list-group-item',
+                sort: true,
+                filter: '.sortable-disabled',
+                chosenClass: 'active',
+                onAdd: function (evt) {
+                    let positionForm = document.getElementById("positionForm");
+                    let ids = document.querySelectorAll("#list{{list.id}}  li[id]");
+                    let ids_list = [];
+                    for (let i = 0; i < ids.length; i++) {
+                    ids_list.push(ids[i].id);
+                    }   // fill in the hidden input 
+                    let item_input = document.getElementById("item-id");
+                    item_input.value = ids_list.join(",");
+                    let list_input = document.getElementById("list-id");
+                    let action_input = document.getElementById("action-id");
+
+                    list_input.value = "list{{list.id}}";
+                    action_input.value = "add"    
+                    positionForm.submit();
+                },
+                onUpdate: function (evt) {
+                    let positionForm = document.getElementById("positionForm");
+                    let ids = document.querySelectorAll("#list{{list.id}}  li[id]");
+                    let ids_list = [];
+                    for (let i = 0; i < ids.length; i++) {
+                    ids_list.push(ids[i].id);
+                    }   // fill in the hidden input 
+                    let item_input = document.getElementById("item-id");
+                    item_input.value = ids_list.join(",");
+                    let list_input = document.getElementById("list-id");
+                    let action_input = document.getElementById("action-id");
+
+                    list_input.value = "list{{list.id}}";
+                    action_input.value = "update"
+                    positionForm.submit();
+                },
+            });    
+
+        </script>
+        {% endfor %}
+
+
+</div>
+{% endblock %}
