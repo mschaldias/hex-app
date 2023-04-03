@@ -50,22 +50,19 @@ def home(request):
     return render(request,"main/home.html",{})
 
 
-def create(request):
-
+def view(request):
     if request.method=="POST":
         form = CreateNewList(request.POST)
         if form.is_valid():
             name = form.cleaned_data["name"]
-            toDoList = request.user.todolist_set.create(name=name)
-        
-        return redirect("/%i" %toDoList.id)
+            request.user.todolist_set.create(name=name)
+
+        elif request.POST.get("removeList"):
+            id = ''.join([n for n in request.POST.get("removeList") if n.isdigit()])
+            request.user.todolist_set.filter(id=id).delete() 
 
     else:
         form = CreateNewList()
-
-    return render(request,"main/create.html",{"form": form})
-
-def view(request):
-    return render(request, "main/view.html",{})
+    return render(request, "main/view.html",{"form":form})
 
 
