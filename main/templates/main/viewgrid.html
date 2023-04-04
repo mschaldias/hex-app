@@ -1,0 +1,65 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+    Week View
+{% endblock %}
+
+{% block style %}
+<script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+
+<div>
+
+        <form id="positionForm" method="post" action = "">
+            {% csrf_token %}
+        <input type="hidden" id = "input-id" name = "input-id" value = "" >
+        </form>
+
+            {% for list in user.todolist_set.all %}
+
+            <ul class="list-group " id="list{{list.id}}"> <!-- List1 -->
+                <h4 class = "mx-auto">{{list.name}}</h4>
+                    {% for item in list.item_set.all %}
+                        <li class="list-group-item" id = "item{{item.id}}">{{item.text}}--{{item.id}}</li>
+                    {% endfor %}
+            </ul>
+            
+
+            {%endfor%}
+        {% for list in user.todolist_set.all %}        
+        <script>
+
+            var list1 = document.getElementById('list{{list.id}}');
+            list1 = Sortable.create(list1, {
+                animation: 100,
+                group: 'list-1',
+                draggable: '.list-group-item',
+                handle: '.list-group-item',
+                sort: true,
+                filter: '.sortable-disabled',
+                chosenClass: 'active',
+                onEnd: () => {
+                    alert("hello")
+                    let list1form = document.getElementById("positionForm");
+                    let ids = document.querySelectorAll("#list{{list.id}}  li[id]");
+                    let ids_list = [];
+                    for (let i = 0; i < ids.length; i++) {
+                    ids_list.push(ids[i].id);
+                    }   // fill in the hidden input 
+                    let input = document.getElementById("input-id");
+                    input.value = ids_list.join(",");
+                    positionForm.submit()
+                }
+        
+            });   
+            
+
+        </script>
+        {% endfor %}
+
+
+</div>
+{% endblock %}

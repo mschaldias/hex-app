@@ -65,3 +65,16 @@ def view(request):
     return render(request, "main/view.html",{"form":form})
 
 
+def week(request):
+    if request.method=="POST":
+        print(request.POST)
+    top = ["Monday","Tuesday","Wednesday","Thursday"]
+
+    ls = request.user.todolist_set.filter(name="Monday").first()
+    ls1 = request.user.todolist_set.filter(name="Tuesday").first()
+
+    return render(request, "main/viewgrid.html",{"top": top,"ls":ls,"ls1":ls1})
+
+
+
+
