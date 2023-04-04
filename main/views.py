@@ -60,9 +60,8 @@ def view(request):
         elif request.POST.get("removeList"):
             id = ''.join([n for n in request.POST.get("removeList") if n.isdigit()])
             request.user.todolist_set.filter(id=id).delete() 
-
-    else:
-        form = CreateNewList()
+    
+    form = CreateNewList()
     return render(request, "main/view.html",{"form":form})
 
 
