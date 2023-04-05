@@ -65,7 +65,22 @@ def view(request):
 def week(request):
     if request.method=="POST":
         print(request.POST)
-    top = ["Monday","Tuesday","Wednesday","Thursday"]
+        list_id = [''.join([n for n in i if n.isdigit()]) for i in request.POST.get("list-id").split(",") if i][0]
+        item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.get("item-id").split(",") if i] 
+        ls = request.user.todolist_set.filter(id=list_id).first()
+ 
+        if request.POST.get("action-id") == "add":
+            for id in item_ids:
+                item = Item.objects.all().filter(id=id).first()
+                item.todolist = ls
+                item.save()
+        
+        position = 0
+        for id in item_ids:
+            item = Item.objects.all().filter(id=id,todolist__id=ls.id).first()
+            item.position = position
+            item.save()
+            position+=1
 
     ls = request.user.todolist_set.filter(name="Monday").first()
     ls1 = request.user.todolist_set.filter(name="Tuesday").first()
