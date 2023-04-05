@@ -6,7 +6,29 @@
 
 {% block style %}
 <script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
-
+<style>
+    .top{
+        margin: 0;
+        padding: 5px 0 0 0;
+        float: left;
+        height: auto;
+    }
+    .bottom{
+        margin: 0;
+        padding: 5px 0 0 0;
+        float: left;
+        height: auto;
+        
+    }
+    .wrapper{
+            margin: 0;
+            padding: 5px 0 0 0;
+            height: auto;
+            
+            clear: both
+    }
+    
+</style>
 {% endblock %}
 
 {% block content %}
@@ -15,25 +37,42 @@
 
         <form id="positionForm" method="post" action = "">
             {% csrf_token %}
-        <input type="hidden" id = "input-id" name = "input-id" value = "" >
+        <input type="hidden" id = "item-id" name = "item-id" value = "" >
+        <input type="hidden" id = "list-id" name = "list-id" value = "" >
+        <input type="hidden" id = "action-id" name = "action-id" value = "" >
         </form>
 
             {% for list in user.todolist_set.all %}
-
-            <ul class="list-group " id="list{{list.id}}"> <!-- List1 -->
-                <h4 class = "mx-auto">{{list.name}}</h4>
-                    {% for item in list.item_set.all %}
-                        <li class="list-group-item" id = "item{{item.id}}">{{item.text}}--{{item.id}}</li>
-                    {% endfor %}
-            </ul>
-            
+                {% if list.name in top %}
+                <ul class="list-group col-3 top" id="list{{list.id}}"> 
+                    <h4 class = "mx-auto">{{list.name}}--{{list.id}}</h4>
+                        {% for item in list.item_set.all %}
+                            <li class="list-group-item" id = "item{{item.id}}">{{item.text}}--{{item.id}}--{{item.position}}</li>
+                        {% endfor %}
+                </ul>
+                {% endif %}
 
             {%endfor%}
+
+            <div class = "wrapper">
+                {% for list in user.todolist_set.all %}
+                    {% if list.name not in top %}   
+                    <ul class="list-group col-3 mt-4 bottom" id="list{{list.id}}">
+                        <h4 class = "mx-auto">{{list.name}}--{{list.id}}</h4>
+                            {% for item in list.item_set.all %}
+                                <li class="list-group-item" id = "item{{item.id}}">{{item.text}}--{{item.id}}--{{item.position}}</li>
+                            {% endfor %}
+                    </ul>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
         {% for list in user.todolist_set.all %}        
         <script>
 
             var list1 = document.getElementById('list{{list.id}}');
             list1 = Sortable.create(list1, {
+                
                 animation: 100,
                 group: 'list-1',
                 draggable: '.list-group-item',
@@ -41,21 +80,39 @@
                 sort: true,
                 filter: '.sortable-disabled',
                 chosenClass: 'active',
-                onEnd: () => {
-                    alert("hello")
-                    let list1form = document.getElementById("positionForm");
+                onAdd: function (evt) {
+                    let positionForm = document.getElementById("positionForm");
                     let ids = document.querySelectorAll("#list{{list.id}}  li[id]");
                     let ids_list = [];
                     for (let i = 0; i < ids.length; i++) {
                     ids_list.push(ids[i].id);
                     }   // fill in the hidden input 
-                    let input = document.getElementById("input-id");
-                    input.value = ids_list.join(",");
-                    positionForm.submit()
-                }
-        
-            });   
-            
+                    let item_input = document.getElementById("item-id");
+                    item_input.value = ids_list.join(",");
+                    let list_input = document.getElementById("list-id");
+                    let action_input = document.getElementById("action-id");
+
+                    list_input.value = "list{{list.id}}";
+                    action_input.value = "add"
+                    positionForm.submit();
+                },
+                onUpdate: function (evt) {
+                    let positionForm = document.getElementById("positionForm");
+                    let ids = document.querySelectorAll("#list{{list.id}}  li[id]");
+                    let ids_list = [];
+                    for (let i = 0; i < ids.length; i++) {
+                    ids_list.push(ids[i].id);
+                    }   // fill in the hidden input 
+                    let item_input = document.getElementById("item-id");
+                    item_input.value = ids_list.join(",");
+                    let list_input = document.getElementById("list-id");
+                    let action_input = document.getElementById("action-id");
+
+                    list_input.value = "list{{list.id}}";
+                    action_input.value = "update"
+                    positionForm.submit();
+                },
+            });           
 
         </script>
         {% endfor %}
