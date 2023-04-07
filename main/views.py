@@ -81,6 +81,7 @@ def week(request):
             item.position = position
             item.save()
             position+=1
+        return redirect("/week")
 
     ls = request.user.todolist_set.filter(name="Monday").first()
     ls1 = request.user.todolist_set.filter(name="Tuesday").first()
