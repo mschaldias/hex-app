@@ -78,10 +78,12 @@
                             {%endif%}
                         </div>
                     </div>
+                    {% if user.is_authenticated %}
                     <div class="sb-sidenav-footer">
                         <div class="small">Logged in as:</div>
                        {{user.username}}
                     </div>
+                    {%endif%}
                     
                 </nav>
             </div>
