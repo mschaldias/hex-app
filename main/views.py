@@ -83,10 +83,8 @@ def week(request):
             position+=1
         return redirect("/week")
 
-    ls = request.user.todolist_set.filter(name="Monday").first()
-    ls1 = request.user.todolist_set.filter(name="Tuesday").first()
-
-    return render(request, "main/viewgrid.html",{"top": top,"ls":ls,"ls1":ls1})
+    else:
+        return render(request, "main/viewgrid.html",{})
 
 
 
