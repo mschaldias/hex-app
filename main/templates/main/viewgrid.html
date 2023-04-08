@@ -61,18 +61,24 @@
         </div>
     </div>
 
-            <div class = "container-fluid px-4">
-                <div class = "row mt-5">
-                {% for list in user.todolist_set.all %}
-                    <ul class="list-group col-3 mb-3" id="list{{list.id}}"> 
-                        <h5 class = "list-group-item list-group-item-success ">{{list.name}}--{{list.id}}</h4>
+    <div class = "row mt-5">
+        {% for list in user.todolist_set.all %}
+        <div class="col-xl-3">
+            <div class="card bg-hex-sidenav text-white mb-4">
+                
+                <div class="card-header"><h5>{{list.name}}</h5></div>
+                <div class="card-body">
+
+                    <ul class="list-group mb-3" id="list{{list.id}}"> 
                             {% for item in list.item_set.all %}
-                                <li class="list-group-item list-group-item-action draggable" id = "item{{item.id}}">{{item.text}}--{{item.id}}--{{item.position}}</li>
+                                <li class="list-group-item list-group-item-action bg-hex-topnav text-white draggable" id = "item{{item.id}}">{{item.text}}</li>
                             {% endfor %}
                     </ul>
-
-                {%endfor%}
                 </div>
+            </div>
+        </div>
+        {%endfor%}
+    </div>
                 
         {% for list in user.todolist_set.all %}  
         <script>
