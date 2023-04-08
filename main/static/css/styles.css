@@ -62,7 +62,7 @@
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
   --bs-body-color: #fff;
-  --bs-body-bg: #19376D;
+  --bs-body-bg: #212529;
   --bs-border-width: 1px;
   --bs-border-style: solid;
   --bs-border-color: #dee2e6;
@@ -77,6 +77,10 @@
   --bs-link-hover-color: #0a58ca;
   --bs-code-color: #d63384;
   --bs-highlight-bg: #fff3cd;
+  --hex-body: #19376D;
+  --hex-sidenav: #0B2447;
+  --hex-topnav: #576CBC;
+  --hex-text: #A5D7E8;
 }
 
 *,
@@ -99,7 +103,7 @@ body {
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
-  background-color: var(--bs-body-bg);
+  background-color: var(--hex-body);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -8173,12 +8177,29 @@ textarea.form-control-lg {
 
 .bg-light {
   --bs-bg-opacity: 1;
-  background-color: #19376D !important;
+  background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;
 }
 
 .bg-dark {
   --bs-bg-opacity: 1;
-  background-color: #576CBC !important;
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+}
+
+.bg-hex-body {
+  --bs-bg-opacity: 1;
+  background-color: var(--hex-body) !important;
+}
+
+.bg-hex-sidenav {
+  background-color: var(--hex-sidenav) !important;
+}
+
+.bg-hex-topnav {
+  background-color: var(--hex-topnav) !important;
+}
+
+.bg-hex-text {
+  background-color: var(--hex-text) !important;
 }
 
 .bg-black {
@@ -10966,7 +10987,7 @@ body {
   margin: 0;
 }
 .sb-topnav.navbar-dark #sidebarToggle {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--hex-sidenav);
 }
 .sb-topnav.navbar-light #sidebarToggle {
   color: #212529;
@@ -11019,14 +11040,14 @@ body {
 }
 
 .sb-sidenav-dark {
-  background-color: #0B2447;
+  background-color: var(--hex-sidenav);
   color: rgba(255, 255, 255, 0.5);
 }
 .sb-sidenav-dark .sb-sidenav-menu .sb-sidenav-menu-heading {
-  color: #A5D7E8;
+  color: var(--hex-text);
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link {
-  color:  #A5D7E8;
+  color:  var(--hex-text);
 }
 .sb-sidenav-dark .sb-sidenav-menu .nav-link .sb-nav-link-icon {
   color: rgba(255, 255, 255, 0.25);
@@ -11044,8 +11065,8 @@ body {
   color: #fff;
 }
 .sb-sidenav-dark .sb-sidenav-footer {
-  background-color: #576CBC;
-  color: #A5D7E8
+  background-color: var(--hex-topnav);
+  color: var(--hex-text);
 }
 
 .sb-sidenav-light {
