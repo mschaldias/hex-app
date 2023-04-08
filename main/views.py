@@ -2,9 +2,11 @@ from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from .models import ToDoList, Item
 from .forms import CreateNewList
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
+@login_required(login_url='/login/')
 def index(request, id):
 
     ls = request.user.todolist_set.filter(id=id).first()
@@ -46,7 +48,7 @@ def index(request, id):
 def home(request):
     return render(request,"main/home.html",{})
 
-
+@login_required(login_url='/login/')
 def view(request):
     if request.method=="POST":
         form = CreateNewList(request.POST)
@@ -61,7 +63,7 @@ def view(request):
     form = CreateNewList()
     return render(request, "main/view.html",{"form":form})
 
-
+@login_required(login_url='/login/')
 def week(request):
     if request.method=="POST":
         print(request.POST)
