@@ -5,6 +5,8 @@
 {% endblock %}
 
 {% block style %}
+{% load static %}
+<script src="{%static 'js/sortable_event.js'%}"></script>
 <script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
 <style>
     .list-group{
@@ -14,7 +16,7 @@
 {% endblock %}
 
 {% block content %}
-
+{% csrf_token %}
 <div>
     <h1 class="mt-4">Dashboard</h1>
     <ol class="breadcrumb mb-4">
@@ -59,13 +61,6 @@
         </div>
     </div>
 
-        <form id="positionForm" method="post" action = "">
-            {% csrf_token %}
-        <input type="hidden" id = "item-id" name = "item-id" value = "" >
-        <input type="hidden" id = "list-id" name = "list-id" value = "" >
-        <input type="hidden" id = "action-id" name = "action-id" value = "" >
-        </form>
-
             <div class = "container-fluid px-4">
                 <div class = "row mt-5">
                 {% for list in user.todolist_set.all %}
@@ -78,13 +73,12 @@
 
                 {%endfor%}
                 </div>
-
+                
         {% for list in user.todolist_set.all %}  
         <script>
 
-            var list1 = document.getElementById('list{{list.id}}');
-            list1 = Sortable.create(list1, {
-                
+            var list = document.getElementById('list{{list.id}}');
+            Sortable.create(list, {
                 animation: 100,
                 group: 'list-1',
                 draggable: '.draggable',
@@ -92,37 +86,11 @@
                 sort: true,
                 filter: '.sortable-disabled',
                 chosenClass: 'active',
-                onAdd: function (evt) {
-                    let positionForm = document.getElementById("positionForm");
-                    let ids = document.querySelectorAll("#list{{list.id}}  li[id]");
-                    let ids_list = [];
-                    for (let i = 0; i < ids.length; i++) {
-                    ids_list.push(ids[i].id);
-                    }   // fill in the hidden input 
-                    let item_input = document.getElementById("item-id");
-                    item_input.value = ids_list.join(",");
-                    let list_input = document.getElementById("list-id");
-                    let action_input = document.getElementById("action-id");
-
-                    list_input.value = "list{{list.id}}";
-                    action_input.value = "add"    
-                    positionForm.submit();
+                onAdd: function () {
+                    sortable_event("add",'list{{list.id}}');
                 },
-                onUpdate: function (evt) {
-                    let positionForm = document.getElementById("positionForm");
-                    let ids = document.querySelectorAll("#list{{list.id}}  li[id]");
-                    let ids_list = [];
-                    for (let i = 0; i < ids.length; i++) {
-                    ids_list.push(ids[i].id);
-                    }   // fill in the hidden input 
-                    let item_input = document.getElementById("item-id");
-                    item_input.value = ids_list.join(",");
-                    let list_input = document.getElementById("list-id");
-                    let action_input = document.getElementById("action-id");
-
-                    list_input.value = "list{{list.id}}";
-                    action_input.value = "update"
-                    positionForm.submit();
+                onUpdate: function () {
+                    sortable_event("update",'list{{list.id}}')
                 },
             });    
 
