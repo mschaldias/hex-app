@@ -15,9 +15,9 @@
                         <div class= "input-group-text" >
                             
                             {% if item.complete == True %}
-                                <input type="checkbox", value = "clicked", name = "c{{item.id}}" onchange="document.getElementById('listform').submit()" checked>
+                                <input class = "form-check-input" type="checkbox", value = "clicked", name = "c{{item.id}}" onchange="document.getElementById('listform').submit()" checked>
                             {%else%}
-                                <input type="checkbox", value = "clicked", name = "c{{item.id}}" onchange="document.getElementById('listform').submit()">
+                                <input class = "form-check-input" type="checkbox", value = "clicked", name = "c{{item.id}}" onchange="document.getElementById('listform').submit()">
                             {%endif%}
         
                         </div>
