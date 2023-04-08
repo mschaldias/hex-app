@@ -65,11 +65,11 @@ def view(request):
 def week(request):
     if request.method=="POST":
         print(request.POST)
-        list_id = [''.join([n for n in i if n.isdigit()]) for i in request.POST.get("list-id").split(",") if i][0]
-        item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.get("item-id").split(",") if i] 
+        list_id = ''.join([n for n in request.POST.get("list-id") if n.isdigit()])
+        item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.getlist("item-ids[]") if i]          
         ls = request.user.todolist_set.filter(id=list_id).first()
- 
-        if request.POST.get("action-id") == "add":
+        
+        if request.POST.get("action") == "add":
             for id in item_ids:
                 item = Item.objects.all().filter(id=id).first()
                 item.todolist = ls
