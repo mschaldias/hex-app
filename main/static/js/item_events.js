@@ -22,7 +22,7 @@ function remove_button(item_id){
         data: {
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
             'id': item_id,
-            action: 'remove-item'
+            action: 'remove'
         },
         // success:function(){
         //     alert('success');
