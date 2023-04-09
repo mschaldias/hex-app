@@ -3131,16 +3131,33 @@ textarea.form-control-lg {
   --bs-gradient: none;
 }
 
-.btn-outline-hex {
+.btn-outline-hex-dark {
   --bs-btn-color: var(--hex-sidenav);
   --bs-btn-border-color: var(--hex-sidenav);
   --bs-btn-hover-color: white;
   --bs-btn-hover-bg: var(--hex-sidenav);
   --bs-btn-hover-border-color: var(--hex-sidenav);
   --bs-btn-focus-shadow-rgb: 13, 202, 240;
-  --bs-btn-active-color: #000;
+  --bs-btn-active-color: var(--hex-text);
   --bs-btn-active-bg: var(--hex-sidenav);
   --bs-btn-active-border-color: var(--hex-sidenav);
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: var(--hex-sidenav);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--hex-sidenav);
+  --bs-gradient: none;
+}
+
+.btn-outline-hex-light {
+  --bs-btn-color: white;
+  --bs-btn-border-color: var(--hex-sidenav);
+  --bs-btn-hover-color: white;
+  --bs-btn-hover-bg: var(--hex-sidenav);
+  --bs-btn-hover-border-color: var(--hex-text);
+  --bs-btn-focus-shadow-rgb: 13, 202, 240;
+  --bs-btn-active-color: var(--hex-sidenav);
+  --bs-btn-active-bg: var(--hex-topnav);
+  --bs-btn-active-border-color: var(--hex-topnav);
   --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   --bs-btn-disabled-color: var(--hex-sidenav);
   --bs-btn-disabled-bg: transparent;

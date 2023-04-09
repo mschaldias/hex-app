@@ -12,10 +12,13 @@
     .list-group{
         word-break: break-all;
      }
-     .chosen {
-        color: #fff;
-        background-color: var(--hex-text);
-      }
+    .chosen {
+    color: #fff;
+    background-color: var(--hex-text);
+    }
+    textarea {
+    height: 0;
+    }
 </style>
 {% endblock %}
 
@@ -65,12 +68,17 @@
         </div>
     </div>
 
-    <div class = "row mt-5">
+    <div class = "row mt-3">
         {% for list in user.todolist_set.all %}
-        <div class="col-xl-3">
-            <div class="card bg-hex-sidenav text-white mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-hex-sidenav border-0 text-white mb-3">
                 
-                <div class="card-header"><h5>{{list.name}}</h5></div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5>{{list.name}}</h5>    
+                                <button  id = "add_button", name = "add", value = "r{{item.id}}", class="btn btn-outline-hex-light", onclick = "add_button('list{{list.id}}')"><i class="fa fa-plus"></i></button>
+
+                    
+                </div>
                 <div class="card-body">
 
                     <ul class="list-group mb-3" id="list{{list.id}}"> 
@@ -78,22 +86,19 @@
                                 <li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item{{item.id}}">
                                     <div class = "input-group mx-auto">
                                         <span class="handle btn border-0" style= "cursor:move"><i class="fa-solid fa-grip-lines-vertical fa" style="color:  var(--hex-body);"></i></span>
-                                        <div class = "input-group-prepend">
 
                                             <div class= "input-group-text bg-hex-sidenav border border-hex" >
                                     
                                             {% if item.complete == True %}
-                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "c{{item.id}}"  , onclick="checkbox_click(name)" checked>
+                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "click{{item.id}}"  , onclick="checkbox_click(name)" checked>
                                             {%else%}
-                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "c{{item.id}}", onclick="checkbox_click(name)">
+                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "click{{item.id}}", onclick="checkbox_click(name)">
                                             {%endif%}
 
                                             </div>
-                        
-                                        </div>
-                                       
-                                        <input type="text", value = "{{item.text}}" name = "e{{item.id}}" class = "form-control bg-hex-topnav border border-hex text-white" >
-                                        <button  id = "remove_button", name = "item{{item.id}}", value = "r{{item.id}}", class="btn btn-outline-hex" onclick = "remove_button(name)"><i class="fa fa-minus"></i></button>
+                                                               
+                                        <textarea value = "{{item.text}}" name = "edit{{item.id}}" class = "form-control bg-hex-topnav border border-hex text-white" onchange="edit_text(name,value)">{{item.text}}</textarea>
+                                        <button  id = "remove_button", name = "remove{{item.id}}", value = "r{{item.id}}", class="btn btn-outline-hex-dark", onclick = "remove_button(name)"><i class="fa fa-minus"></i></button>
 
                                     </div>
                                     
@@ -129,6 +134,14 @@
         </script>
         {% endfor %}
 
+        <script>
+            $('textarea').each(function () {
+                this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+                }).on('input', function () {
+                this.style.height = "0";
+                this.style.height = (this.scrollHeight) + 'px';
+              });
+        </script>
 
 </div>
 {% endblock %}
