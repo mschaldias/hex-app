@@ -98,6 +98,10 @@ def item_actions(request):
             if item:
                 if action == "remove":
                     item.delete()
+                elif action == "edit":
+                    item.text = request.POST.get("text")
+                    item.save()
+
                 elif action == "checkbox":
                     item.complete = not(item.complete)
                     item.save()

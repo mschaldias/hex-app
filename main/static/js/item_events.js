@@ -1,3 +1,21 @@
+
+function edit_text(item_id,value){
+    $.ajax({
+        type:'POST',
+        url: "/item_actions/",
+        data: {
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            'id': item_id,
+            action: "edit",
+            text: value
+        },
+        // success:function(){
+        //     alert('success');
+        // }                        
+    });
+};
+
+
 function checkbox_click(item_id){
     $.ajax({
         type:'POST',
@@ -14,6 +32,7 @@ function checkbox_click(item_id){
 };
 
 function remove_button(item_id){
+    var item_id = "item" + item_id.replace(/\D/g, "");
     const element = document.getElementById(item_id);
     element.remove();
     $.ajax({
