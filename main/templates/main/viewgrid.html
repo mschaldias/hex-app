@@ -74,8 +74,6 @@
                 <div class="card-body">
 
                     <ul class="list-group mb-3" id="list{{list.id}}"> 
-                        <form id = "listform" method="post" action="/{{list.id}}">
-                            {% csrf_token %}
                             {% for item in list.item_set.all %}
                                 <li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item{{item.id}}">
                                     <div class = "input-group mx-auto">
@@ -85,9 +83,9 @@
                                             <div class= "input-group-text bg-hex-sidenav border border-hex" >
                                     
                                             {% if item.complete == True %}
-                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "c{{item.id}}"  checked, onchange="document.getElementById('listform').submit()">
+                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "c{{item.id}}"  , onclick="checkbox_click(name)" checked>
                                             {%else%}
-                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "c{{item.id}}", onchange="document.getElementById('listform').submit()" >
+                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "c{{item.id}}", onclick="checkbox_click(name)">
                                             {%endif%}
 
                                             </div>
@@ -95,13 +93,12 @@
                                         </div>
                                        
                                         <input type="text", value = "{{item.text}}" name = "e{{item.id}}" class = "form-control bg-hex-topnav border border-hex text-white" >
-                                        <button type="submit", name = "removeItem", value = "r{{item.id}}", class="btn btn-outline-hex"><i class="fa fa-minus"></i></button>
+                                        <button  id = "remove_button", name = "item{{item.id}}", value = "r{{item.id}}", class="btn btn-outline-hex" onclick = "remove_button(name)"><i class="fa fa-minus"></i></button>
 
                                     </div>
                                     
                                 </li>
                             {% endfor %}
-                        </form>
                     </ul>
                 </div>
             </div>
