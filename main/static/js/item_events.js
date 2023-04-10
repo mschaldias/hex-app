@@ -1,11 +1,12 @@
 
-function edit_text(item_id,value){
+function edit_text(item_id,value,list_id){
     $.ajax({
         type:'POST',
         url: "/item_actions/",
         data: {
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-            'id': item_id,
+            list_id: list_id,
+            item_id: item_id,
             action: "edit",
             text: value
         },
@@ -22,7 +23,7 @@ function checkbox_click(item_id){
         url: "/item_actions/",
         data: {
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-            'id': item_id,
+            item_id: item_id,
             action: "checkbox"
         },
         // success:function(){
@@ -40,7 +41,7 @@ function remove_button(item_id){
         url: "/item_actions/",
         data: {
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-            'id': item_id,
+            item_id: item_id,
             action: 'remove'
         },
         // success:function(){
