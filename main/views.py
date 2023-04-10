@@ -76,34 +76,35 @@ def item_actions(request):
     if request.method == "POST":
         print(request.POST)
         if request.POST.get("sortable"):
-                action = request.POST.get("action")
-                list_id = ''.join([n for n in request.POST.get("list_id") if n.isdigit()])
-                item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.getlist("item_ids[]") if i]          
-                ls = request.user.todolist_set.filter(id=list_id).first()
+            action = request.POST.get("action")
+            list_id = ''.join([n for n in request.POST.get("list_id") if n.isdigit()])
+            item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.getlist("item_ids[]") if i]          
+            ls = request.user.todolist_set.filter(id=list_id).first()
 
+            if action == "add":
                 position = 0
-                if action == "add":
-                    for item in ls.item_set.all():
-                        position = item.position
-                    ls.item_set.create(complete = False, position = position+1)
-                    
-                
-                if action == "move":
-                    for id in item_ids:
-                        item = Item.objects.all().filter(id=id).first()
-                        item.todolist = ls
-                        item.save()
-                
-                position = 0
+                for item in ls.item_set.all():
+                    position = item.position
+                ls.item_set.create(complete = False, position = position+1)
+
+            
+            elif action == "move":
                 for id in item_ids:
-                    item = Item.objects.all().filter(id=id,todolist__id=ls.id).first()
-                    item.position = position
+                    item = Item.objects.all().filter(id=id).first()
+                    item.todolist = ls
                     item.save()
-                    position+=1
+
+            #update list position
+            position = 0
+            for id in item_ids:
+                item = Item.objects.all().filter(id=id,todolist__id=ls.id).first()
+                item.position = position
+                item.save()
+                position+=1
 
         elif request.POST.get("action"): 
             action = request.POST.get("action")
-            id = ''.join([n for n in request.POST.get("id") if n.isdigit()])
+            id = ''.join([n for n in request.POST.get("item_id") if n.isdigit()])           
             item = Item.objects.all().filter(id=id,todolist__user=request.user).first()
             if item:
                 if action == "remove":
