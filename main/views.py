@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET,require_POST
 # Create your views here.
 
+MAX_ITEMS = 1000
+
 @login_required(login_url='/login/')
 def index(request, id):
 
@@ -74,11 +76,19 @@ def item_actions(request):
     if request.method == "POST":
         print(request.POST)
         if request.POST.get("sortable"):
-                list_id = ''.join([n for n in request.POST.get("list-id") if n.isdigit()])
-                item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.getlist("item-ids[]") if i]          
+                action = request.POST.get("action")
+                list_id = ''.join([n for n in request.POST.get("list_id") if n.isdigit()])
+                item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.getlist("item_ids[]") if i]          
                 ls = request.user.todolist_set.filter(id=list_id).first()
+
+                position = 0
+                if action == "add":
+                    for item in ls.item_set.all():
+                        position = item.position
+                    ls.item_set.create(complete = False, position = position+1)
+                    
                 
-                if request.POST.get("action") == "move":
+                if action == "move":
                     for id in item_ids:
                         item = Item.objects.all().filter(id=id).first()
                         item.todolist = ls

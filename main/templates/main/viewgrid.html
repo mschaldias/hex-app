@@ -71,9 +71,14 @@
     <div class = "row mt-5">
         {% for list in user.todolist_set.all %}
         <div class="col-xl-3">
-            <div class="card bg-hex-sidenav text-white mb-4">
+            <div class="card bg-hex-sidenav border-0 text-white mb-4">
                 
-                <div class="card-header"><h5>{{list.name}}</h5></div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5>{{list.name}}</h5>    
+                                <button  id = "add_button", name = "add", value = "r{{item.id}}", class="btn btn-outline-hex-light", onclick = "add_button('list{{list.id}}')"><i class="fa fa-plus"></i></button>
+
+                    
+                </div>
                 <div class="card-body">
 
                     <ul class="list-group mb-3" id="list{{list.id}}"> 
@@ -93,7 +98,7 @@
                                             </div>
                                                                
                                         <textarea value = "{{item.text}}" name = "edit{{item.id}}" class = "form-control bg-hex-topnav border border-hex text-white" onchange="edit_text(name,value)">{{item.text}}</textarea>
-                                        <button  id = "remove_button", name = "remove{{item.id}}", value = "r{{item.id}}", class="btn btn-outline-hex", onclick = "remove_button(name)"><i class="fa fa-minus"></i></button>
+                                        <button  id = "remove_button", name = "remove{{item.id}}", value = "r{{item.id}}", class="btn btn-outline-hex-dark", onclick = "remove_button(name)"><i class="fa fa-minus"></i></button>
 
                                     </div>
                                     
