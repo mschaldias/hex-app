@@ -68,10 +68,10 @@
         </div>
     </div>
 
-    <div class = "row mt-5">
+    <div class = "row mt-3">
         {% for list in user.todolist_set.all %}
-        <div class="col-xl-3">
-            <div class="card bg-hex-sidenav border-0 text-white mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-hex-sidenav border-0 text-white mb-3">
                 
                 <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5>{{list.name}}</h5>    
