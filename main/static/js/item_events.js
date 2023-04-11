@@ -81,7 +81,6 @@ function add_button(list_id){
             item_ids: []
         },
         success: (data) => {
-            alert(data);
             append_new_item(list_id,data)
         },
         error: (error) =>{
