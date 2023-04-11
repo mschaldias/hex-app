@@ -1,11 +1,10 @@
 
-function edit_text(item_id,value,list_id){
+function edit_text(item_id,value){
     $.ajax({
         type:'POST',
         url: "/item_actions/",
         data: {
             csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-            list_id: list_id,
             item_id: item_id,
             action: "edit",
             text: value
@@ -50,6 +49,25 @@ function remove_button(item_id){
     });
 };
 
+function append_new_item(list_id,item_id){
+var list_item = 
+    `<li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item` + item_id + `}">
+        <div class = "input-group mx-auto">
+            <span class="handle btn border-0" style= "cursor:move"><i class="fa-solid fa-grip-lines-vertical fa" style="color:  var(--hex-body);"></i></span>
+                <div class= "input-group-text bg-hex-sidenav border border-hex" >
+                    <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "click` + item_id + `", onclick="checkbox_click(name)">
+                </div> 
+            <textarea id = "textarea" value = "" name = "edit` + item_id + `" class = "form-control bg-hex-topnav border border-hex text-white" onchange="edit_text(name,value)"></textarea>
+            <button  id = "remove_button", name = "remove` + item_id + `", value = "` + item_id + `", class="btn btn-outline-hex-dark", onclick = "remove_button(name)"><i class="fa fa-minus"></i></button>
+        </div>
+    </li>`
+
+    list_id="#" + list_id
+    item_clone = $(list_id)
+
+    $(list_id).append(list_item);
+}
+
 function add_button(list_id){
     
     $.ajax({
@@ -62,27 +80,15 @@ function add_button(list_id){
             list_id: list_id,
             item_ids: []
         },
-        // success:function(){
-        //     alert('success');
-        // }                        
+        success: (data) => {
+            alert(data);
+            append_new_item(list_id,data)
+        },
+        error: (error) =>{
+            console.log(error);
+        }                        
     });
 
-    var list_item = 
-    `<li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item{{item.id}}">
-        <div class = "input-group mx-auto">
-            <span class="handle btn border-0" style= "cursor:move"><i class="fa-solid fa-grip-lines-vertical fa" style="color:  var(--hex-body);"></i></span>
-                <div class= "input-group-text bg-hex-sidenav border border-hex" >
-                    <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "click{{item.id}}", onclick="checkbox_click(name)">
-                </div> 
-            <textarea id = "textarea" value = "{{item.text}}" name = "edit{{item.id}}" class = "form-control bg-hex-topnav border border-hex text-white" onchange="edit_text(name,value,'`+ list_id + `')"></textarea>
-            <button  id = "remove_button", name = "remove{{item.id}}", value = "r{{item.id}}", class="btn btn-outline-hex-dark", onclick = "remove_button(name)"><i class="fa fa-minus"></i></button>
-        </div>
-    </li>`
-
-    list_id="#" + list_id
-    $(list_id).append(list_item);
-
-    location.reload(); 
 };
 
 function sortable_event(action,list_id){

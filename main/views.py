@@ -85,7 +85,8 @@ def item_actions(request):
                 position = 0
                 for item in ls.item_set.all():
                     position = item.position
-                ls.item_set.create(complete = False, position = position+1)
+                new_item = ls.item_set.create(complete = False, position = position+1)
+                return HttpResponse(new_item.id)
 
             
             elif action == "move":
