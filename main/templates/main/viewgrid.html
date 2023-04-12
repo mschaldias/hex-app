@@ -75,7 +75,7 @@
                 
                 <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5>{{list.name}}</h5>    
-                                <button  id = "add_button", name = "add", value = "r{{item.id}}", class="btn btn-outline-hex-light", onclick = "add_button('list{{list.id}}')"><i class="fa fa-plus"></i></button>
+                                <button  id = "create_button", name = "create_new", value = "r{{item.id}}", class="btn btn-outline-hex-light", onclick = "create_button('{{list.id}}')"><i class="fa fa-plus"></i></button>
 
                     
                 </div>
@@ -90,15 +90,15 @@
                                             <div class= "input-group-text bg-hex-sidenav border border-hex" >
                                     
                                             {% if item.complete == True %}
-                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "click{{item.id}}"  , onclick="checkbox_click(name)" checked>
+                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "true", name = "{{item.id}}"  , onclick="checkbox_click(name,value)" checked>
                                             {%else%}
-                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "clicked", name = "click{{item.id}}", onclick="checkbox_click(name)">
+                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "false", name = "{{item.id}}", onclick="checkbox_click(name,value)">
                                             {%endif%}
 
                                             </div>
                                                                
-                                        <textarea value = "{{item.text}}" name = "edit{{item.id}}" class = "form-control bg-hex-topnav border border-hex text-white" onchange="edit_text(name,value)">{{item.text}}</textarea>
-                                        <button  id = "remove_button", name = "remove{{item.id}}", value = "r{{item.id}}", class="btn btn-outline-hex-dark", onclick = "remove_button(name)"><i class="fa fa-minus"></i></button>
+                                        <textarea value = "{{item.text}}" name = "{{item.id}}" class = "form-control bg-hex-topnav border border-hex text-white" onchange="edit_text(name,value)">{{item.text}}</textarea>
+                                        <button  id = "delete_button", name = "{{item.id}}", value = "r{{item.id}}", class="btn btn-outline-hex-dark", onclick = "delete_button(name)"><i class="fa fa-minus"></i></button>
 
                                     </div>
                                     
@@ -124,10 +124,10 @@
                 filter: '.sortable-disabled',
                 chosenClass: 'chosen',
                 onAdd: function () {
-                    sortable_event("move",'list{{list.id}}');
+                    sortable_event("move",'{{list.id}}');
                 },
                 onUpdate: function () {
-                    sortable_event("update",'list{{list.id}}')
+                    sortable_event("update",'{{list.id}}')
                 },
             });    
 

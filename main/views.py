@@ -1,51 +1,26 @@
-from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from .models import ToDoList, Item
 from .forms import CreateNewList
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET,require_POST
+from django.shortcuts import render
+from rest_framework import viewsets
+from .serializers import ToDoListSerializer,ItemSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from http import HTTPStatus
+
 # Create your views here.
 
-MAX_ITEMS = 1000
+class ToDoListView(viewsets.ModelViewSet):
+    serializer_class = ToDoListSerializer
+    queryset = ToDoList.objects.all()
 
-@login_required(login_url='/login/')
-def index(request, id):
+class ItemView(viewsets.ModelViewSet):
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
 
-    ls = request.user.todolist_set.filter(id=id).first()
-
-    if ls:
-
-        for k in request.POST:
-            if k.startswith("e") and any(str.isdigit(c) for c in k):
-                id = ''.join([n for n in k if n.isdigit()])
-                newText = request.POST.get(k)
-                item = Item.objects.get(id=id)
-                item.text = newText
-                item.save()
-
-
-        if request.method == "POST":
-            print(request.POST)
-            for item in ls.item_set.all():
-                if request.POST.get("c" + str(item.id)) == "clicked":
-                    item.complete = True
-                else:
-                    item.complete = False
-
-                item.save()
-                
-            if request.POST.get("newItem"):
-                text = request.POST.get("newText")
-                ls.item_set.create(text = text, complete = False)
-
-
-            elif request.POST.get("removeItem"):
-                id = ''.join([n for n in request.POST.get("removeItem") if n.isdigit()])
-                ls.item_set.filter(id=id).delete()       
- 
-        return render(request,"main/list.html",{"ls": ls})
-    else:
-        return redirect("/")
+MAX_ITEMS = 10000
 
 def home(request):
     return render(request,"main/home.html",{})
@@ -70,55 +45,61 @@ def view(request):
 def week(request):
     return render(request, "main/viewgrid.html",{})
 
-@require_POST
 @login_required(login_url='/login/')
-def item_actions(request):
+@api_view(['POST','DELETE','PUT'])
+def items(request,id=None):
+
+    data = request.data
+    
     if request.method == "POST":
-        print(request.POST)
-        if request.POST.get("sortable"):
-            action = request.POST.get("action")
-            list_id = ''.join([n for n in request.POST.get("list_id") if n.isdigit()])
-            item_ids = [''.join([n for n in i if n.isdigit()]) for i in request.POST.getlist("item_ids[]") if i]          
-            ls = request.user.todolist_set.filter(id=list_id).first()
+        item_serializer = ItemSerializer(data = data)
+        if item_serializer.is_valid() and data.get('todolist'):
+            item_serializer.save(position=MAX_ITEMS)
+            return Response(item_serializer.data,status=HTTPStatus.CREATED)
+        return Response(item_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
+    
+    else:
+        item = Item.objects.all().filter(id=id,todolist__user=request.user).first()
+        if not item:
+            return Response({}, status=HTTPStatus.NOT_FOUND)
+    
+        if request.method == "DELETE":
+            item.delete()
+            return Response({},status=HTTPStatus.NO_CONTENT)        
+        
+        elif request.method == "PUT":
+            item_serializer = ItemSerializer(item, data = data)
+            if item_serializer.is_valid():
+                item_serializer.save()
+                return Response(item_serializer.data,status=HTTPStatus.OK)  
+            return Response(item_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
 
-            if action == "add":
-                position = 0
-                for item in ls.item_set.all():
-                    position = item.position
-                new_item = ls.item_set.create(complete = False, position = position+1)
-                return HttpResponse(new_item.id)
+@api_view(['PUT'])
+def sortable(request,id):   
+      
+    todolist =request.user.todolist_set.filter(id=id).first()
+    data = request.data
+    action = data.get("action")
+    item_set = data.get("item_set")
 
-            
-            elif action == "move":
-                for id in item_ids:
-                    item = Item.objects.all().filter(id=id).first()
-                    item.todolist = ls
-                    item.save()
+    if not (item_set and action):
+         return Response({},status=HTTPStatus.BAD_REQUEST) 
 
-            #update list position
-            position = 0
-            for id in item_ids:
-                item = Item.objects.all().filter(id=id,todolist__id=ls.id).first()
-                item.position = position
-                item.save()
-                position+=1
+    if action == "move":
+        for id in item_set:
+            item = Item.objects.all().filter(id=id).first()
+            item.todolist = todolist
+            item.save()
 
-        elif request.POST.get("action"): 
-            action = request.POST.get("action")
-            id = ''.join([n for n in request.POST.get("item_id") if n.isdigit()])           
-            item = Item.objects.all().filter(id=id,todolist__user=request.user).first()
-            if item:
-                if action == "remove":
-                    item.delete()
-                elif action == "edit":
-                    item.text = request.POST.get("text")
-                    item.save()
+    #update item positions in list
+    position = 0
+    for id in item_set:
+        item = Item.objects.all().filter(id=id,todolist__id=todolist.id).first()
+        item.position = position
+        item.save()
+        position+=1
 
-                elif action == "checkbox":
-                    item.complete = not(item.complete)
-                    item.save()
-                
-    return render(request, "main/viewgrid.html",{})
-
+    todolist_serializer = ToDoListSerializer(todolist)
+    return Response(todolist_serializer.data,status=HTTPStatus.OK)              
 
 
