@@ -14,6 +14,15 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function autosize_textarea(){
+    $('textarea').each(function () {
+        this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+        }).on('input', function () {
+        this.style.height = "0";
+        this.style.height = (this.scrollHeight) + 'px';
+      });
+}
+
 function edit_text(item_id,value){
     $.ajax(
         {
@@ -94,7 +103,7 @@ function append_new_item(list_id,item_id){
     $.ajax(
         {
             type: 'GET',
-            url: "/week/",
+            url: document.URL,
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
               },
@@ -103,6 +112,7 @@ function append_new_item(list_id,item_id){
                         doc = parser.parseFromString(data, "text/html");
                         item = doc.getElementById("item"+item_id)
                         $("#list"+list_id).append(item);
+                        autosize_textarea();
                     },
             error: (error) =>{
                 console.log(error);
@@ -142,11 +152,15 @@ function sortable_event(action,list_id){
     let ids_list = [];
     for (let i = 0; i < ids.length; i++) {
         ids_list.push(ids[i].id.replace(/\D/g, ""));
-    }      
+    }   
+    
+    // item_set = ids_list.map(x => {
+    //     return({id: x,todolist:list_id});
+    //   });
     $.ajax(
         {
             type: 'PUT',
-            url: "/sortable/"+list_id,
+            url: "/sortable_todolists/"+list_id,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -154,7 +168,7 @@ function sortable_event(action,list_id){
             data: JSON.stringify({
                 id: list_id,
                 action: action,
-                item_set: ids_list
+                item_list: ids_list,
             }),
             dataType: 'json',
             success: (data,msg,xhr) => {

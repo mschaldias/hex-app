@@ -1,5 +1,5 @@
 from django.urls import path,include
-# from rest_framework import routers
+from rest_framework import routers
 from . import views
 
 # router = routers.DefaultRouter()
@@ -11,10 +11,15 @@ urlpatterns = [
     # path("<int:id>",views.index, name = "index"),
     path("",views.home, name = "home"),
     path("view/",views.view, name = "view"),
+    path("board/",views.board, name = "board"), 
     path("week/",views.week, name = "week"), 
     path("items/",views.items, name = "items"), 
     path("items/<int:id>",views.items, name = "items"),
-    path("sortable/<int:id>",views.sortable, name = "sortable"),  
+    path("sortable_todolists/<int:id>",views.sortable_todolists, name = "sortable_todolists"),
+    path("todolists/",views.todolists, name = "todolists"), 
+    path("todolists/<int:id>",views.todolists, name = "todolists"), 
+
 
     # path("api/", include(router.urls)), 
+    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
