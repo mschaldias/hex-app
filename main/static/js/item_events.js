@@ -18,25 +18,30 @@ function autosize_textarea(){
     $('textarea').each(function () {
         this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
         }).on('input', function () {
-        this.style.height = "0";
-        this.style.height = (this.scrollHeight) + 'px';
+        this.style.height = "0px";
+        this.style.height += (this.scrollHeight) + 'px';
       });
 }
 
-function edit_text(item_id,value){
+function edit_text(resource,item_id,value){
+
+    key = "text"
+    if (resource == "todolists"){
+        key = "name"
+    }
+
+    data = {"id":item_id,[key]:value}
+        
     $.ajax(
         {
             type: 'PUT',
-            url: "/items/"+item_id,
+            url: `/${resource}/${item_id}`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
               },
             dataType: 'json',
-            data: JSON.stringify({
-                id: item_id,
-                text: value
-            }),
+            data: JSON.stringify(data),
             success: (data,msg,xhr) => {
                 console.log(msg,xhr.status)
             },
@@ -73,14 +78,14 @@ function checkbox_click(item_id,value){
     );
 };
 
-function delete_button(item_id){
+function delete_button(resource,item_id){
     item_id = item_id
-    element = document.getElementById("item"+item_id);
+    element = document.getElementById(`item${item_id}`);
     element.remove();
     $.ajax(
         {
             type: 'DELETE',
-            url: "/items/"+item_id,
+            url: `/${resource}/${item_id}`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -110,8 +115,8 @@ function append_new_item(list_id,item_id){
             success: (data) => {
                         parser = new DOMParser();
                         doc = parser.parseFromString(data, "text/html");
-                        item = doc.getElementById("item"+item_id)
-                        $("#list"+list_id).append(item);
+                        item = doc.getElementById(`item${item_id}`)
+                        $(`#${list_id}`).append(item);
                         autosize_textarea();
                     },
             error: (error) =>{
@@ -121,19 +126,22 @@ function append_new_item(list_id,item_id){
     );
 }
 
-function create_button(list_id){
+function create_button(resource,list_id){
 
+    key = "todolist"
+    data = {[key]:list_id}
+    if (resource == "todolists"){
+        data={}
+    }
     $.ajax(
         {
             type: 'POST',
-            url: "/items/",
+            url: `/${resource}/`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
               },
-            data: JSON.stringify({
-                todolist: list_id,
-            }),
+            data: JSON.stringify(data),
             dataType: 'json',
             success: (data,msg,xhr) => {
                         console.log(msg,xhr.status)
@@ -146,30 +154,27 @@ function create_button(list_id){
     );       
 };
 
-function sortable_event(action,list_id){
-
-    let ids = document.querySelectorAll( "#list" + list_id + " li[id]");
+function sortable_event(resource,list_id){
+    let ids = document.querySelectorAll(`#${CSS.escape(list_id)}  li[id]`);
     let ids_list = [];
     for (let i = 0; i < ids.length; i++) {
         ids_list.push(ids[i].id.replace(/\D/g, ""));
     }   
+    data = {"item_set":ids_list,"id":list_id}
+    if (resource == "boards"){
+        data = {"todolist_set":ids_list}
+        list_id=""
+    }
     
-    // item_set = ids_list.map(x => {
-    //     return({id: x,todolist:list_id});
-    //   });
     $.ajax(
         {
             type: 'PUT',
-            url: "/sortable_todolists/"+list_id,
+            url: `/${resource}/${list_id}`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
               },
-            data: JSON.stringify({
-                id: list_id,
-                action: action,
-                item_list: ids_list,
-            }),
+            data: JSON.stringify(data),
             dataType: 'json',
             success: (data,msg,xhr) => {
                         console.log(msg,xhr.status)
