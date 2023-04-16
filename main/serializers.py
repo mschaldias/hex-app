@@ -2,37 +2,33 @@ from rest_framework import serializers
 from .models import ToDoList, Item
 
 class ItemSerializer(serializers.ModelSerializer):
-    queryset = Item.objects.all()
+
     class Meta:
         model = Item
         fields = ('id', 'todolist', 'text', 'complete','position')
 
 class ToDoListSerializer(serializers.ModelSerializer):
-    queryset = ToDoList.objects.all()
-    # item_list = ItemSerializer(many=True,)
-    item_set = ItemSerializer(many=True,read_only=True)
+
     user = serializers.ReadOnlyField(source='user.username')
+    item_set = serializers.PrimaryKeyRelatedField(queryset = Item.objects.all(),many=True,required=False)
     
     class Meta:
         model = ToDoList
         fields = ('id', 'user', 'name','item_set','date')
 
     def update(self,instance,validated_data):
-        item_list= validated_data.pop('item_list') #list of item ids
-        todolist = instance
-        action = validated_data.get('action')
+        user = self.context['user']
 
         position = 0
-        for id in item_list:
-            item = Item.objects.get(id=id)
-            item.position = position
-            if action == "move":
-                item.todolist = todolist
-                if todolist.date:
-                    item.due_date = todolist.date
-            position+=1
-            item.save()
+        for item in validated_data.get('item_set',[]):
+            if item.todolist in user.todolist_set.all():
+                item.position = position
+                item.todolist = instance
+                position+=1
+                item.save()
 
+        instance.name = validated_data.get('name', instance.name)
+        instance.save()
         return instance
 
     

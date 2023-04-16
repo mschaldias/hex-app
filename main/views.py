@@ -1,6 +1,5 @@
 from django.shortcuts import render,redirect
 from .models import ToDoList, Item
-from .forms import CreateNewList
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET,require_POST
 from django.shortcuts import render
@@ -27,24 +26,15 @@ def home(request):
 
 @login_required(login_url='/login/')
 def view(request):
-    if request.method=="POST":
-        form = CreateNewList(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data["name"]
-            request.user.todolist_set.create(name=name)
 
-        elif request.POST.get("removeList"):
-            id = ''.join([n for n in request.POST.get("removeList") if n.isdigit()])
-            request.user.todolist_set.filter(id=id).delete() 
-    
-    form = CreateNewList()
-    return render(request, "main/view.html",{"form":form})
+    todolists = request.user.todolist_set.filter(date__isnull=True)
+    return render(request, "main/view.html",{"todolists":todolists})
 
 
 @login_required(login_url='/login/')
 def board(request):
-    lists = request.user.todolist_set.filter(date__isnull=True)
-    return render(request, "main/viewgrid.html",{"lists": lists})
+    todolists = request.user.todolist_set.filter(date__isnull=True)
+    return render(request, "main/viewgrid.html",{"lists": todolists,"title": "Board"})
 
 @login_required(login_url='/login/')
 def week(request):
@@ -55,7 +45,7 @@ def week(request):
     lists = request.user.todolist_set.filter(date__isnull=False)
     #find this week.monday
     #lists = this week's lists
-    return render(request, "main/viewgrid.html",{"lists": lists})
+    return render(request, "main/viewgrid.html",{"lists": lists, "title": "Week View"})
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
@@ -72,7 +62,7 @@ def todolists(request,id=None):
     elif request.method == "POST":
         todolist_serializer = ToDoListSerializer(data = data)
         if todolist_serializer.is_valid():
-            todolist_serializer.save(user=request.user)
+            todolist_serializer.save(user=request.user,position=MAX_ITEMS,category="board")
             return Response(todolist_serializer.data,status=HTTPStatus.CREATED)
         return Response(todolist_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
     
@@ -85,7 +75,7 @@ def todolists(request,id=None):
             return Response({},status=HTTPStatus.NO_CONTENT)   
 
         elif request.method == "PUT":
-                todolist_serializer = ToDoListSerializer(todolist, data = data)
+                todolist_serializer = ToDoListSerializer(todolist, data = data,context={'user':request.user}, partial=True)
                 if todolist_serializer.is_valid():
                     todolist_serializer.save()
                     return Response(todolist_serializer.data,status=HTTPStatus.OK)  
@@ -116,7 +106,7 @@ def items(request,id=None):
         return Response(item_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
     
     else:
-        item = Item.objects.filter(id=id,todolist__user=request.user).first()
+        item = Item.objects.get(id=id,todolist__user=request.user)
         if not item: return Response({}, status=HTTPStatus.NOT_FOUND)
     
         if request.method == "DELETE":
@@ -124,42 +114,34 @@ def items(request,id=None):
             return Response({},status=HTTPStatus.NO_CONTENT)        
         
         elif request.method == "PUT":
-            item_serializer = ItemSerializer(item, data = data)
+            item_serializer = ItemSerializer(item, data = data,partial=True)
             if item_serializer.is_valid():
                 item_serializer.save()
                 return Response(item_serializer.data,status=HTTPStatus.OK)  
-            return Response(item_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
+            return Response(item_serializer.errors,status=HTTPStatus.BAD_REQUEST)             
 
 @login_required(login_url='/login/')
 @api_view(['PUT'])
-def sortable_todolists(request,id):   
-      
-    todolist =request.user.todolist_set.get(id=id)
-    if not (todolist):
-        return Response({"msg":"list not found"},status=HTTPStatus.NOT_FOUND)
+def boards(request):   
+    
+    board = request.user.todolist_set.filter(date__isnull=True,category='board')
+    
+    if not (board):
+        return Response({"msg":"board not found"},status=HTTPStatus.NOT_FOUND)
 
     data = request.data
-    action = data.get("action")
-    item_list = data.get("item_list")
+    todolist_set = data.get("todolist_set")
 
-    if not (item_list and action):
-         return Response({"msg":"item_list and action required"},status=HTTPStatus.BAD_REQUEST) 
+    if not (todolist_set and type(todolist_set) is list):
+         return Response({"msg":"todolist_set must be list"},status=HTTPStatus.BAD_REQUEST) 
 
-    if action == "move":
-        for id in item_list:
-            item = Item.objects.all().filter(id=id).first()
-            item.todolist = todolist
-            item.save()
-
-    #update item positions in list
     position = 0
-    for id in item_list:
-        item = Item.objects.all().filter(id=id,todolist__id=todolist.id).first()
-        item.position = position
-        item.save()
+    for id in todolist_set:
+        todolist = board.get(id=id) 
+        todolist.position = position
+        todolist.save()
         position+=1
-
-    todolist_serializer = ToDoListSerializer(todolist)
-    return Response(todolist_serializer.data,status=HTTPStatus.OK)              
-
-           
+   
+    todolist_serializer = ToDoListSerializer(board,many=True)
+    return Response(todolist_serializer.data,status=HTTPStatus.OK)  
+                

@@ -15,9 +15,10 @@ urlpatterns = [
     path("week/",views.week, name = "week"), 
     path("items/",views.items, name = "items"), 
     path("items/<int:id>",views.items, name = "items"),
-    path("sortable_todolists/<int:id>",views.sortable_todolists, name = "sortable_todolists"),
     path("todolists/",views.todolists, name = "todolists"), 
-    path("todolists/<int:id>",views.todolists, name = "todolists"), 
+    path("todolists/<int:id>",views.todolists, name = "todolists"),
+    path("boards/",views.boards, name = "boards"), 
+
 
 
     # path("api/", include(router.urls)), 
