@@ -35,10 +35,12 @@ function edit_text(resource,item_id,value){
             dataType: 'json',
             data: JSON.stringify(data),
             success: (data,msg,xhr) => {
-                console.log(msg,xhr.status)
+                console.log(msg,xhr.status)                
             },
-            error: (error) =>{
-                console.log(error);
+            error: (data,msg,xhr) =>{
+                console.log(data.responseText);
+                $("#charFieldError .modal-title").text(JSON.parse(data.responseText)[key][0]);
+                $('#charFieldError').modal("show")
             }
         }
     );

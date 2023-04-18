@@ -101,6 +101,20 @@
                      
                             {% block content %}         
                             {% endblock %}
+
+                            <div class="modal" id="charFieldError" tabindex="-1">
+                                <div class="modal-dialog modal-sm">
+                                  <div class="modal-content bg-hex-sidenav">
+                                    <div type="button" class="btn btn-danger active"><i class="fa-solid fa-circle-exclamation"></i></div>
+                                    <div class="modal-header border-0">
+                                        <div class="modal-title text-red">Modal title</div>
+                                    </div>
+                                    <div class="modal-footer border-0">
+                                        <button type="button" class="btn btn-secondary col-12" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
                        
                     </div>
                 </main>
