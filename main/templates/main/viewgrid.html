@@ -8,23 +8,17 @@
 {% load static %}
 <script src="{%static 'js/item_events.js'%}"></script>
 <!-- jsDelivr :: Sortable :: Latest (https://www.jsdelivr.com/package/npm/sortablejs) -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script><style>
-    .list-group{
-        word-break: break-all;
-     }
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<style>
     .chosen {
     color: #fff;
     background-color: var(--hex-text);
-    }
-    textarea {
-    height: 0;
-    word-break: break-word;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-{% csrf_token %}
+
 <div>
     <h1 class="mt-4"></h1>
     <div class="row">
@@ -73,7 +67,7 @@
                                                     <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "false", name = "{{item.id}}", onclick="checkbox_click(name,value)">
                                                 {%endif%}
                                                 </div>                                    
-                                            <textarea wrap = "hard" value = "" name = "{{item.id}}" class = "form-control bg-hex-topnav border border-hex text-white" onchange="edit_text('items',name,value)">{{item.text}}</textarea>
+                                            <div contenteditable="true" class = "form-control bg-hex-topnav border border-hex text-white" spellcheck = "false" oninput="edit_text('items','{{item.id}}',$(this).text())">{{item.text}}</div>
                                             <button  id = "delete_button" class="btn btn-outline-hex-dark", onclick = "delete_button('items','{{item.id}}')"><i class="fa fa-minus"></i></button>
                                         </div>
                                     </li>
@@ -82,30 +76,29 @@
                     </div>
                 </div>
             </div>
-            {%endfor%}
+            {%endfor%}            
         </div>
-    </div>       
-        <script>autosize_textarea();</script>
-        {% for list in lists %}  
-        <script>
-            var list = document.getElementById('{{list.id}}');
-            Sortable.create(list, {
-                animation: 100,
-                group: 'list-1',
-                draggable: '.draggable',
-                handle: '.handle',
-                sort: true,
-                filter: '.sortable-disabled',
-                chosenClass: 'chosen',
-                onAdd: function () {
-                    sortable_event('todolists','{{list.id}}');
-                },
-                onUpdate: function () {
-                    sortable_event('todolists','{{list.id}}')
-                },
-            });    
-        </script>
-        {% endfor %}
+    </div>      
+    {% for list in lists %}  
+    <script>
+        var list = document.getElementById('{{list.id}}');
+        Sortable.create(list, {
+            animation: 100,
+            group: 'list-1',
+            draggable: '.draggable',
+            handle: '.handle',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'chosen',
+            onAdd: function () {
+                sortable_event('todolists','{{list.id}}');
+            },
+            onUpdate: function () {
+                sortable_event('todolists','{{list.id}}')
+            },
+        });    
+    </script>
+    {% endfor %}
 
 </div>
 {% endblock %}

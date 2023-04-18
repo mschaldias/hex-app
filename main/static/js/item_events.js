@@ -14,14 +14,6 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function autosize_textarea(){
-    $('textarea').each(function () {
-        this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
-        }).on('input', function () {
-        this.style.height = "0px";
-        this.style.height += (this.scrollHeight) + 'px';
-      });
-}
 
 function edit_text(resource,item_id,value){
 
@@ -117,7 +109,6 @@ function append_new_item(list_id,item_id){
                         doc = parser.parseFromString(data, "text/html");
                         item = doc.getElementById(`item${item_id}`)
                         $(`#${list_id}`).append(item);
-                        autosize_textarea();
                     },
             error: (error) =>{
                 console.log(error);
