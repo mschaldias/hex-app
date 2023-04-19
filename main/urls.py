@@ -18,6 +18,7 @@ urlpatterns = [
     path("todolists/",views.todolists, name = "todolists"), 
     path("todolists/<int:id>",views.todolists, name = "todolists"),
     path("boards/",views.boards, name = "boards"), 
+    path("boards/<int:id>",views.boards, name = "boards"), 
 
 
 

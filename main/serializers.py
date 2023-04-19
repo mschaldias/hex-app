@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ToDoList, Item
+from .models import Board,ToDoList, Item
 
 class ItemSerializer(serializers.ModelSerializer):
 
@@ -9,19 +9,19 @@ class ItemSerializer(serializers.ModelSerializer):
 
 class ToDoListSerializer(serializers.ModelSerializer):
 
-    user = serializers.ReadOnlyField(source='user.username')
+    # user = serializers.ReadOnlyField(source='user.username')
     item_set = serializers.PrimaryKeyRelatedField(queryset = Item.objects.all(),many=True,required=False)
     
     class Meta:
         model = ToDoList
-        fields = ('id', 'user', 'name','item_set','date')
+        fields = ('id','board','name','item_set','date')
 
     def update(self,instance,validated_data):
-        user = self.context['user']
+        board = self.context['board']
 
         position = 0
         for item in validated_data.get('item_set',[]):
-            if item.todolist in user.todolist_set.all():
+            if item.todolist in board.todolist_set.all():
                 item.position = position
                 item.todolist = instance
                 position+=1
@@ -32,3 +32,26 @@ class ToDoListSerializer(serializers.ModelSerializer):
         return instance
 
     
+class BoardSerializer(serializers.ModelSerializer):
+
+    owner = serializers.ReadOnlyField(source='user.username')
+    todolist_set = serializers.PrimaryKeyRelatedField(queryset = ToDoList.objects.all(),many=True,required=False)
+    
+    class Meta:
+        model = Board
+        fields = ('id','owner','category','todolist_set')
+
+    def update(self,instance,validated_data):
+        user = self.context['user']
+
+        position = 0
+        for todolist in validated_data.get('todolist_set',[]):
+            if todolist.board in user.board_set.all():
+                todolist.position = position
+                todolist.board = instance
+                position+=1
+                todolist.save()
+
+        instance.category = validated_data.get('category', instance.category)
+        instance.save()
+        return instance

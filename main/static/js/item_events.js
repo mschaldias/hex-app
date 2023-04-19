@@ -124,7 +124,7 @@ function create_button(resource,list_id){
     key = "todolist"
     data = {[key]:list_id}
     if (resource == "todolists"){
-        data={}
+        data={"board":list_id}
     }
     $.ajax(
         {
@@ -155,8 +155,7 @@ function sortable_event(resource,list_id){
     }   
     data = {"item_set":ids_list,"id":list_id}
     if (resource == "boards"){
-        data = {"todolist_set":ids_list}
-        list_id=""
+        data = {"todolist_set":ids_list,"id":list_id}
     }
     
     $.ajax(
