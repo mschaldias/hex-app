@@ -17,7 +17,7 @@ class ToDoListSerializer(serializers.ModelSerializer):
         fields = ('id','board','name','item_set','date')
 
     def update(self,instance,validated_data):
-        board = self.context['board']
+        board = instance.board
 
         position = 0
         for item in validated_data.get('item_set',[]):

@@ -14,13 +14,22 @@
     color: #fff;
     background-color: var(--hex-text);
     }
+    .btn{
+        white-space:normal !important;
+        word-wrap: break-word; 
+        max-width:84%;
+        }
+
+    .col-md-6 {
+        min-width: 300px;
+        }
 </style>
 {% endblock %}
 
 {% block content %}
 
 <div>
-    <h1 class="mt-4"></h1>
+    <h1 class="mt-4">{{title}}</h1>
     <div class="row">
         <div class="col-xl-3 col-md-6">
             {% if backlog %}
@@ -51,8 +60,10 @@
             <div class="col-xl-3 col-md-6">
                 <div class="card bg-hex-sidenav border-0 text-white mb-3"> 
                     <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5>{{list.name}}</h5>    
-                                    <button  id = "create_button" class="btn btn-outline-hex-light", onclick = "create_button('items','{{list.id}}')"><i class="fa fa-plus"></i></button>
+                        <a class = "btn btn-primary" href="/todolist_view/{{list.id}}" >
+                            <h5 href = "/">{{list}}</h5>
+                        </a>
+                        <button  id = "create_button" class="btn btn-outline-hex-light", onclick = "create_button('items','{{list.id}}')"><i class="fa fa-plus"></i></button>
                     </div>
                     <div class="card-body">
                         <ul class="list-group mb-3" id="{{list.id}}"> 

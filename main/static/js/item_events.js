@@ -75,6 +75,9 @@ function checkbox_click(item_id,value){
 function delete_button(resource,item_id){
     item_id = item_id
     element = document.getElementById(`item${item_id}`);
+    if (resource == 'boards'){
+        element = document.getElementById(`card${item_id}`);
+    }
     element.remove();
     $.ajax(
         {
@@ -98,7 +101,7 @@ function delete_button(resource,item_id){
     );
 };
 
-function append_new_item(list_id,item_id){
+function append_new_item(list_id,element_id,card=false){
     $.ajax(
         {
             type: 'GET',
@@ -109,8 +112,13 @@ function append_new_item(list_id,item_id){
             success: (data) => {
                         parser = new DOMParser();
                         doc = parser.parseFromString(data, "text/html");
-                        item = doc.getElementById(`item${item_id}`)
-                        $(`#${list_id}`).append(item);
+                        if (card) {
+                            element = doc.getElementById(`card${element_id}`)
+                        }else{
+                           element = doc.getElementById(`item${element_id}`)
+                        }
+                        
+                        $(`#${list_id}`).append(element);
                     },
             error: (error) =>{
                 console.log(error);
@@ -120,11 +128,21 @@ function append_new_item(list_id,item_id){
 }
 
 function create_button(resource,list_id){
-
-    key = "todolist"
-    data = {[key]:list_id}
+    
+    key = ""
+    card = false
+    data = {}
+    if (resource  == "items"){
+        key="todolist"
+    }
     if (resource == "todolists"){
-        data={"board":list_id}
+        key = "board"
+    }
+    data = {[key]:list_id}
+    if (resource == "boards"){
+        input = $("#boardName").val(),  
+        data = {"category":input};
+        card = true
     }
     $.ajax(
         {
@@ -137,8 +155,8 @@ function create_button(resource,list_id){
             data: JSON.stringify(data),
             dataType: 'json',
             success: (data,msg,xhr) => {
-                        console.log(msg,xhr.status)
-                        append_new_item(list_id,data.id);
+                        console.log(msg,xhr.status);
+                        append_new_item(list_id,data.id,card);
                     },
             error: (error) =>{
                 console.log(error);

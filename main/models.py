@@ -6,7 +6,6 @@ from django.utils import timezone
 class Board(models.Model):                       
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(max_length=200,blank=True)
-    name = models.CharField(max_length=200,blank=True)
 
     def __str__(self):
         return self.category
@@ -15,7 +14,6 @@ class ToDoList(models.Model):
     board = models.ForeignKey(Board, on_delete=models.CASCADE)
     name = models.CharField(max_length=200,blank=True)
     date = models.DateTimeField(null=True)
-    category = models.CharField(max_length=200,blank=True)
     position = models.IntegerField(default=0)
 
     class Meta:

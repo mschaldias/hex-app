@@ -27,13 +27,25 @@ def home(request):
 @login_required(login_url='/login/')
 def view(request):
     boards = request.user.board_set.all()
-    return render(request, "main/test.html",{"lists":boards, "title":"View","set":"board_set"})
+    return render(request, "main/view.html",{"lists":boards, "title":"View","set":"board_set"})
+
 
 
 @login_required(login_url='/login/')
-def board(request):
-    todolists = ToDoList.objects.filter(board__owner=request.user,board__category="main")
-    return render(request, "main/viewgrid.html",{"lists": todolists,"title": "Board"})
+def todolist_view(request,id):
+    if request.method == "GET":
+        todolists = ToDoList.objects.filter(board__owner = request.user,id=id)
+        if not todolists: return Response({}, status=HTTPStatus.NOT_FOUND)
+        
+        return render(request,"main/viewgrid.html",{"lists":todolists,"title": f"{todolists.first().name}"})  
+
+@login_required(login_url='/login/')
+def board_view(request,id):
+    if request.method == "GET":
+        board = request.user.board_set.filter(id=id).first()
+        if not board: return Response({}, status=HTTPStatus.NOT_FOUND)
+        todolists = ToDoList.objects.filter(board__owner = request.user,board__id=id)
+        return render(request, "main/viewgrid.html",{"lists": todolists,"title": f"{board.category}"})             
 
 @login_required(login_url='/login/')
 def week(request):
@@ -52,11 +64,8 @@ def todolists(request,id=None):
 
     data = request.data
 
-    #There is only supposed to be one board with category "main" per user
-    board = request.user.board_set.get(category="main",owner=request.user)
-
     if request.method == "GET":
-        todolists = ToDoList.objects.filter(board__owner = request.user,board__category="main")
+        todolists = ToDoList.objects.filter(board__owner = request.user)
         todolist_serializer = ToDoListSerializer(todolists,many=True)
         return Response(todolist_serializer.data,status=HTTPStatus.OK) 
 
@@ -68,7 +77,7 @@ def todolists(request,id=None):
         return Response(todolist_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
     
     else:
-        todolist = board.todolist_set.filter(id=id).first()
+        todolist = ToDoList.objects.filter(board__owner = request.user,id=id).first()
         if not todolist: return Response({}, status=HTTPStatus.NOT_FOUND)
 
         if request.method == "DELETE":
@@ -76,7 +85,7 @@ def todolists(request,id=None):
             return Response({},status=HTTPStatus.NO_CONTENT)   
 
         elif request.method == "PUT":
-                todolist_serializer = ToDoListSerializer(todolist, data = data,context={'board':board}, partial=True)
+                todolist_serializer = ToDoListSerializer(todolist, data = data, partial=True)
                 if todolist_serializer.is_valid():
                     todolist_serializer.save()
                     return Response(todolist_serializer.data,status=HTTPStatus.OK)  
@@ -135,7 +144,7 @@ def boards(request,id=None):
     elif request.method == "POST":
         board_serializer = BoardSerializer(data = data)
         if board_serializer.is_valid():
-            board_serializer.save()
+            board_serializer.save(owner=request.user)
             return Response(board_serializer.data,status=HTTPStatus.CREATED)
         return Response(board_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
     
