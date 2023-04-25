@@ -15,15 +15,28 @@ function getCookie(name) {
 }
 
 
-function edit_text(resource,item_id,value){
+function edit(resource,item_id,value){
 
-    key = "text"
+    key = ""
+    data={}
+    if( resource == "tasks"){
+        key = "text"
+    }
     if (resource == "todolists"){
         key = "name"
+        if (value===""){
+            value = "List"
+        }
+    }
+    else if (resource == "boards" ){
+        key = "category"
+        if (value===""){
+            value = "Board"
+        }
     }
 
     data = {"id":item_id,[key]:value}
-        
+
     $.ajax(
         {
             type: 'PUT',
@@ -35,7 +48,13 @@ function edit_text(resource,item_id,value){
             dataType: 'json',
             data: JSON.stringify(data),
             success: (data,msg,xhr) => {
-                console.log(msg,xhr.status)                
+                console.log(msg,xhr.status)  
+                if (resource == "boards"){
+                    $(`#card${item_id} #header-text`).text(data.category);
+                }   
+                else if (resource == "todolists"){
+                    $(`#card${item_id} #header-text`).text(data.name);
+                }           
             },
             error: (data,msg,xhr) =>{
                 console.log(data.responseText);
@@ -73,9 +92,11 @@ function checkbox_click(item_id,value){
 };
 
 function delete_button(resource,item_id){
+    alert(resource)
+    alert(item_id)
     item_id = item_id
     element = document.getElementById(`item${item_id}`);
-    if (resource == 'boards'){
+    if (resource == 'boards'||resource == 'todolists'){
         element = document.getElementById(`card${item_id}`);
     }
     element.remove();
@@ -114,11 +135,13 @@ function append_new_item(list_id,element_id,card=false){
                         doc = parser.parseFromString(data, "text/html");
                         if (card) {
                             element = doc.getElementById(`card${element_id}`)
+                            $(`#cards`).append(element);
                         }else{
                            element = doc.getElementById(`item${element_id}`)
+                           $(`#${list_id}`).append(element);
                         }
                         
-                        $(`#${list_id}`).append(element);
+                        
                     },
             error: (error) =>{
                 console.log(error);
@@ -127,21 +150,28 @@ function append_new_item(list_id,element_id,card=false){
     );
 }
 
-function create_button(resource,list_id){
-    
+function create_button(resource,list_id,value="New"){
     key = ""
     card = false
     data = {}
     if (resource  == "tasks"){
         key="todolist"
+        data = {[key]:list_id}
     }
     if (resource == "todolists"){
         key = "board"
+        card = true
+        if (value !== ""){
+            data = {[key]:list_id,"name":value}
+        }
     }
-    data = {[key]:list_id}
+    
     if (resource == "boards"){
-        input = $("#boardName").val(),  
-        data = {"category":input};
+        if (value !== ""){
+            key = "category"
+            data = {"category":value};
+        }
+        
         card = true
     }
     $.ajax(
@@ -158,7 +188,10 @@ function create_button(resource,list_id){
                         console.log(msg,xhr.status);
                         append_new_item(list_id,data.id,card);
                     },
-            error: (error) =>{
+            error: (data,msg,xhr) =>{
+                console.log(JSON.parse(data.responseText)[key][0])
+                $("#charFieldError .modal-title").text(JSON.parse(data.responseText)[key][0]);
+                $('#charFieldError').modal("show")
                 console.log(error);
             }
         }

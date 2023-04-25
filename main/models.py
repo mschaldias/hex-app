@@ -5,7 +5,7 @@ from django.utils import timezone
 
 class Board(models.Model):                       
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    category = models.CharField(max_length=200,blank=True)
+    category = models.CharField(max_length=200,default="Board",blank=True)
 
     def __str__(self):
         return self.category
@@ -20,7 +20,7 @@ class ToDoList(models.Model):
         ordering = ('position',)
     
     def __str__(self):
-        return f"{self.name} {self.date}"
+        return f"{self.name}"
 
 class Task(models.Model):                       
     todolist = models.ForeignKey(ToDoList, on_delete=models.CASCADE)

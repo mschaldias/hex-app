@@ -11,7 +11,7 @@ from http import HTTPStatus
 
 # Create your views here.
 
-# class ToDoListView(viewsets.ModelViewSet):
+# class ToDoView(viewsets.ModelViewSet):
 #     serializer_class = ToDoListSerializer
 #     queryset = ToDoList.objects.all()
 
@@ -27,7 +27,7 @@ def home(request):
 @login_required(login_url='/login/')
 def view(request):
     boards = request.user.board_set.all()
-    return render(request, "main/view.html",{"lists":boards, "title":"View","set":"board_set"})
+    return render(request, "main/resource_view.html",{"lists":boards,"resource":"boards","items":"todolists"})
 
 
 
@@ -37,7 +37,7 @@ def todolist_view(request,id):
         todolists = ToDoList.objects.filter(board__owner = request.user,id=id)
         if not todolists: return Response({}, status=HTTPStatus.NOT_FOUND)
         
-        return render(request,"main/viewgrid.html",{"lists":todolists,"title": f"{todolists.first().name}"})  
+        return render(request,"main/resource_view.html",{"lists": todolists,"resource":"todolists","items":"tasks"})  
 
 @login_required(login_url='/login/')
 def board_view(request,id):
@@ -45,7 +45,7 @@ def board_view(request,id):
         board = request.user.board_set.filter(id=id).first()
         if not board: return Response({}, status=HTTPStatus.NOT_FOUND)
         todolists = ToDoList.objects.filter(board__owner = request.user,board__id=id)
-        return render(request, "main/viewgrid.html",{"lists": todolists,"title": f"{board.category}"})             
+        return render(request, "main/resource_view.html",{"lists": todolists,"parent": board,"resource":"todolists","items":"tasks"})             
 
 @login_required(login_url='/login/')
 def week(request):
@@ -56,7 +56,7 @@ def week(request):
     lists = request.user.todolist_set.filter(date__isnull=False)
     #find this week.monday
     #lists = this week's lists
-    return render(request, "main/viewgrid.html",{"lists": lists, "title": "Week View"})
+    return render(request, "main/test.html",{"lists": lists, "title": "Week View"})
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
