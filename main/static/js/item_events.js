@@ -40,7 +40,7 @@ function edit(resource,item_id,value){
     $.ajax(
         {
             type: 'PUT',
-            url: `/${resource}/${item_id}`,
+            url: `/api/${resource}/${item_id}`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -91,19 +91,17 @@ function checkbox_click(item_id,value){
     );
 };
 
-function delete_button(resource,item_id){
-    alert(resource)
-    alert(item_id)
+function delete_button(resource,item_id,card=false){
     item_id = item_id
     element = document.getElementById(`item${item_id}`);
-    if (resource == 'boards'||resource == 'todolists'){
+    if (card){
         element = document.getElementById(`card${item_id}`);
     }
     element.remove();
     $.ajax(
         {
             type: 'DELETE',
-            url: `/${resource}/${item_id}`,
+            url: `/api/${resource}/${item_id}`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -122,7 +120,7 @@ function delete_button(resource,item_id){
     );
 };
 
-function append_new_item(list_id,element_id,card=false){
+function append_new_item(list_id,element_id,card){
     $.ajax(
         {
             type: 'GET',
@@ -150,9 +148,8 @@ function append_new_item(list_id,element_id,card=false){
     );
 }
 
-function create_button(resource,list_id,value="New"){
+function create_button(resource,list_id,value="",card=false){
     key = ""
-    card = false
     data = {}
     if (resource  == "tasks"){
         key="todolist"
@@ -160,9 +157,9 @@ function create_button(resource,list_id,value="New"){
     }
     if (resource == "todolists"){
         key = "board"
-        card = true
+        data = {[key]:list_id}
         if (value !== ""){
-            data = {[key]:list_id,"name":value}
+            data["name"]=value
         }
     }
     
@@ -171,13 +168,11 @@ function create_button(resource,list_id,value="New"){
             key = "category"
             data = {"category":value};
         }
-        
-        card = true
     }
     $.ajax(
         {
             type: 'POST',
-            url: `/${resource}/`,
+            url: `/api/${resource}/`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -212,7 +207,7 @@ function sortable_event(resource,list_id){
     $.ajax(
         {
             type: 'PUT',
-            url: `/${resource}/${list_id}`,
+            url: `/api/${resource}/${list_id}`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),

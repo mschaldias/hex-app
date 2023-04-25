@@ -1,7 +1,7 @@
 {% extends 'main/base.html' %}
 
 {% block title %}
-    {{parent.category}}
+    {{title}}
 {% endblock %}
 
 {% block style %}
@@ -31,14 +31,14 @@
 
 <div>
     <div class = "row mt-4">   
-        <h1>{{parent.category}}</h1>     
+        <h1>{{title}}</h1>     
         <div class = "col-3">
             <button class = "btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse-create" aria-expanded="false" aria-controls="collapse-create">
                 <i class="fa-regular fa-square-plus"></i> Create
             </button>
             <p>
             <div class="collapse" id="collapse-create">
-                <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource}}','{{parent.id}}',$('#resource-name').val());$('#resource-name').val('')" method = "dialog">
+                <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource}}','{{parent.id}}',$('#resource-name').val(), card=true);$('#resource-name').val('')" method = "dialog">
                     {% csrf_token %}    
                     <div class = "card border-0 text-white mb-3">
                         <div class="card-body bg-hex-sidenav">
@@ -131,7 +131,7 @@
                     <div class="collapse" id="collapse{{list.id}}">
                         <div class = "card-footer">
                                 <button  id = "edit_button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}}" aria-expanded="false" aria-controls="collapse_edit{{list.id}}" ><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                                <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{resource}}','{{list.id}}')"><i class="fa-regular fa-square-minus"></i> Delete</button>
+                                <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{resource}}','{{list.id}}',card=true)"><i class="fa-regular fa-square-minus"></i> Delete</button>
                         </div>
                         <div class = "collapse" id="collapse_edit{{list.id}}" >
                             <div>

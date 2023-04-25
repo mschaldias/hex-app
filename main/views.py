@@ -8,44 +8,33 @@ from .serializers import BoardSerializer,ToDoListSerializer,TaskSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from http import HTTPStatus
-
-# Create your views here.
-
-# class ToDoView(viewsets.ModelViewSet):
-#     serializer_class = ToDoListSerializer
-#     queryset = ToDoList.objects.all()
-
-# class ItemView(viewsets.ModelViewSet):
-#     serializer_class = ItemSerializer
-#     queryset = Item.objects.all()
+from django.http import Http404
 
 MAX_ITEMS = 10000
 
+@require_GET
 def home(request):
     return render(request,"main/home.html",{})
 
+@require_GET
 @login_required(login_url='/login/')
-def view(request):
-    boards = request.user.board_set.all()
-    return render(request, "main/resource_view.html",{"lists":boards,"resource":"boards","items":"todolists"})
+def todolists(request,id):
+    todolists = ToDoList.objects.filter(board__owner = request.user,id=id)
+    if not todolists: raise Http404
+    
+    return render(request,"main/resource_view.html",{"lists": todolists,"resource":"todolists","items":"tasks"})  
 
-
-
+@require_GET
 @login_required(login_url='/login/')
-def todolist_view(request,id):
-    if request.method == "GET":
-        todolists = ToDoList.objects.filter(board__owner = request.user,id=id)
-        if not todolists: return Response({}, status=HTTPStatus.NOT_FOUND)
-        
-        return render(request,"main/resource_view.html",{"lists": todolists,"resource":"todolists","items":"tasks"})  
-
-@login_required(login_url='/login/')
-def board_view(request,id):
-    if request.method == "GET":
+def boards(request,id=None):
+    if id:  
         board = request.user.board_set.filter(id=id).first()
-        if not board: return Response({}, status=HTTPStatus.NOT_FOUND)
+        if not board: raise Http404
         todolists = ToDoList.objects.filter(board__owner = request.user,board__id=id)
-        return render(request, "main/resource_view.html",{"lists": todolists,"parent": board,"resource":"todolists","items":"tasks"})             
+        return render(request, "main/resource_view.html",{"lists": todolists,"parent": board,"resource":"todolists","items":"tasks","title":board.category})  
+
+    boards = request.user.board_set.all()
+    return render(request, "main/resource_view.html",{"lists":boards,"resource":"boards","items":"todolists","title":"Boards"})           
 
 @login_required(login_url='/login/')
 def week(request):
@@ -58,9 +47,10 @@ def week(request):
     #lists = this week's lists
     return render(request, "main/test.html",{"lists": lists, "title": "Week View"})
 
+#API Views:
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
-def todolists(request,id=None):
+def todolists_api(request,id=None):
 
     data = request.data
 
@@ -96,7 +86,7 @@ def todolists(request,id=None):
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
-def tasks(request,id=None):
+def tasks_api(request,id=None):
 
     data = request.data
 
@@ -132,7 +122,7 @@ def tasks(request,id=None):
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
-def boards(request,id=None):   
+def boards_api(request,id=None):   
 
     data = request.data
 

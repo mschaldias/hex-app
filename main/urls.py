@@ -8,16 +8,16 @@ from . import views
 
 urlpatterns = [
     path("",views.home, name = "home"),
-    path("view/",views.view, name = "view"),
+    path("boards/",views.boards, name = "manage_boards"),
     path("week/",views.week, name = "week"), 
-    path("todolist_view/<int:id>",views.todolist_view, name = "todolist_view"),
-    path("board_view/<int:id>",views.board_view, name = "board_view")   ,
-    path("tasks/",views.tasks, name = "tasks"), 
-    path("tasks/<int:id>",views.tasks, name = "tasks"),
-    path("todolists/",views.todolists, name = "todolists"), 
     path("todolists/<int:id>",views.todolists, name = "todolists"),
-    path("boards/",views.boards, name = "boards"), 
-    path("boards/<int:id>",views.boards, name = "boards"), 
+    path("boards/<int:id>",views.boards, name = "boards")   ,
+    path("api/tasks/",views.tasks_api, name = "tasks"), 
+    path("api/tasks/<int:id>",views.tasks_api, name = "tasks"),
+    path("api/todolists/",views.todolists_api, name = "todolists"), 
+    path("api/todolists/<int:id>",views.todolists_api, name = "todolists"),
+    path("api/boards/",views.boards_api, name = "boards"), 
+    path("api/boards/<int:id>",views.boards_api, name = "boards"), 
 
 
 
