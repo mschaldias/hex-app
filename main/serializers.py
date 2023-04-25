@@ -1,31 +1,31 @@
 from rest_framework import serializers
-from .models import Board,ToDoList, Item
+from .models import Board,ToDoList,Task
 
-class ItemSerializer(serializers.ModelSerializer):
+class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Item
+        model = Task
         fields = ('id', 'todolist', 'text', 'complete','position')
 
 class ToDoListSerializer(serializers.ModelSerializer):
 
     # user = serializers.ReadOnlyField(source='user.username')
-    item_set = serializers.PrimaryKeyRelatedField(queryset = Item.objects.all(),many=True,required=False)
+    task_set = serializers.PrimaryKeyRelatedField(queryset = Task.objects.all(),many=True,required=False)
     
     class Meta:
         model = ToDoList
-        fields = ('id','board','name','item_set','date')
+        fields = ('id','board','name','task_set','date')
 
     def update(self,instance,validated_data):
         board = instance.board
 
         position = 0
-        for item in validated_data.get('item_set',[]):
-            if item.todolist in board.todolist_set.all():
-                item.position = position
-                item.todolist = instance
+        for task in validated_data.get('task_set',[]):
+            if task.todolist in board.todolist_set.all():
+                task.position = position
+                task.todolist = instance
                 position+=1
-                item.save()
+                task.save()
 
         instance.name = validated_data.get('name', instance.name)
         instance.save()

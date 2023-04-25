@@ -1,10 +1,10 @@
 from django.shortcuts import render,redirect
-from .models import Board,ToDoList, Item
+from .models import Board,ToDoList,Task
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET,require_POST
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializers import BoardSerializer,ToDoListSerializer,ItemSerializer
+from .serializers import BoardSerializer,ToDoListSerializer,TaskSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from http import HTTPStatus
@@ -96,39 +96,39 @@ def todolists(request,id=None):
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
-def items(request,id=None):
+def tasks(request,id=None):
 
     data = request.data
 
     if request.method == "GET":
-        items = Item.objects.filter(todolist__board__owner=request.user)
-        item_serializer = ItemSerializer(items,many=True)
-        return Response(item_serializer.data,status=HTTPStatus.OK) 
+        tasks = Task.objects.filter(todolist__board__owner=request.user)
+        task_serializer = TaskSerializer(tasks,many=True)
+        return Response(task_serializer.data,status=HTTPStatus.OK) 
     
     if request.method == "POST":
         todolist = ToDoList.objects.filter(board__owner=request.user,id=data.get('todolist'))
         if not todolist: return Response({}, status=HTTPStatus.NOT_FOUND)
 
-        item_serializer = ItemSerializer(data = data)
-        if item_serializer.is_valid():
-            item_serializer.save(position=MAX_ITEMS)
-            return Response(item_serializer.data,status=HTTPStatus.CREATED)
-        return Response(item_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
+        task_serializer = TaskSerializer(data = data)
+        if task_serializer.is_valid():
+            task_serializer.save(position=MAX_ITEMS)
+            return Response(task_serializer.data,status=HTTPStatus.CREATED)
+        return Response(task_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
     
     else:
-        item = Item.objects.filter(id=id,todolist__board__owner=request.user).first()
-        if not item: return Response({}, status=HTTPStatus.NOT_FOUND)
+        task = Task.objects.filter(id=id,todolist__board__owner=request.user).first()
+        if not task: return Response({}, status=HTTPStatus.NOT_FOUND)
     
         if request.method == "DELETE":
-            item.delete()
+            task.delete()
             return Response({},status=HTTPStatus.NO_CONTENT)        
         
         elif request.method == "PUT":
-            item_serializer = ItemSerializer(item, data = data,partial=True)
-            if item_serializer.is_valid():
-                item_serializer.save()
-                return Response(item_serializer.data,status=HTTPStatus.OK)  
-            return Response(item_serializer.errors,status=HTTPStatus.BAD_REQUEST)             
+            task_serializer = TaskSerializer(task, data = data,partial=True)
+            if task_serializer.is_valid():
+                task_serializer.save()
+                return Response(task_serializer.data,status=HTTPStatus.OK)  
+            return Response(task_serializer.errors,status=HTTPStatus.BAD_REQUEST)             
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])

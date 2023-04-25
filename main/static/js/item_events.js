@@ -52,7 +52,7 @@ function checkbox_click(item_id,value){
     $.ajax(
         {
             type: 'PUT',
-            url: "/items/"+item_id,
+            url: "/tasks/"+item_id,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -132,7 +132,7 @@ function create_button(resource,list_id){
     key = ""
     card = false
     data = {}
-    if (resource  == "items"){
+    if (resource  == "tasks"){
         key="todolist"
     }
     if (resource == "todolists"){
@@ -171,7 +171,7 @@ function sortable_event(resource,list_id){
     for (let i = 0; i < ids.length; i++) {
         ids_list.push(ids[i].id.replace(/\D/g, ""));
     }   
-    data = {"item_set":ids_list,"id":list_id}
+    data = {"task_set":ids_list,"id":list_id}
     if (resource == "boards"){
         data = {"todolist_set":ids_list,"id":list_id}
     }

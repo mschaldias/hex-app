@@ -22,7 +22,7 @@ class ToDoList(models.Model):
     def __str__(self):
         return f"{self.name} {self.date}"
 
-class Item(models.Model):                       
+class Task(models.Model):                       
     todolist = models.ForeignKey(ToDoList, on_delete=models.CASCADE)
     text = models.CharField(max_length=300,blank=True)
     complete = models.BooleanField(default=False)
