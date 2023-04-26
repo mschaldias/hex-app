@@ -32,10 +32,20 @@
 <div>
     <div class = "row mt-4">   
         <h1>{{title}}</h1>     
-        <div class = "col-3">
-            <button class = "btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse-create" aria-expanded="false" aria-controls="collapse-create">
+        <div class = "col-3 mt-3">
+            {% if create_resources %}
+                <button class = "btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse-create" aria-expanded="false" aria-controls="collapse-create">
                 <i class="fa-regular fa-square-plus"></i> Create
-            </button>
+                </button>
+            {% elif week_view%}
+                
+            {%else%}
+                <a class = "btn btn-card btn-primary btn-sm" href="/boards/{{lists.first.board.id}}" >
+                    <h5 id = "header-text" href = "/">Return to board: {{lists.first.board}}</h5>
+                </a>
+            {% endif %}
+
+            
             <p>
             <div class="collapse" id="collapse-create">
                 <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource}}','{{parent.id}}',$('#resource-name').val(), card=true);$('#resource-name').val('')" method = "dialog">

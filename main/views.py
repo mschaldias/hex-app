@@ -19,10 +19,11 @@ def home(request):
 @require_GET
 @login_required(login_url='/login/')
 def todolists(request,id):
+    board = request.user.board_set.filter(todolist=id).first()
     todolists = ToDoList.objects.filter(board__owner = request.user,id=id)
     if not todolists: raise Http404
     
-    return render(request,"main/resource_view.html",{"lists": todolists,"resource":"todolists","items":"tasks"})  
+    return render(request,"main/resource_view.html",{"lists": todolists,"resource":"todolists","parent":board,"items":"tasks","create_resources":False})  
 
 @require_GET
 @login_required(login_url='/login/')
@@ -31,10 +32,10 @@ def boards(request,id=None):
         board = request.user.board_set.filter(id=id).first()
         if not board: raise Http404
         todolists = ToDoList.objects.filter(board__owner = request.user,board__id=id)
-        return render(request, "main/resource_view.html",{"lists": todolists,"parent": board,"resource":"todolists","items":"tasks","title":board.category})  
+        return render(request, "main/resource_view.html",{"lists": todolists,"parent": board,"resource":"todolists","items":"tasks","title":board.category,"create_resources":True})  
 
     boards = request.user.board_set.all()
-    return render(request, "main/resource_view.html",{"lists":boards,"resource":"boards","items":"todolists","title":"Boards"})           
+    return render(request, "main/resource_view.html",{"lists":boards,"resource":"boards","items":"todolists","title":"Boards","create_resources":True})           
 
 @login_required(login_url='/login/')
 def week(request):
@@ -42,10 +43,11 @@ def week(request):
     #backlog = incomplete items with due_date before this monday
     #futurelog = incomplete items with due_date after this sunday
 
-    lists = request.user.todolist_set.filter(date__isnull=False)
+    lists = ToDoList.objects.filter(date__isnull=False,board__owner = request.user)
     #find this week.monday
     #lists = this week's lists
-    return render(request, "main/test.html",{"lists": lists, "title": "Week View"})
+    return render(request, "main/resource_view.html",{"lists":lists,"resource":"todolists","items":"items","title":"Week View","week_view":True})           
+
 
 #API Views:
 @login_required(login_url='/login/')
