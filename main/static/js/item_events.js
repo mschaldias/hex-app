@@ -71,7 +71,7 @@ function checkbox_click(item_id,value){
     $.ajax(
         {
             type: 'PUT',
-            url: "/tasks/"+item_id,
+            url: "/api/tasks/"+item_id,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
