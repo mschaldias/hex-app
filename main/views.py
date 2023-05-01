@@ -118,7 +118,11 @@ def tasks_api(request,id=None):
         elif request.method == "PUT":
             task_serializer = TaskSerializer(task, data = data,partial=True)
             if task_serializer.is_valid():
-                task_serializer.save()
+                if data.get("click",None):
+                    complete= not(task.complete)
+                    task_serializer.save(complete=complete)
+                else:
+                    task_serializer.save()
                 return Response(task_serializer.data,status=HTTPStatus.OK)  
             return Response(task_serializer.errors,status=HTTPStatus.BAD_REQUEST)             
 

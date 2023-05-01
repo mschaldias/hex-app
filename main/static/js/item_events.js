@@ -66,7 +66,8 @@ function edit(resource,item_id,value){
 };
 
 
-function checkbox_click(item_id,value){
+
+function checkbox_click(item_id){
 
     $.ajax(
         {
@@ -79,7 +80,7 @@ function checkbox_click(item_id,value){
             dataType: 'json',
             data: JSON.stringify({
                 id: item_id,
-                complete: (value != 'true')
+                click:true 
             }),
             success: (data,msg,xhr) => {
                 console.log(msg,xhr.status)
