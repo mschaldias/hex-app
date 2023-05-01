@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "main.apps.MainConfig",
     "register.apps.RegisterConfig",
     "rest_framework",
+    'tz_detect',
 ]
 
 MIDDLEWARE = [
@@ -52,7 +53,15 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'tz_detect.middleware.TimezoneMiddleware',
+    # 'main.middleware.UserTimezoneMiddleware',
 ]
+
+# These countries will be prioritized in the search
+# for a matching timezone. Consider putting your
+# app's most popular countries first.
+# Defaults to the top Internet using countries.
+TZ_DETECT_COUNTRIES = ('CN', 'US', 'IN', 'JP', 'BR', 'RU', 'DE', 'FR', 'GB')
 
 ROOT_URLCONF = "todoapp.urls"
 

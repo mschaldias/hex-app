@@ -5,7 +5,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('id', 'todolist', 'text', 'complete','position')
+        fields = ('id', 'todolist', 'text', 'complete', 'due_date' ,'position')
 
 class ToDoListSerializer(serializers.ModelSerializer):
 
@@ -24,6 +24,8 @@ class ToDoListSerializer(serializers.ModelSerializer):
             if task.todolist in board.todolist_set.all():
                 task.position = position
                 task.todolist = instance
+                if instance.date:
+                    task.due_date = instance.date
                 position+=1
                 task.save()
 

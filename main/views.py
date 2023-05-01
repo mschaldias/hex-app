@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect
-from .models import Board,ToDoList,Task
+from django.contrib.auth.models import User
+from .models import Board,ToDoList,Task,Profile
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET,require_POST
 from django.shortcuts import render
@@ -9,6 +10,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from http import HTTPStatus
 from django.http import Http404
+from django.utils import timezone
+import datetime
+from tzlocal import get_localzone
+from django.db.models import Q
+
 
 MAX_ITEMS = 10000
 
@@ -40,13 +46,44 @@ def boards(request,id=None):
 @login_required(login_url='/login/')
 def week(request):
 
-    #backlog = incomplete items with due_date before this monday
-    #futurelog = incomplete items with due_date after this sunday
+    #TODO
+    #this board has to be created for each user using a fixture
+    #this board can't be edited or deleted, and the category is unique
+    board = request.user.board_set.get(category="week")
 
-    lists = ToDoList.objects.filter(date__isnull=False,board__owner = request.user)
-    #find this week.monday
-    #lists = this week's lists
-    return render(request, "main/resource_view.html",{"lists":lists,"resource":"todolists","items":"items","title":"Week View","week_view":True})           
+    #board always has this list which can't be edited or deleted
+    archive = board.todolist_set.get(name="archive")
+    
+    #board always has these lists which can't be edited or deleted
+    backlog = board.todolist_set.get(name="backlog")
+    futurelog = board.todolist_set.get(name="futurelog")
+
+    #update future log
+    for task in futurelog.task_set.all():
+        if task.due_date:
+            if task.due_date < board.due_date:
+                task.due_date = None
+                task.save()
+
+    #archive complete tasks from backlog and futurelog
+    board.archive(board.todolist_set.filter(name__in=['backlog','futurelog']),archive)
+ 
+    now = timezone.now()
+    end_of_week = board.due_date
+    if now > end_of_week:
+        board.migrate_week()
+
+    week_todolists = board.todolist_set.exclude(date=None)
+    return render(request, "main/resource_view.html",{"lists": week_todolists,
+                                                      "week":True,
+                                                      "parent": board,
+                                                      "resource":"todolists",
+                                                      "items":"tasks",
+                                                      "title":board.category,
+                                                      "create_resources":False,
+                                                      "backlog":backlog,
+                                                      "futurelog":futurelog
+                                                      })  
 
 
 #API Views:
@@ -98,12 +135,12 @@ def tasks_api(request,id=None):
         return Response(task_serializer.data,status=HTTPStatus.OK) 
     
     if request.method == "POST":
-        todolist = ToDoList.objects.filter(board__owner=request.user,id=data.get('todolist'))
+        todolist = ToDoList.objects.filter(board__owner=request.user,id=data.get('todolist')).first()
         if not todolist: return Response({}, status=HTTPStatus.NOT_FOUND)
 
         task_serializer = TaskSerializer(data = data)
         if task_serializer.is_valid():
-            task_serializer.save(position=MAX_ITEMS)
+            task_serializer.save(position=MAX_ITEMS,due_date=todolist.date)
             return Response(task_serializer.data,status=HTTPStatus.CREATED)
         return Response(task_serializer.errors,status=HTTPStatus.BAD_REQUEST) 
     

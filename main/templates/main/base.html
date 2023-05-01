@@ -18,6 +18,8 @@
         {% block style %}          
         {% endblock %}
     </head>
+    {% load tz_detect %}
+    {% tz_detect %}
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-hex-topnav">
             <!-- Navbar Brand-->

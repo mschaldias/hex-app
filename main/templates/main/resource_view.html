@@ -7,23 +7,34 @@
 {% block style %}
 {% load static %}
 {% load custom_tags %}
+{% load tz %}
 <script src="{%static 'js/item_events.js'%}"></script>
 <!-- jsDelivr :: Sortable :: Latest (https://www.jsdelivr.com/package/npm/sortablejs) -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
 <style>
     .chosen {
     color: #fff;
     background-color: var(--hex-text);
     }
-        .btn-card{
+    .btn-card{
         white-space:normal !important;
         word-wrap: break-word; 
-        max-width:75%;
-        }
+        max-width:60%;
+    }
+    .li-text{
+        white-space:normal !important;
+        word-wrap: break-word; 
+        max-width:85%;
+    }
 
     .col-md-6 {
         min-width: 300px;
-        }
+    }
+    .datepicker {
+        color: var(--hex-text) ;
+    }
 </style>
 {% endblock %}
 
@@ -36,31 +47,37 @@
             {% if create_resources %}
                 <button class = "btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse-create" aria-expanded="false" aria-controls="collapse-create">
                 <i class="fa-regular fa-square-plus"></i> Create
-                </button>
-            {% elif week_view%}
-                
+                </button>                
             {%else%}
-                <a class = "btn btn-card btn-primary btn-sm" href="/boards/{{lists.first.board.id}}" >
+                {% if week %}
+                <button class = "btn btn-success">
+                    <i class="fa-solid fa-rotate"></i> This week
+                </button>   
+                <button class = "btn btn-success">
+                    <i class="fa-solid fa-arrow-right"></i> Migrate
+                </button>   
+                {% else %}
+                   <a class = "btn btn-card btn-primary btn-sm" href="/boards/{{lists.first.board.id}}" >
                     <h5 id = "header-text" href = "/">Return to board: {{lists.first.board}}</h5>
-                </a>
+                    </a> 
+                {% endif %}                
             {% endif %}
 
-            
             <p>
             <div class="collapse" id="collapse-create">
-                <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource}}','{{parent.id}}',$('#resource-name').val(), card=true);$('#resource-name').val('')" method = "dialog">
-                    {% csrf_token %}    
-                    <div class = "card border-0 text-white mb-3">
-                        <div class="card-body bg-hex-sidenav">
+                <div class = "card bg-hex-sidenav">
+                    <div class = "card-body">
+                        <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource}}','{{parent.id}}',$('#resource-name').val(), card=true);$('#resource-name').val('')" method = "dialog">
+                            {% csrf_token %}
                             <p>
                             <label for="resource-name">{{resource}} name:</label>
                             <input type="text" id="resource-name" value= "" class = "form-control bg-hex-topnav border border-hex text-white">   
                             </p>
                             <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Close</button>
                             <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Submit</button>
-                        </div>
-                    </div>                             
-                </form>
+                        </form>
+                    </div>
+                </div>
             </div>
             </p>
         </div>
@@ -69,26 +86,128 @@
     <div class="row">
         <div class="col-xl-3 col-md-6">
             {% if backlog %}
-            <div class="card bg-danger text-white mb-4">
-                <div class="card-body">Backlog</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+            <div class="card bg-danger" id = "backlog">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 id = "header-text" href = "#">Back Log</h5>
+                    <div>
+                        <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{backlog.id}}" aria-expanded="false" aria-controls="collapse{{backlog.id}}">
+                            <i class="fas fa-angle-down"></i>
+                        </button>                        
+                        <button  id = "create_button" class="btn btn-success", onclick = "create_button('{{items}}','{{backlog.id}}')">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>  
+                <div class = "card-body">
+                    <ul class="list-group mb-3" id="{{backlog.id}}"> 
+                        {% for item in backlog|queryset %}
+                        <li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item{{item.id}}">   
+                            <div class="handle card-body" style= "cursor:move">                                             
+                                <div class = "d-flex justify-content gap-2">                                                
+                                    <div class = "input-group " style= "cursor:auto">
+                                            <div class= "input-group-text bg-hex-sidenav border-0" >
+                                                {% if item.complete == True %}
+                                                    <input class = "form-check-input bg-hex-topnav" type="checkbox" name = "{{item.id}}"  , onclick="checkbox_click(name)" checked>
+                                                {%else%}
+                                                    <input class = "form-check-input bg-hex-topnav" type="checkbox" name = "{{item.id}}", onclick="checkbox_click(name)">
+                                                {%endif%}
+                                            </div>
+                                        <div contenteditable="true" class = "form-control bg-hex-topnav border-white text-white text-start li-text" spellcheck = "false" oninput="edit('{{items}}','{{item.id}}',$(this).text(),item_edit=true)">{{item}}</div>
+                                        <button id="item-text" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-0 text-white text-start mx-auto">
+                                            <i class="fa-solid fa-angle-down"></i>
+                                        </button>
+                                    </div>
+                                </div>      
+                                <div class = "task-due-date-text">
+                                    {% if item.due_date %}
+                                        <i class="fa-solid fa-calendar"></i>     
+                                        {{item.due_date|date:"D M d Y"}}
+                                    {% endif %}                                        
+                                </div>
+                                <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
+                                    <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
+                                        <i class="fa-solid fa-calendar"></i>                                                   
+                                    </button>
+                                    <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{items}}','{{item.id}}')"> 
+                                        <i class="fa fa-minus"></i>
+                                    </button>                                    
+                                    <div class = "collapse mt-1" id = "calendar-collapse{{item.id}}">
+                                        <div class = "card bg-hex-body d-flex justify-content-center">                                    
+                                            <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
+                                            <script>set_datepicker('{{item.id}}')</script> 
+                                    </div>
+                                </div>                                                                                                                                
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>                
             </div>
+            <script>initialize_sortable('{{resource}}','{{backlog.id}}')</script>     
             {%endif%}
         </div>
         <div class="col-xl-3 col-md-6">
             {% if futurelog %}
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">Future Log</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+            <div class="card bg-primary" id = "futurelog">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 id = "header-text" href = "#">Future Log</h5>
+                    <div>
+                        <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{futurelog.id}}" aria-expanded="false" aria-controls="collapse{{futurelog.id}}">
+                            <i class="fas fa-angle-down"></i>
+                        </button>                        
+                        <button  id = "create_button" class="btn btn-success", onclick = "create_button('{{items}}','{{futurelog.id}}')">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>  
+                <div class = "card-body">
+                    <ul class="list-group mb-3" id="{{futurelog.id}}"> 
+                        {% for item in futurelog|queryset %}
+                        <li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item{{item.id}}">   
+                            <div class="handle card-body" style= "cursor:move">                                             
+                                <div class = "d-flex justify-content gap-2">                                                
+                                    <div class = "input-group " style= "cursor:auto">
+                                            <div class= "input-group-text bg-hex-sidenav border-0" >
+                                                {% if item.complete == True %}
+                                                    <input class = "form-check-input bg-hex-topnav" type="checkbox",  name = "{{item.id}}"  , onclick="checkbox_click(name)" checked>
+                                                {%else%}
+                                                    <input class = "form-check-input bg-hex-topnav" type="checkbox",  name = "{{item.id}}", onclick="checkbox_click(name)">
+                                                {%endif%}
+                                            </div>
+                                        <div contenteditable="true" class = "form-control bg-hex-topnav border-white text-white text-start li-text" spellcheck = "false" oninput="edit('{{items}}','{{item.id}}',$(this).text(),item_edit=true)">{{item}}</div>
+                                        <button id="item-text" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-0 text-white text-start mx-auto">
+                                            <i class="fa-solid fa-angle-down"></i>
+                                        </button>
+                                    </div>
+                                </div>      
+                                    <div class = "task-due-date-text">
+                                        {% if item.due_date %}
+                                            <i class="fa-solid fa-calendar"></i>     
+                                            {{item.due_date|date:"D M d Y"}}
+                                        {% endif %}                                        
+                                    </div>
+                                <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
+                                <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
+                                    <i class="fa-solid fa-calendar"></i>                                                   
+                                </button>
+                                <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{items}}','{{item.id}}')"> 
+                                    <i class="fa fa-minus"></i>
+                                </button>                                    
+                                    <div class = "collapse mt-1" id = "calendar-collapse{{item.id}}">
+                                        <div class = "card bg-hex-body d-flex justify-content-center">                                    
+                                            <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
+                                            <script>set_datepicker('{{item.id}}')</script> 
+                                    </div>                                    
+                                </div>                                                                                                                                
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>                
             </div>
+            <script>initialize_sortable('{{resource}}','{{futurelog.id}}')</script>     
             {%endif%}
-        </div>
+        </div>         
     </div>    
     <div class = "" style = "margin: auto;">
         <div class = "row mt-3 d-flex justify-content-center" id = "cards">
@@ -113,29 +232,63 @@
 
                     </div>
                     <div class="card-body">
-                        <ul class="list-group mb-3" id="{{list.id}}"> 
+                        <ul class="list-group mb-3 d-flex justify-content" id="{{list.id}}"> 
                                 {% for item in list|queryset %}
-                                    <li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item{{item.id}}">
-                                        <div class = "input-group mx-auto">
-                                            <span class="handle btn border-0" style= "cursor:move"><i class="fa-solid fa-grip-lines-vertical fa" style="color:  var(--hex-body);"></i></span>
+                                    <li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item{{item.id}}">   
+                                        <div class="handle card-body" style= "cursor:move">                                             
+                                            <div class = "d-flex justify-content gap-2">                                                
+                                                <div class = "input-group " style= "cursor:auto">
                                                     {% if items == "tasks" %}
-                                                        <div class= "input-group-text bg-hex-sidenav border border-hex" >
+                                                        <div class= "input-group-text bg-hex-sidenav border-0" >
                                                             {% if item.complete == True %}
-                                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "true", name = "{{item.id}}"  , onclick="checkbox_click(name,value)" checked>
+                                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", name = "{{item.id}}"  , onclick="checkbox_click(name)" checked>
                                                             {%else%}
-                                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", value = "false", name = "{{item.id}}", onclick="checkbox_click(name,value)">
+                                                                <input class = "form-check-input bg-hex-topnav" type="checkbox", name = "{{item.id}}", onclick="checkbox_click(name)">
                                                             {%endif%}
-                                                        </div>     
+                                                        </div>  
+                                                        
                                                     {% else %}
-                                                        <a class = "btn btn-outline-hex-dark" href="/{{items}}/{{item.id}}">
+                                                        <a class = "btn bg-hex-sidenav border" href="/{{items}}/{{item.id}}">
                                                         </a>
                                                     {% endif %}
-                                                    
-                                            <div contenteditable="true" class = "form-control bg-hex-topnav border border-hex text-white" spellcheck = "false" oninput="edit('{{items}}','{{item.id}}',$(this).text())">{{item}}</div>
-                                            <button  id = "delete_button" class="btn btn-outline-hex-dark", onclick = "delete_button('{{items}}','{{item.id}}')"><i class="fa fa-minus"></i></button>
+                                                
+                                                    <div contenteditable="true" class = "form-control bg-hex-topnav border-white text-white text-start li-text" spellcheck = "false" oninput="edit('{{items}}','{{item.id}}',$(this).text(),item_edit=true)">{{item}}</div>
+                                                    <button id="item-text" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-0 text-white text-start mx-auto">
+                                                        <i class="fa-solid fa-angle-down"></i>
+                                                    </button>
+                                                </div>
+                                            </div>      
+                                            {% if items == "tasks" and not week%}
+                                                <div class = "task-due-date-text">
+                                                {% if item.due_date %}
+                                                    <i class="fa-solid fa-calendar"></i>     
+                                                    {{item.due_date|date:"D M d Y"}}
+                                                
+                                                {% endif %}
+                                                </div>                                                
+                                            {% endif %}
+                                            <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
+                                                {% if items == "tasks" and not week %}
+                                                <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
+                                                    <i class="fa-solid fa-calendar"></i>                                                   
+                                                </button>                                                
+                                                {% endif %}
+                                                <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{items}}','{{item.id}}')"> 
+                                                    <i class="fa fa-minus"></i>
+                                                </button>                                                
+                                                {% if items == "tasks" %}
+                                                    <div class = "collapse mt-1" id = "calendar-collapse{{item.id}}">
+                                                        <div class = "card bg-hex-body d-flex justify-content-center">                                                    
+                                                            <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
+                                                            <script>set_datepicker('{{item.id}}')</script>                                                             
+                                                    </div>                                                    
+                                                {% endif %}
+                                            </div>                                                                                                                                
                                         </div>
                                     </li>
+                                    
                                 {% endfor %}
+                                <script>initialize_sortable('{{resource}}','{{list.id}}')</script>     
                         </ul>
                     </div>
                     <div class="collapse" id="collapse{{list.id}}">
@@ -151,7 +304,7 @@
                                         <label for="resource-name">{{resource}} name:</label>
                                         <input type="text" name="boardName" id="resource-name{{list.id}}" value= "{{list}}" class = "form-control bg-hex-topnav border border-hex text-white">                    
                                     </div>
-                                    <div class="card-footer border-0 justify-content-start">
+                                    <div class="card-body border-0">
                                         <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}},#collapse{{list.id}}">Close</button>
                                         <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}},#collapse{{list.id}}">Submit</button>
                                     </div>
@@ -164,28 +317,5 @@
             {%endfor%}            
         </div>
     </div>    
-    
-
-    {% for list in lists %}  
-    <script>
-        var list = document.getElementById('{{list.id}}');
-        Sortable.create(list, {
-            animation: 100,
-            group: 'list-1',
-            draggable: '.draggable',
-            handle: '.handle',
-            sort: true,
-            filter: '.sortable-disabled',
-            chosenClass: 'chosen',
-            onAdd: function () {
-                sortable_event('{{resource}}','{{list.id}}');
-            },
-            onUpdate: function () {
-                sortable_event('{{resource}}','{{list.id}}')
-            },
-        });    
-    </script>
-    {% endfor %}
-
 </div>
 {% endblock %}

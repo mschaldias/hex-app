@@ -54,7 +54,7 @@ function edit(resource,item_id,value){
                 }   
                 else if (resource == "todolists"){
                     $(`#card${item_id} #header-text`).text(data.name);
-                }           
+                }        
             },
             error: (data,msg,xhr) =>{
                 console.log(data.responseText);
@@ -65,6 +65,42 @@ function edit(resource,item_id,value){
     );
 };
 
+function set_task_date(item_id,value){
+    const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+    $.ajax(
+        {
+            type: 'PUT',
+            url: "/api/tasks/"+item_id,
+            contentType: 'application/json',
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+            dataType: 'json',
+            data: JSON.stringify({
+                id: item_id,
+                due_date: value
+            }),
+            success: (data,msg,xhr) => {
+                console.log(msg,xhr.status)
+                if (data.due_date != null){
+                    date = new Date(data.due_date).toDateString()  
+                    html = `<i class="fa-solid fa-calendar"></i>  ${date}`
+                }else{
+                    html = ''
+                }                              
+                $(`#item${item_id} .task-due-date-text`).html(html)
+            },
+            error: (error) =>{
+                console.log(error);
+            }
+        }
+    );
+}
 
 
 function checkbox_click(item_id){
@@ -121,7 +157,7 @@ function delete_button(resource,item_id,card=false){
     );
 };
 
-function append_new_item(list_id,element_id,card){
+function append_new_item(list_id,element_id,card,log=false){ 
     $.ajax(
         {
             type: 'GET',
@@ -132,15 +168,23 @@ function append_new_item(list_id,element_id,card){
             success: (data) => {
                         parser = new DOMParser();
                         doc = parser.parseFromString(data, "text/html");
+                        if (log){  
+                            element = doc.getElementById(`${element_id}`)
+                            $(`#${element_id}`).replaceWith(element)
+                            initialize_sortable('todolists',`${element_id}`)   
+                            let task_ids = document.querySelectorAll(`#${CSS.escape(element_id)}  li[id]`);
+                            for (let i = 0; i < task_ids.length; i++) {
+                                set_datepicker(task_ids[i].id.replace(/\D/g, ""));
+                            }                                       
+                        }                        
                         if (card) {
                             element = doc.getElementById(`card${element_id}`)
                             $(`#cards`).append(element);
                         }else{
-                           element = doc.getElementById(`item${element_id}`)
-                           $(`#${list_id}`).append(element);
-                        }
-                        
-                        
+                            element = doc.getElementById(`item${element_id}`)
+                            $(`#${list_id}`).append(element);
+                        };
+                        set_datepicker(element_id)      
                     },
             error: (error) =>{
                 console.log(error);
@@ -216,7 +260,8 @@ function sortable_event(resource,list_id){
             data: JSON.stringify(data),
             dataType: 'json',
             success: (data,msg,xhr) => {
-                        console.log(msg,xhr.status)
+                        console.log(msg,xhr.status)                        
+                        append_new_item(`${data.name}`,`${data.id}`,card=false,log=true)
                     },
             error: (error) =>{
                 console.log(error);
@@ -224,3 +269,38 @@ function sortable_event(resource,list_id){
         }
     );
 }
+function set_datepicker(element_id){
+    $(`#datepicker${element_id}`).datepicker({
+        todayHighlight:true,
+        clearBtn:true,
+        todayBtn:"linked",        
+    });
+    $(`#datepicker${element_id}`).on('changeDate', function() {
+        value = $(`#datepicker${element_id}`).datepicker('getDate');
+        set_task_date(element_id,value);
+        $(`#calendar-collapse${element_id}`).collapse("toggle")
+        $(`#item-collapse${element_id}`).collapse("toggle")
+                
+    });  
+}
+
+function initialize_sortable(resource,list_id){
+
+    var list = document.getElementById(list_id);
+    Sortable.create(list, {
+        animation: 100,
+        group: 'list-1',
+        draggable: '.draggable',
+        handle: '.handle',
+        sort: true,
+        filter: '.sortable-disabled',
+        chosenClass: 'chosen',
+        onAdd: function () {
+            sortable_event(resource,list_id);
+        },
+        onUpdate: function () {
+            sortable_event(resource,list_id)
+        },
+    });  
+
+} 
