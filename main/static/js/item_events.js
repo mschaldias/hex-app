@@ -270,17 +270,18 @@ function sortable_event(resource,list_id){
     );
 }
 function set_datepicker(element_id){
-    $(`#datepicker${element_id}`).datepicker({
+    options = {
         todayHighlight:true,
         clearBtn:true,
-        todayBtn:"linked",        
-    });
+        todayBtn:"linked", 
+    }  
+    $(`#datepicker${element_id}`).datepicker(options);
+    
     $(`#datepicker${element_id}`).on('changeDate', function() {
         value = $(`#datepicker${element_id}`).datepicker('getDate');
         set_task_date(element_id,value);
         $(`#calendar-collapse${element_id}`).collapse("toggle")
-        $(`#item-collapse${element_id}`).collapse("toggle")
-                
+        $(`#item-collapse${element_id}`).collapse("toggle")                
     });  
 }
 
