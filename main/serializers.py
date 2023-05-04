@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Board,ToDoList,Task
+from django.utils import timezone
+from datetime import datetime
 
 class TaskSerializer(serializers.ModelSerializer):
 
@@ -18,14 +20,19 @@ class ToDoListSerializer(serializers.ModelSerializer):
 
     def update(self,instance,validated_data):
         board = instance.board
+        name = instance.name
+        board_category = board.category
 
         position = 0
         for task in validated_data.get('task_set',[]):
             if task.todolist in board.todolist_set.all():
+                #tasks moved into futurelog from another todolist have their due_dates set to None
+                if task.todolist != instance and board_category == 'week' and name == 'futurelog':
+                    task.due_date = None 
                 task.position = position
                 task.todolist = instance
                 if instance.date:
-                    task.due_date = instance.date
+                    task.due_date = (datetime.combine(instance.date, datetime.min.time())).astimezone(tz=timezone.get_current_timezone())
                 position+=1
                 task.save()
 
