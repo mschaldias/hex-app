@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User
-from .models import Board,ToDoList,Task,Profile
+from .models import Board,ToDoList,Task
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET,require_POST
 from django.shortcuts import render
@@ -58,18 +58,9 @@ def migration(request):
 @login_required(login_url='/login/')
 def week(request):
 
-    #TODO
-    #this board has to be created for each user using a fixture
-    #this board can't be edited or deleted, and the category is  
-    board = request.user.board_set.filter(category="week")
-    if not board:
-        board = request.user.board_set.create(category="week")
-        board.initialize_week()
-        archive = board.todolist_set.create(name="archive")
-        backlog = board.todolist_set.create(name="backlog")
-        futurelog = board.todolist_set.create(name="futurelog")
-    else:
-        board = board.first()
+    #this board is to be created for each new user using a signal
+    #TODO : ensure this board can't be edited or deleted 
+    board = request.user.board_set.get(category="week")
 
     #board always has this list which can't be edited or deleted
     archive = board.todolist_set.get(name="archive")
