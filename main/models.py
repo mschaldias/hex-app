@@ -21,14 +21,14 @@ class Board(models.Model):
         year, week_num, day_of_week = given_datetime.isocalendar()
         if next_week:
             week_num+=1
-        self.start_date = tz.localize(datetime.fromisocalendar(year,week_num,1))
+        self.start_date = (datetime.fromisocalendar(year,week_num,1)).astimezone(tz)
         for day_of_week in range(1,8):
-            dt = tz.localize(datetime.fromisocalendar(year,week_num,day_of_week))
+            dt = (datetime.fromisocalendar(year,week_num,day_of_week)).astimezone(tz)
             date = dt.date()
             name = f"{date.strftime('%A')} {date}"
             self.todolist_set.create(name=name,date=date)
         
-        dt = tz.localize(datetime.combine(dt, datetime.max.time())) #sets dt to 23:59 local time
+        dt = (datetime.combine(dt, datetime.max.time())).astimezone(tz) #sets dt to 23:59 local time
         self.due_date = dt
         self.save()
 
