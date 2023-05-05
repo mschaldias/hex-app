@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import datetime
+from main.custom_exceptions import IncorrectBoardCategoryError
 
 # Create your models here.
 
@@ -15,6 +16,7 @@ class Board(models.Model):
         return self.category
     
     def initialize_week(self,given_datetime=False,next_week=False):
+        if self.category != 'week': raise IncorrectBoardCategoryError
         if not given_datetime:        
             given_datetime = timezone.localtime()
         tz = timezone.get_current_timezone()
