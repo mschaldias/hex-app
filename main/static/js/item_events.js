@@ -183,6 +183,7 @@ function append_new_item(list_id,element_id,card,log=false){
                         }else{
                             element = doc.getElementById(`item${element_id}`)
                             $(`#${list_id}`).append(element);
+                            initialize_sortable('todolists',list_id)
                         };
                         set_datepicker(element_id)      
                     },
