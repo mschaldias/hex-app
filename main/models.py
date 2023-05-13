@@ -61,8 +61,9 @@ class Board(models.Model):
             for task in todolist.task_set.all():
                 if task.complete:
                     task.todolist = archive
-                elif task.due_date and task.due_date.astimezone(tz=timezone.get_current_timezone()).date() < datetime.astimezone(tz=timezone.get_current_timezone()).date():
-                    task.todolist = backlog
+                elif datetime:
+                    if task.due_date and task.due_date.astimezone(tz=timezone.get_current_timezone()) < datetime.astimezone(tz=timezone.get_current_timezone()):
+                        task.todolist = backlog
                 task.save()
 
 
