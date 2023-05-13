@@ -50,7 +50,7 @@ def migration(request):
             # board.peek()
             board.migrate_week(next_week=True)
         elif request.POST.get("current_week"): 
-            dt = (datetime.combine(timezone.localtime(), datetime.max.time())).astimezone(tz=timezone.get_default_timezone()) #datetime is 23:59 current day local time as UTC
+            dt = (datetime.combine(timezone.localtime(), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone()) #datetime is 23:59 current day local time as UTC
             board.migrate_week(dt=dt) 
                  
     return redirect("/week/")
@@ -156,7 +156,7 @@ def tasks_api(request,id=None):
         if task_serializer.is_valid():
             dt=None
             if todolist.date:
-                dt = (datetime.combine(todolist.date, datetime.min.time())).astimezone(tz=timezone.get_current_timezone())
+                dt = (datetime.combine(todolist.date, datetime.min.time())).replace(tzinfo=timezone.get_current_timezone())
             task_serializer.save(position=MAX_ITEMS,due_date=dt)
             return Response(task_serializer.data,status=HTTPStatus.CREATED)
         return Response(task_serializer.errors,status=HTTPStatus.BAD_REQUEST) 

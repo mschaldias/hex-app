@@ -30,7 +30,7 @@ class Board(models.Model):
             name = f"{date.strftime('%A')} {date}"
             self.todolist_set.create(name=name,date=date)
         
-        dt = (datetime.combine(dt, datetime.max.time())).astimezone(tz) #sets dt to 23:59 local time
+        dt = (datetime.combine(dt, datetime.max.time())).replace(tzinfo=tz) #sets dt to 23:59 local time
         self.due_date = dt
         self.save()
 

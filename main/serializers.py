@@ -32,7 +32,7 @@ class ToDoListSerializer(serializers.ModelSerializer):
                 task.position = position
                 task.todolist = instance
                 if instance.date:
-                    task.due_date = (datetime.combine(instance.date, datetime.min.time())).astimezone(tz=timezone.get_current_timezone())
+                    task.due_date = (datetime.combine(instance.date, datetime.min.time())).replace(tzinfo=timezone.get_current_timezone())
                 position+=1
                 task.save()
 
