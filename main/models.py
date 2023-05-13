@@ -35,6 +35,7 @@ class Board(models.Model):
         self.save()
 
     def migrate_week(self,next_week=False,dt=None):
+        if self.category != 'week': raise IncorrectBoardCategoryError
         week_todolists = self.todolist_set.exclude(date=None)
 
         #all complete tasks in board are moved to archive, 
@@ -54,7 +55,7 @@ class Board(models.Model):
         return
     
     def archive(self,todolists,datetime=None):
-        if not datetime: datetime = self.due_date
+        if self.category != 'week': raise IncorrectBoardCategoryError
         archive = self.todolist_set.get(name="archive")
         backlog = self.todolist_set.get(name="backlog")
         for todolist in todolists:
