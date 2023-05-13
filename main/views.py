@@ -73,17 +73,6 @@ def week(request):
     if now > board.due_date:
         board.migrate_week()
 
-    for task in futurelog.task_set.filter(complete=False):
-        if task.due_date and task.due_date < now:
-            task.todolist = backlog
-        elif task.due_date and board.start_date <= task.due_date <= board.due_date:
-            date = task.due_date.astimezone(tz=timezone.get_current_timezone()).date()
-            task.todolist = board.todolist_set.get(date=date)
-        task.save()
-    for task in backlog.task_set.filter(complete=False):
-        if task.due_date and task.due_date > board.due_date:
-            task.todolist = futurelog
-            task.save()
 
     #archive complete tasks from backlog and futurelog
     board.archive(board.todolist_set.filter(name__in=['backlog','futurelog']))   

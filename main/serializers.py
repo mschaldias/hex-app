@@ -9,6 +9,34 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ('id', 'todolist', 'text', 'complete', 'due_date' ,'position')
 
+    def update(self,instance,validated_data):
+        todolist = instance.todolist
+        board = todolist.board
+        if board.category == 'week':
+            due_date = validated_data.get('due_date')
+            current_datetime = timezone.localtime()
+            current_date = current_datetime.date()
+            if due_date:
+                if todolist.name == 'backlog': 
+                    #if backlog task due_date is changed to after board due_date, task is assigned to futurelog
+                    if due_date.date() > board.due_date.date():
+                        futurelog = board.todolist_set.get(name='futurelog')
+                        instance.todolist = futurelog
+                elif todolist.name == 'futurelog':
+                    #if futurelog task due_date is changed to be in the past, task is assigned to backlog
+                    if due_date.date() < current_date:
+                        backlog = board.todolist_set.get(name='backlog')
+                        instance.todolist = backlog
+
+                #if futurelog/backlog task due_date is between now and board.due_date then assign to week day
+                if todolist.name == 'backlog' or todolist.name == 'futurelog':
+                    if current_date <= due_date.date() <= board.due_date.astimezone(timezone.get_current_timezone()).date():
+                        week_day_todolist = board.todolist_set.get(date=due_date.astimezone(timezone.get_current_timezone()).date())
+                        instance.todolist = week_day_todolist
+                instance.save()
+        return super().update(instance, validated_data)  
+
+
 class ToDoListSerializer(serializers.ModelSerializer):
 
     # user = serializers.ReadOnlyField(source='user.username')
