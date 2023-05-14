@@ -40,14 +40,27 @@ class BoardModelTest(TestCase):
             self.board.initialize_week()
     
     def test_initialize_week_succeeds(self):
-        #creating a user sends a signal to call initialize_week()    
-        # so week_board todolists are deleted to test initialize_week directly  
-        self.week_board.todolist_set.all().delete() 
-        self.week_board.initialize_week()
-        self.assertIsNotNone(self.week_board.start_date)
-        self.assertIsNotNone(self.week_board.due_date)
-        self.assertGreater(self.week_board.due_date,self.week_board.start_date)
-        self.assertEqual(self.week_board.todolist_set.exclude(date=None).count(),7)
+        
+        for tz in timezones:
+            timezone.activate(tz)
+            with self.subTest(msg=f"Testing with timezone {tz}", tz=tz):
+                #creating a user sends a signal to call initialize_week()    
+                # so week_board todolists are deleted to test initialize_week directly  
+                self.week_board.todolist_set.all().delete() 
+                tz = timezone.get_current_timezone()
+                
+                year, week_num, day_of_week = timezone.localtime().isocalendar()
+                expected_start_date = (datetime.fromisocalendar(year,week_num,1)).replace(tzinfo=tz)
+                expected_due_date = (datetime.fromisocalendar(year,week_num,7)).replace(tzinfo=tz)
+                expected_due_date = (datetime.combine(expected_due_date, datetime.max.time())).replace(tzinfo=tz)
+                self.week_board.initialize_week()
+
+                self.assertEquals(self.week_board.start_date,expected_start_date)
+                self.assertEquals(self.week_board.due_date,expected_due_date)
+                self.assertGreater(self.week_board.due_date,self.week_board.start_date)
+                self.assertEqual(self.week_board.todolist_set.exclude(date=None).count(),7)
+
+        timezone.deactivate()
         
     def test_archive(self):
         todolists = self.week_board.todolist_set.exclude(name='archive')
