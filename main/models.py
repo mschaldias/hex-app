@@ -24,9 +24,9 @@ class Board(models.Model):
         year, week_num, day_of_week = given_datetime.isocalendar()
         if next_week:
             week_num+=1
-        self.start_date = (datetime.fromisocalendar(year,week_num,1)).astimezone(tz)
+        self.start_date = (datetime.fromisocalendar(year,week_num,1)).replace(tzinfo=tz)
         for day_of_week in range(1,8):
-            dt = (datetime.fromisocalendar(year,week_num,day_of_week)).astimezone(tz)
+            dt = (datetime.fromisocalendar(year,week_num,day_of_week)).replace(tzinfo=tz)
             date = dt.date()
             name = f"{date.strftime('%A')} {date}"
             self.todolist_set.create(name=name,date=date)
@@ -39,15 +39,15 @@ class Board(models.Model):
         if self.category != 'week': raise IncorrectBoardCategoryError
         week_todolists = self.todolist_set.exclude(date=None)
 
+        #if not migrating to next week and if board is already current week
+        if not (next_week or self.due_date < timezone.now() or self.start_date > timezone.now()):
+            self.archive(week_todolists,dt)
+            return        
+
         #all complete tasks in board are moved to archive, 
         #tasks with due date up to datetime are moved to backlog
         #if datetime=None then all incomplete tasks in board are moved to backlog
         self.archive(week_todolists,datetime=dt)
-
-        #if not migrating to next week and if board is already current week
-        if not (next_week or self.start_date > timezone.now()):
-            return      
-       
         given_datetime=False
         if next_week:
             given_datetime = datetime.combine(self.start_date, datetime.min.time())

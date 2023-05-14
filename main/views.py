@@ -68,7 +68,7 @@ def migration(request):
             # board.peek()
             board.migrate_week(next_week=True)
         elif request.POST.get("current_week"): 
-            dt = (datetime.combine(timezone.localtime(), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone()) #datetime is 23:59 current day local time as UTC
+            dt = (datetime.combine(timezone.localtime(), datetime.min.time())).replace(tzinfo=timezone.get_current_timezone()) #datetime is 23:59 current day local time as UTC
             board.migrate_week(dt=dt) 
                  
     return redirect("/week/")
