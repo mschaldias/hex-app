@@ -89,7 +89,7 @@ class BoardModelTest(TestCase):
                 count = backlog.task_set.count()
 
                 for todolist in todolists.exclude(date=None):
-                    due_date = (datetime.combine(todolist.date, datetime.min.time())).astimezone(tz=timezone.get_current_timezone())
+                    due_date = (datetime.combine(todolist.date, datetime.min.time())).replace(tzinfo=timezone.get_current_timezone())
                     todolist.task_set.create(text=f"task in {todolist}",due_date=due_date)
                     count+=1
                 
