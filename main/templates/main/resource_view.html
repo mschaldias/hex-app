@@ -42,7 +42,12 @@
 
 <div>
     <div class = "row mt-4">   
-        <h1>{{title}}</h1>     
+        {% if not week %}
+            <h1>{{title}}</h1>
+        {% else %}
+            <h1>{{parent.start_date|date:"M Y"}}</h1>
+        {% endif %}
+               
         <div class = "col-3 mt-3">
             {% if create_resources %}
                 <button class = "btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse-create" aria-expanded="false" aria-controls="collapse-create">
@@ -226,24 +231,56 @@
                             <a class = "btn btn-card btn-primary btn-sm" href="/{{resource}}/{{list.id}}" >
                                 <h5 id = "header-text">{{list}}</h5>
                             </a> 
+                            <div>
+                                <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{list.id}}" aria-expanded="false" aria-controls="collapse{{list.id}}">
+                                    <i class="fa-solid fa-gear"></i>
+                                </button>
+                                
+                                <button  id = "create_button" class="btn btn-success", onclick = "create_button('{{items}}','{{list.id}}')">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        {% else %}
+                        {% if list.date == localdate %}
+                            <a class = "btn btn-card btn-primary btn-sm" >
+                                <h5  id = "header-text" >{{list.date|date:"l j" }} *</h5>                                
+                            </a> 
                         {% else %}
                             <a class = "btn btn-card btn-primary btn-sm" >
-                                <h5 id = "header-text" >{{list}}</h5>
+                                <h5 id = "header-text" >{{list.date|date:"l j" }}</h5>                                
                             </a> 
+                        {% endif %}                            
+                            <div>
+                                <button  id = "create_button" class="btn btn-success", onclick = "create_button('{{items}}','{{list.id}}')">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
                         {% endif %}
 
-
-                        <div>
-                            <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{list.id}}" aria-expanded="false" aria-controls="collapse{{list.id}}">
-                                <i class="fa-solid fa-gear"></i>
-                            </button>
-                            
-                            <button  id = "create_button" class="btn btn-success", onclick = "create_button('{{items}}','{{list.id}}')">
-                                <i class="fa fa-plus"></i>
-                            </button>
-                        </div>
-
                     </div>
+                    {% if not week %}
+                    <div class="collapse" id="collapse{{list.id}}">
+                        <div class = "card-body">
+                                <button  id = "edit_button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}}" aria-expanded="false" aria-controls="collapse_edit{{list.id}}" ><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{resource}}','{{list.id}}',card=true)"><i class="fa-regular fa-square-minus"></i> Delete</button>
+                        </div>
+                        <div class = "collapse" id="collapse_edit{{list.id}}" >
+                            <div>
+                                <form action="#" id = "edit-board-form" onsubmit="edit('{{resource}}','{{list.id}}',$(`#resource-name{{list.id}}`).val())" method="dialog">
+                                {% csrf_token %}
+                                    <div class="card-body">
+                                        <label for="resource-name">{{resource_name}} name:</label>
+                                        <input type="text" name="boardName" id="resource-name{{list.id}}" value= "{{list}}" class = "form-control bg-hex-topnav border-0 text-white">                    
+                                    </div>
+                                    <div class="card-header">
+                                        <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}},#collapse{{list.id}}">Close</button>
+                                        <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}},#collapse{{list.id}}">Submit</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="card-body">
                         <ul class="list-group mb-3 d-flex justify-content" id="{{list.id}}"> 
                             {% for item in list|queryset %}
@@ -303,27 +340,6 @@
                         </ul>
                     </div>
                     <script>initialize_sortable('{{resource}}','{{list.id}}')</script>
-                    <div class="collapse" id="collapse{{list.id}}">
-                        <div class = "card-footer">
-                                <button  id = "edit_button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}}" aria-expanded="false" aria-controls="collapse_edit{{list.id}}" ><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                                <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{resource}}','{{list.id}}',card=true)"><i class="fa-regular fa-square-minus"></i> Delete</button>
-                        </div>
-                        <div class = "collapse" id="collapse_edit{{list.id}}" >
-                            <div>
-                                <form action="#" id = "edit-board-form" onsubmit="edit('{{resource}}','{{list.id}}',$(`#resource-name{{list.id}}`).val())" method="dialog">
-                                {% csrf_token %}
-                                    <div class="card-body">
-                                        <label for="resource-name">{{resource}} name:</label>
-                                        <input type="text" name="boardName" id="resource-name{{list.id}}" value= "{{list}}" class = "form-control bg-hex-topnav border border-hex text-white">                    
-                                    </div>
-                                    <div class="card-body border-0">
-                                        <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}},#collapse{{list.id}}">Close</button>
-                                        <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{list.id}},#collapse{{list.id}}">Submit</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             {%endfor%}             

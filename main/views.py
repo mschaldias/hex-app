@@ -91,7 +91,7 @@ def week(request):
     if now > board.due_date:
         board.migrate_week()
 
-
+    localdate = timezone.localdate()
     #archive complete tasks from backlog and futurelog
     board.archive(board.todolist_set.filter(name__in=['backlog','futurelog']))   
     week_todolists = board.todolist_set.exclude(date=None)
@@ -100,10 +100,11 @@ def week(request):
                                                         "parent": board,
                                                         "resource":"todolists",
                                                         "items":"tasks",
-                                                        "title":board.category,
+                                                        "title":'week',
                                                         "create_resources":False,
                                                         "backlog":backlog,
-                                                        "futurelog":futurelog
+                                                        "futurelog":futurelog,
+                                                        "localdate":localdate
                                                         })  
 
 
