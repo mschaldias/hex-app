@@ -8,12 +8,13 @@ from main.custom_exceptions import IncorrectBoardCategoryError
 
 class Board(models.Model):                       
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    category = models.CharField(max_length=200,default="New Board",blank=True)
+    name = models.CharField(max_length=200,default="new board")
+    category = models.CharField(max_length=200,default="main")
     due_date = models.DateTimeField(null=True)
     start_date = models.DateTimeField(null=True)
 
     def __str__(self):
-        return self.category
+        return self.name
     
     def initialize_week(self,given_datetime=False,next_week=False):
         if self.category != 'week': raise IncorrectBoardCategoryError
@@ -70,7 +71,7 @@ class Board(models.Model):
 
 class ToDoList(models.Model):
     board = models.ForeignKey(Board, on_delete=models.CASCADE)
-    name = models.CharField(max_length=200,default="New List",blank=True)
+    name = models.CharField(max_length=200,default="new todolist")
     date = models.DateField(null=True)
     position = models.IntegerField(default=0)
 

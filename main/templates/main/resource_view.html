@@ -74,11 +74,11 @@
             <div class="collapse" id="collapse-create">
                 <div class = "card bg-hex-sidenav">
                     <div class = "card-body">
-                        <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource}}','{{parent.id}}',$('#resource-name').val(), card=true);$('#resource-name').val('')" method = "dialog">
+                        <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource}}','{{parent.id}}',$('#resource-name').val(), card=true);" method = "dialog">
                             {% csrf_token %}
                             <p>
-                            <label for="resource-name">{{resource}} name:</label>
-                            <input type="text" id="resource-name" value= "" class = "form-control bg-hex-topnav border border-hex text-white">   
+                            <label for="resource-name">{{resource_name}} name:</label>
+                            <input type="text" id="resource-name" value= "new {{resource_name}}" class = "form-control bg-hex-topnav border border-hex text-white">   
                             </p>
                             <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Close</button>
                             <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Submit</button>
@@ -222,10 +222,16 @@
             <div class="col-xl-3 col-md-6" id = "card{{list.id}}">
                 <div class="card bg-hex-sidenav border-0 text-white mb-3"> 
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        
-                        <a class = "btn btn-card btn-primary btn-sm" href="/{{resource}}/{{list.id}}" >
-                            <h5 id = "header-text" href = "/">{{list}}</h5>
-                        </a>
+                        {% if not week %}
+                            <a class = "btn btn-card btn-primary btn-sm" href="/{{resource}}/{{list.id}}" >
+                                <h5 id = "header-text">{{list}}</h5>
+                            </a> 
+                        {% else %}
+                            <a class = "btn btn-card btn-primary btn-sm" >
+                                <h5 id = "header-text" >{{list}}</h5>
+                            </a> 
+                        {% endif %}
+
 
                         <div>
                             <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{list.id}}" aria-expanded="false" aria-controls="collapse{{list.id}}">

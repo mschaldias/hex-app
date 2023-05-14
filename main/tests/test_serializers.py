@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from main.custom_exceptions import IncorrectBoardCategoryError
 from main.models import Board,ToDoList,Task
 from django.db.models import Q
-from main.serializers import TaskSerializer, ToDoListSerializer
+from main.serializers import BoardSerializer, TaskSerializer, ToDoListSerializer
 from django.utils import timezone
 from datetime import datetime, timedelta
 
@@ -72,3 +73,12 @@ class TaskSerializerTest(TestCase):
                 self.assertEqual(task.due_date,datetime)
                 self.assertEqual(task.todolist,self.futurelog)
             timezone.deactivate()
+
+
+class BoardSerializerTest(TestCase):
+    def test_board_create_week_raises_exception(self):
+        data = {'category':'week'}
+        board_serializer = BoardSerializer(data=data)
+        with self.assertRaises(IncorrectBoardCategoryError):
+           if board_serializer.is_valid():
+               board_serializer.save()

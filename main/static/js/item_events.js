@@ -16,7 +16,7 @@ function getCookie(name) {
 
 
 function edit(resource,item_id,value){
-
+    // debugger;
     key = ""
     data={}
     if( resource == "tasks"){
@@ -24,15 +24,9 @@ function edit(resource,item_id,value){
     }
     if (resource == "todolists"){
         key = "name"
-        if (value===""){
-            value = "List"
-        }
     }
     else if (resource == "boards" ){
-        key = "category"
-        if (value===""){
-            value = "Board"
-        }
+        key = "name"
     }
 
     data = {"id":item_id,[key]:value}
@@ -50,7 +44,7 @@ function edit(resource,item_id,value){
             success: (data,msg,xhr) => {
                 console.log(msg,xhr.status)  
                 if (resource == "boards"){
-                    $(`#card${item_id} #header-text`).text(data.category);
+                    $(`#card${item_id} #header-text`).text(data.name);
                 }   
                 else if (resource == "todolists"){
                     $(`#card${item_id} #header-text`).text(data.name);
@@ -58,7 +52,8 @@ function edit(resource,item_id,value){
             },
             error: (data,msg,xhr) =>{
                 console.log(data.responseText);
-                $("#charFieldError .modal-title").text(JSON.parse(data.responseText)[key][0]);
+                response = JSON.parse(data.responseText)[key][0]
+                $("#charFieldError .modal-title").text(response);
                 $('#charFieldError').modal("show")
             }
         }
@@ -211,8 +206,8 @@ function create_button(resource,list_id,value="",card=false){
     
     if (resource == "boards"){
         if (value !== ""){
-            key = "category"
-            data = {"category":value};
+            key = "name"
+            data = {[key]:value};
         }
     }
     $.ajax(

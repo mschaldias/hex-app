@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from main.custom_exceptions import IncorrectBoardCategoryError
 from .models import Board,ToDoList,Task
 from django.utils import timezone
 from datetime import datetime
@@ -76,7 +78,14 @@ class BoardSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Board
-        fields = ('id','owner','category','todolist_set')
+        fields = ('id','owner','category','todolist_set','name')
+
+    def create(self, validated_data):
+        category = validated_data.get('category')
+        if category == 'week':
+            raise IncorrectBoardCategoryError
+        else:
+            return super().create(validated_data)  
 
     def update(self,instance,validated_data):
         user = self.context['user']
@@ -89,6 +98,6 @@ class BoardSerializer(serializers.ModelSerializer):
                 position+=1
                 todolist.save()
 
-        instance.category = validated_data.get('category', instance.category)
+        instance.name = validated_data.get('name', instance.name)
         instance.save()
         return instance

@@ -29,19 +29,37 @@ def todolists(request,id):
     todolists = ToDoList.objects.filter(board__owner = request.user,id=id)
     if not todolists: raise Http404
     
-    return render(request,"main/resource_view.html",{"lists": todolists,"resource":"todolists","parent":board,"items":"tasks","create_resources":False})  
+    return render(request,"main/resource_view.html",{"lists": todolists,
+                                                     "resource":"todolists",
+                                                     "parent":board,
+                                                     "items":"tasks",
+                                                     "create_resources":False,
+                                                     })  
 
 @require_GET
 @login_required(login_url='/login/')
 def boards(request,id=None):
+    boards = request.user.board_set.filter(category='main')
     if id:  
-        board = request.user.board_set.filter(id=id).first()
+        board = boards.filter(id=id).first()
         if not board: raise Http404
         todolists = ToDoList.objects.filter(board__owner = request.user,board__id=id)
-        return render(request, "main/resource_view.html",{"lists": todolists,"parent": board,"resource":"todolists","items":"tasks","title":board.category,"create_resources":True})  
+        return render(request, "main/resource_view.html",{"lists": todolists,
+                                                          "parent": board,
+                                                          "resource":"todolists",
+                                                          "items":"tasks",
+                                                          "title":board.name,
+                                                          "create_resources":True,
+                                                          "resource_name": "todolist",
+                                                          })  
 
-    boards = request.user.board_set.all()
-    return render(request, "main/resource_view.html",{"lists":boards,"resource":"boards","items":"todolists","title":"Boards","create_resources":True})           
+    return render(request, "main/resource_view.html",{"lists":boards,
+                                                      "resource":"boards",
+                                                      "items":"todolists",
+                                                      "title":"Boards",
+                                                      "create_resources":True,
+                                                      "resource_name": "board",
+                                                      })           
 
 def migration(request):
     if request.method == "POST":
