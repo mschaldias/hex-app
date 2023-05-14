@@ -1,4 +1,5 @@
 {% load static %}
+{% load tz %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -19,8 +20,7 @@
         {% block style %}          
         {% endblock %}
     </head>
-    {% load tz_detect %}
-    {% tz_detect %}
+
   <body>
     <!-- Side-Nav -->
     <div
@@ -29,7 +29,7 @@
     >
       <ul class="nav flex-column text-white w-100">
         <nav class="top-navbar bg-hex-topnav-dark d-flex flex-column border-bottom">
-          <a class="btn btn-lg text-white" id="">ToDoHex</a>
+          <a class="btn btn-lg text-white" id="" href="/">ToDoHex</a>
         </nav>
 
         <div class = "mt-4">
@@ -117,6 +117,9 @@
       </div>
         
     <!-- custom js -->
-    <script>toggleSidebar();</script>
+    <script>
+      toggleSidebar();
+      setTimezone();
+    </script>
   </body>
 </html>
