@@ -65,8 +65,7 @@ def migration(request):
     if request.method == "POST":
         board = request.user.board_set.get(category="week")        
         if request.POST.get("migrate"):
-            # board.peek()
-            board.migrate_week(next_week=True)
+            board.migrate_week(next_week=True,dt=board.due_date)
         elif request.POST.get("current_week"): 
             dt = (datetime.combine(timezone.localtime(), datetime.min.time())).replace(tzinfo=timezone.get_current_timezone()) #datetime is 23:59 current day local time as UTC
             board.migrate_week(dt=dt) 
@@ -89,11 +88,13 @@ def week(request):
 
     now = timezone.now()
     if now > board.due_date:
-        board.migrate_week()
+        board.migrate_week(next_week=True,dt=board.due_date)
 
     localdate = timezone.localdate()
+
     #archive complete tasks from backlog and futurelog
-    board.archive(board.todolist_set.filter(name__in=['backlog','futurelog']))   
+    logs = board.todolist_set.filter(name__in=['backlog','futurelog'])
+    board.archive(logs)   
     week_todolists = board.todolist_set.exclude(date=None)
     return render(request, "main/resource_view.html",{"lists": week_todolists,
                                                         "week":True,

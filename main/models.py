@@ -16,15 +16,19 @@ class Board(models.Model):
     def __str__(self):
         return self.name
     
-    def initialize_week(self,given_datetime=False,next_week=False):
+    def initialize_week(self,given_datetime=None,next_week=False):
         if self.category != 'week': raise IncorrectBoardCategoryError
-        if not given_datetime:        
+        #if not given a datetime automatically sets it to start of current week
+        if not given_datetime:       
             given_datetime = timezone.localtime()
-        tz = timezone.get_current_timezone()
+            year, week_num, day_of_week = given_datetime.isocalendar()
+             
         year, week_num, day_of_week = given_datetime.isocalendar()
-        if next_week:
-            week_num+=1
-        self.start_date = (datetime.fromisocalendar(year,week_num,1)).replace(tzinfo=tz)
+        if next_week:week_num+=1            
+        day_of_week=1
+
+        tz = timezone.get_current_timezone()
+        self.start_date = (datetime.fromisocalendar(year,week_num,day_of_week)).replace(tzinfo=tz)
         for day_of_week in range(1,8):
             dt = (datetime.fromisocalendar(year,week_num,day_of_week)).replace(tzinfo=tz)
             date = dt.date()
@@ -38,21 +42,46 @@ class Board(models.Model):
     def migrate_week(self,next_week=False,dt=None):
         if self.category != 'week': raise IncorrectBoardCategoryError
         week_todolists = self.todolist_set.exclude(date=None)
+        futurelog = self.todolist_set.get(name="futurelog")
+        backlog = self.todolist_set.get(name="backlog")
+        tz = timezone.get_current_timezone()
+        
+        #board is in a future week and and we are migrating back to current week
+        if (not next_week) and self.start_date > timezone.now():
+                for week_todolist in week_todolists:
+                    week_todolist.task_set.update(todolist=futurelog)
+                week_todolists.delete()
+                self.initialize_week(given_datetime=False,next_week=next_week) 
+                for task in backlog.task_set.all():
+                    if task.due_date:
+                        if dt <= task.due_date <= self.due_date.astimezone(tz) :
+                            task.todolist = week_todolists.get(date=task.due_date)
+                        elif task.due_date > self.due_date.astimezone(tz) :
+                            task.todolist = futurelog
+                        task.save()
+                
+        #board is in current week and and we are backlogging incomplete tasks up to today and archiving current tasks
+        elif not next_week:
+            self.archive(week_todolists,datetime=dt)
 
-        #if not migrating to next week and if board is already current week
-        if not (next_week or self.due_date < timezone.now() or self.start_date > timezone.now()):
-            self.archive(week_todolists,dt)
-            return        
+        #migrate to next week
+        else:
+            #all complete tasks in board are moved to archive, 
+            #tasks with due date up to datetime are moved to backlog
+            self.archive(week_todolists,datetime=dt)
+            
+            week_todolists.delete()                
+            self.initialize_week(next_week=next_week) 
 
-        #all complete tasks in board are moved to archive, 
-        #tasks with due date up to datetime are moved to backlog
-        #if datetime=None then all incomplete tasks in board are moved to backlog
-        self.archive(week_todolists,datetime=dt)
-        given_datetime=False
-        if next_week:
-            given_datetime = datetime.combine(self.start_date, datetime.min.time())
-        week_todolists.delete()
-        self.initialize_week(given_datetime=given_datetime,next_week=next_week)      
+            for task in futurelog.task_set.all():
+                board_start_date = self.start_date.astimezone(tz)
+                board_due_date = self.due_date.astimezone(tz)
+                if task.due_date:
+                    task_due_date = task.due_date.astimezone(tz)
+                    if board_start_date <= task_due_date <= board_due_date:
+                        week_day_todolist = self.todolist_set.get(date=task_due_date)
+                        task.todolist = week_day_todolist
+                        task.save()     
         return
     
     def archive(self,todolists,datetime=None):
