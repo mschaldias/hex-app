@@ -15,7 +15,6 @@ class TimezoneMiddleware:
                 tzname = request.COOKIES.get("django_timezone")
                 if tzname:
                     timezone.activate(zoneinfo.ZoneInfo(tzname))
-                    print(f"activated {tzname}")
                 else:
                     timezone.deactivate()
             except Exception as e:
