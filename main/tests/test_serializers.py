@@ -73,6 +73,25 @@ class TaskSerializerTest(TestCase):
                 self.assertEqual(task.due_date,datetime)
                 self.assertEqual(task.todolist,self.futurelog)
             timezone.deactivate()
+    
+    #Tests that when backlog task due_date is set to None, prev_date field is also set to None
+    def test_backlog_task_prev_date_update(self):
+        for tz in timezones:
+            timezone.activate(tz)
+            with self.subTest(msg=f"Testing with timezone {tz}", tz=tz):
+                now = timezone.localtime()
+                task = Task.objects.create(todolist=self.backlog,text='test text',prev_date=now)
+                data = {'due_date':None}
+                
+                ts = TaskSerializer(task,data=data,partial=True)
+                if ts.is_valid():
+                    ts.save()
+                
+                self.assertEqual(task.todolist,self.backlog)
+                self.assertEqual(task.due_date,None)
+                self.assertEqual(task.prev_date,None)
+                
+            timezone.deactivate()
 
 
 class BoardSerializerTest(TestCase):

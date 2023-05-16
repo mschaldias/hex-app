@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from http import HTTPStatus
 from django.http import Http404
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 from tzlocal import get_localzone
 from django.db.models import Q
 
@@ -103,9 +103,10 @@ def week(request):
                                                         "items":"tasks",
                                                         "title":'week',
                                                         "create_resources":False,
-                                                        "backlog":backlog,
                                                         "futurelog":futurelog,
-                                                        "localdate":localdate
+                                                        "backlog":backlog,
+                                                        "localdate":localdate,
+                                                        "logs":logs
                                                         })  
 
 

@@ -117,6 +117,7 @@ class Task(models.Model):
     position = models.IntegerField(default=0)
     date_created = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField(null=True)
+    prev_date = models.DateTimeField(null=True)
 
     class Meta:
         ordering = ('position',)
