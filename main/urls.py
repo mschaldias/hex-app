@@ -1,10 +1,27 @@
-from django.urls import path
+from django.urls import path,include
+from rest_framework import routers
 from . import views
 
+# router = routers.DefaultRouter()
+# router.register(r'todolists', views.ToDoView, 'todolist')
+
+
 urlpatterns = [
-    path("<int:id>",views.index, name = "index"),
     path("",views.home, name = "home"),
-    path("view/",views.view, name = "view"),
+    path("boards/",views.boards, name = "manage_boards"),
     path("week/",views.week, name = "week"), 
-    path("item_actions/",views.item_actions, name = "item_actions"), 
+    path("migration/",views.migration, name = "migration"), 
+    path("todolists/<int:id>",views.todolists, name = "todolists"),
+    path("boards/<int:id>",views.boards, name = "boards")   ,
+    path("api/tasks/",views.tasks_api, name = "tasks"), 
+    path("api/tasks/<int:id>",views.tasks_api, name = "tasks"),
+    path("api/todolists/",views.todolists_api, name = "todolists"), 
+    path("api/todolists/<int:id>",views.todolists_api, name = "todolists"),
+    path("api/boards/",views.boards_api, name = "boards"), 
+    path("api/boards/<int:id>",views.boards_api, name = "boards"), 
+
+
+
+    # path("api/", include(router.urls)), 
+    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

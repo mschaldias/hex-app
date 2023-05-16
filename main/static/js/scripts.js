@@ -1,31 +1,18 @@
-/*!
-    * Start Bootstrap - SB Admin v7.0.7 (https://startbootstrap.com/template/sb-admin)
-    * Copyright 2013-2023 Start Bootstrap
-    * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-sb-admin/blob/master/LICENSE)
-    */
-    // 
-// Scripts
-// 
 
-window.addEventListener('DOMContentLoaded', event => {
+function toggleSidebar(){
+    var menu_btn = document.querySelector("#menu-btn");
+    var sidebar = document.querySelector("#sidebar");
+    var container = document.querySelector(".my-container");
+    menu_btn.addEventListener("click", () => {
+        sidebar.classList.toggle("active-nav");
+        container.classList.toggle("active-cont");
+}); 
+}
 
-    // Toggle the side navigation
-    const sidebarToggle = document.body.querySelector('#sidebarToggle');
-    if (sidebarToggle) {
-        // Uncomment Below to persist sidebar toggle between refreshes
-        // if (localStorage.getItem('sb|sidebar-toggle') === 'true') {
-        //     document.body.classList.toggle('sb-sidenav-toggled');
-        // }
-        sidebarToggle.addEventListener('click', event => {
-            event.preventDefault();
-            document.body.classList.toggle('sb-sidenav-toggled');
-            localStorage.setItem('sb|sidebar-toggle', document.body.classList.contains('sb-sidenav-toggled'));
-        });
-    }
-});
-
-
-
-
+function setTimeZone() {
+    // Timezone settings
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; // e.g. "America/New_York"
+    document.cookie = "django_timezone=" + timezone;
+}
 
 
