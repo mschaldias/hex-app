@@ -1,4 +1,5 @@
 {% load static %}
+{% load tz %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -15,103 +16,110 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
         <script src="{%static 'js/scripts.js'%}"></script>
         <link href="{% static 'css/styles.css' %}" rel="stylesheet" type="text/css" />
+        <link rel="icon" href="{% static 'assets/favicon.ico' %}">
         {% block style %}          
         {% endblock %}
     </head>
-    <body class="sb-nav-fixed">
-        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-hex-topnav">
-            <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="/">ToDoHex</a>
-            <!-- Sidebar Toggle-->
-            <button class="btn btn-link btn-sm" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-            <!-- Navbar Search-->
-            <div class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                
-            </div>
-            <!-- Navbar-->
-            {% if user.is_authenticated %}
-            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
-            {%endif%}
+
+  <body>
+    <!-- Side-Nav -->
+    <div
+      class="side-navbar active-nav d-flex justify-content-between flex-column"
+      id="sidebar"
+    >
+      <ul class="nav flex-column text-white w-100">
+        <nav class="top-navbar bg-hex-topnav-dark d-flex flex-column border-bottom">
+          <a class="btn btn-lg text-white" id="" href="/">ToDoHex</a>
         </nav>
-        <div id="layoutSidenav">
-            <div id="layoutSidenav_nav">
-                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                    <div class="sb-sidenav-menu">
-                        <div class="nav">
-                            {% if user.is_authenticated %}
-                                
-                            <a class="nav-link" href="/">
-                                <div class="sb-nav-link-icon"><i class="fa-solid fa-house fa-lg"></i></div>
-                                Home
-                            </a>
-                            <div class="sb-sidenav-menu-heading">Interface</div>
-                                                                  
-                            <a class="nav-link" href="/view">
-                                <div class="sb-nav-link-icon"><i class="fa-solid fa-list fa-lg"></i></i></div>
-                                View
-                            </a>
-                            <a class="nav-link" href="/week">
-                                <div class="sb-nav-link-icon"><i class="fa-solid fa-calendar-week fa-lg"></i></i></i></div>
-                                Week View
-                            </a>
 
-                            {% else %}
+        <div class = "mt-4">
+          {% if user.is_authenticated %}
+                                      
+            <a class="nav-link p-3" href="/">
+                <i class="fa-solid fa-house"></i>
+                 Home
+            </a>           
+                                                  
+            <a class="nav-link p-3" href="/boards">
+                <i class="fa-solid fa-list"></i>
+                 Boards
+            </a>
+            <a class="nav-link p-3" href="/week">
+                <i class="fa-solid fa-calendar-week"></i>
+                 Week
+            </a>
+          {% else %}
 
-                            <a class="nav-link" href="/">
-                                <div class="sb-nav-link-icon"><i class="fa-solid fa-house fa-lg"></i></div>
-                                Home
-                            </a>
-                            <div class="sb-sidenav-menu-heading">Sign In</div>
-                                                                  
-                            <a class="nav-link" href="/login">
-                                <div class="sb-nav-link-icon"><i class="fa-solid fa-right-to-bracket fa-lg"></i></div>
-                                Login
-                            </a>
-                            <a class="nav-link" href="/register">
-                                <div class="sb-nav-link-icon"><i class="fa-solid fa-user-plus fa-lg"></i></div>
-                                Register
-                            </a>
+            <a class="nav-link p-3" href="/">
+                <i class="fa-solid fa-house"></i>
+                 Home
+            </a>
+                                                              
+            <a class="nav-link p-3" href="/login">
+              <i class="fa-solid fa-right-to-bracket"></i>
+                 Login
+            </a>
+            <a class="nav-link p-3" href="/register">
+                <i class="fa-solid fa-user-plus"></i>
+                 Register
+            </a>
+          {%endif%}
+        </div>   
 
-                            {%endif%}
-                        </div>
-                    </div>
-                    {% if user.is_authenticated %}
-                    <div class="sb-sidenav-footer">
+      </ul>
+
+      {% if user.is_authenticated %}
+                    <div class="p-3">
                         <div class="small">Logged in as:</div>
                        {{user.username}}
                     </div>
                     {%endif%}
-                    
-                </nav>
-            </div>
-            <div id="layoutSidenav_content">
-                <main>
-                    <div class="container-fluid px-4">
-                     
-                            {% block content %}         
-                            {% endblock %}
-                       
-                    </div>
-                </main>
-                <footer class="py-4 mt-auto">
-                    <div class="container-fluid px-4">
-                        <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted"></div>
-                            <div>
-                                <div class="text-muted">Copyright &copy; ToDoHex 2023</div>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
-            </div>
-        </div>
+      
+    </div>
 
-    </body>
+    <!-- Main Wrapper -->
+    <div class="my-container active-cont">
+      <!-- Top Nav -->
+      <nav class="navbar top-navbar bg-hex-topnav px-5 border-bottom">
+        <a class="btn border-0 bg-hex-sidenav" id="menu-btn"><i class="fas fa-bars"></i></a>
+
+        {% if user.is_authenticated %}
+        <div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                </ul>
+              </div>
+          </div>
+        {%endif%}
+      </nav>
+      <!--End Top Nav -->
+      
+      <div class="container-fluid px-4">
+        {% block content %}         
+        {% endblock %}
+
+        <div class="modal" id="charFieldError" tabindex="-1">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content bg-hex-sidenav">
+              <div type="button" class="btn btn-danger active"><i class="fa-solid fa-circle-exclamation"></i></div>
+              <div class="modal-header border-0">
+                  <div class="modal-title text-red">Modal title</div>
+              </div>
+              <div class="modal-footer border-0">
+                  <button type="button" class="btn btn-secondary col-12" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+      </div>
+
+      </div>
+        
+    <!-- custom js -->
+    <script>
+      toggleSidebar();
+      setTimeZone();
+    </script>
+  </body>
 </html>

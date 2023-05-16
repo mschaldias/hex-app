@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-#@%!mr3hliwvkr&eb)uv0whlz(4s++%%_vtsrbzy(_pyv^^0&(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['testserver','localhost','127.0.0.1']
 
 
 # Application definition
@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap4",
     "main.apps.MainConfig",
-    "register.apps.RegisterConfig"
+    "register.apps.RegisterConfig",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
@@ -51,7 +52,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'main.middleware.TimezoneMiddleware',
 ]
+
 
 ROOT_URLCONF = "todoapp.urls"
 
