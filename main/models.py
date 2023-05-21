@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import datetime
 from main.custom_exceptions import IncorrectBoardCategoryError
+from django.core.validators import MinValueValidator,MaxValueValidator,RegexValidator
+from dateutil.relativedelta import relativedelta
 
 # Create your models here.
 
@@ -118,10 +120,23 @@ class Task(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField(null=True)
     prev_date = models.DateTimeField(null=True)
+    interval_value = models.PositiveIntegerField(validators=[MinValueValidator(1),MaxValueValidator(100)],null=True)
+    valid_interval_types = RegexValidator(r'^(days|weeks|months|years)$', "Only 'days','weeks','months' or 'years' are allowed.")
+    interval_type = models.CharField(validators=[valid_interval_types],max_length=6,blank=True)
 
     class Meta:
         ordering = ('position',)
         
+    def set_recurring(self,datetime=timezone.localtime()):
+        if self.interval_type and self.interval_value:
+            interval_type_options = ['days','weeks','months','years']
+            kwargs = {x:self.interval_value for x in interval_type_options if x == self.interval_type}
+            if self.complete:
+                self.due_date = datetime + relativedelta(**kwargs)
+                self.prev_date = datetime
+                self.complete = False
+                self.todolist = self.todolist.board.todolist_set.get(name='futurelog')
+                self.save()
     
     def __str__(self):
         return self.text

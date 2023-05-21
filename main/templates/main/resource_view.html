@@ -128,7 +128,7 @@
                             <div class="handle card-body" style= "cursor:move">                                           
                                 <div class = "d-flex justify-content">   
                                     <div class = "input-group " style= "cursor:auto">
-                                            <div class= "input-group-text bg-hex-sidenav border-0" >
+                                            <div class= "input-group-text bg-hex-sidenav border-hex" >
                                                 {% if item.complete == True %}
                                                     <input class = "form-check-input bg-hex-topnav" type="checkbox" name = "{{item.id}}"  , onclick="checkbox_click(name)" checked>
                                                 {%else%}
@@ -136,28 +136,59 @@
                                                 {%endif%}
                                             </div>
                                         <div contenteditable="true" class = "form-control bg-hex-topnav border-white text-white text-start li-text" spellcheck = "false" oninput="edit('{{items}}','{{item.id}}',$(this).text(),item_edit=true)">{{item}}</div>
-                                        <button id="item-text" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-0 text-white text-start mx-auto">
+                                        <button id="item-text" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-hex text-white text-start mx-auto">
                                             <i class="fa-solid fa-angle-down"></i>
                                         </button>
                                     </div>
                                 </div>      
-                                <div class = "task-due-date-text mt-1">
-                                    {% if item.due_date%}
-                                        <i class="fa-solid fa-calendar"></i>     
-                                        {{item.due_date|date:"D M d Y"}}
-                                    {%elif item.prev_date%}
-                                        <i class="fa-solid fa-calendar"></i>  
-                                        {{item.prev_date|date:"D M d Y"}}
-                                    {% endif %}       
-                                    
+                                <div class = "mt-1 d-flex justify-content-between">                                    
+                                    <div class = "task-due-date-text">
+                                        {% if item.due_date%}
+                                            <i class="fa-solid fa-calendar"></i>     
+                                            {{item.due_date|date:"D M d Y"}}
+                                        {%elif item.prev_date%}
+                                            <i class="fa-solid fa-calendar"></i>  
+                                            {{item.prev_date|date:"D M d Y"}}
+                                        {% endif %} 
+                                    </div>
+                                    <div class = "task-repeat-text">
+                                        {% if item.interval_type and item.interval_value %}
+                                            {% if item.interval_value == 1 %}
+                                                Every {{item.interval_value}} {{item.interval_type|remove_last_char}}
+                                            {% else %}
+                                                Every {{item.interval_value}} {{item.interval_type}}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>                                          
                                 </div>
                                 <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
                                     <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
                                         <i class="fa-solid fa-calendar"></i>                                                   
                                     </button>
+                                    <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#repeat-collapse{{item.id}}" aria-expanded="false" aria-controls="repeat-collapse{{item.id}}">
+                                        Repeat
+                                    </button>
                                     <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{items}}','{{item.id}}')"> 
                                         <i class="fa fa-minus"></i>
-                                    </button>                                    
+                                    </button> 
+                                    <div class = "collapse mt-1" id = "repeat-collapse{{item.id}}">
+                                        <div class="card card-body bg-hex-body">                                            
+                                            <div class="input-group input-group-sm mb-3">
+                                                <label class="input-group-text" >Every</label>
+                                                <input onchange="set_task_repeat('{{item.id}}')" value="{{item.interval_value}}" type="number" min="1" class = "form-control" id="interval_value{{item.id}}">
+                                                <select onchange="set_task_repeat('{{item.id}}')" class="form-select" id="interval_type{{item.id}}">
+                                                    {% for option in interval_type_options %}
+                                                        {% if item.interval_type == option %}
+                                                        <option selected value="{{option}}">{{option}}</option> 
+                                                        {% else %}
+                                                        <option value="{{option}}">{{option}}</option>
+                                                        {% endif %}
+                                                    {% endfor %}                                              
+                                                </select>
+                                            </div>
+                                              <button class = "btn btn-secondary btn-sm" onclick="set_task_repeat('{{item.id}}',clear=true)">Clear</button>
+                                        </div>                                            
+                                    </div>                                   
                                     <div class = "collapse mt-1" id = "calendar-collapse{{item.id}}">
                                         <div class = "card bg-hex-body d-flex justify-content-center">                                    
                                             <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
@@ -243,9 +274,9 @@
                             <li class="list-group-item list-group-item-action list-group-item-hex text-white draggable" id = "item{{item.id}}">   
                                 <div class="handle card-body" style= "cursor:move">                                             
                                     <div class = "d-flex justify-content gap-2">                                                
-                                        <div class = "input-group " style= "cursor:auto">
+                                        <div class = "input-group" style= "cursor:auto">
                                             {% if items == "tasks" %}
-                                                <div class= "input-group-text bg-hex-sidenav border-0" >
+                                                <div class= "input-group-text bg-hex-sidenav border-hex" >
                                                     {% if item.complete == True %}
                                                         <input class = "form-check-input bg-hex-topnav" type="checkbox", name = "{{item.id}}"  , onclick="checkbox_click(name)" checked>
                                                     {%else%}
@@ -254,11 +285,11 @@
                                                 </div>  
                                                 
                                             {% else %}
-                                                <a class = "btn bg-hex-sidenav border" href="/{{items}}/{{item.id}}">
-                                                </a>
+                                                <a class = "input-group-text bg-hex-sidenav border-0" href="/{{items}}/{{item.id}}">
+                                                </a>                                                 
                                             {% endif %}
                                         
-                                            <div contenteditable="true" class = "form-control bg-hex-topnav border-white text-white text-start li-text" spellcheck = "false" oninput="edit('{{items}}','{{item.id}}',$(this).text(),item_edit=true)">{{item}}</div>
+                                            <div contenteditable="true" class = "form-control bg-hex-topnav text-white text-start li-text" spellcheck = "false" oninput="edit('{{items}}','{{item.id}}',$(this).text(),item_edit=true)">{{item}}</div>
                                             <button id="item-text" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-0 text-white text-start mx-auto">
                                                 <i class="fa-solid fa-angle-down"></i>
                                             </button>
@@ -268,21 +299,50 @@
                                         <div class = "task-due-date-text">
                                         {% if item.due_date %}
                                             <i class="fa-solid fa-calendar"></i>     
-                                            {{item.due_date|date:"D M d Y"}}
-                                        
+                                            {{item.due_date|date:"D M d Y"}}                                        
                                         {% endif %}
                                         </div>                                                
                                     {% endif %}
+                                    <div class = "task-repeat-text d-flex justify-content-end">
+                                        {% if item.interval_type and item.interval_value %}
+                                            {% if item.interval_value == 1 %}
+                                                Every {{item.interval_value}} {{item.interval_type|remove_last_char}}
+                                            {% else %}
+                                                Every {{item.interval_value}} {{item.interval_type}}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div> 
                                     <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
                                         {% if items == "tasks" and not week %}
                                         <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
                                             <i class="fa-solid fa-calendar"></i>                                                   
                                         </button>                                                
                                         {% endif %}
+                                        <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#repeat-collapse{{item.id}}" aria-expanded="false" aria-controls="repeat-collapse{{item.id}}">
+                                            Repeat
+                                        </button>
                                         <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{items}}','{{item.id}}')"> 
                                             <i class="fa fa-minus"></i>
                                         </button>                                                
                                         {% if items == "tasks" %}
+                                            <div class = "collapse mt-1" id = "repeat-collapse{{item.id}}">
+                                                <div class="card card-body bg-hex-body">                                            
+                                                    <div class="input-group input-group-sm mb-3">
+                                                        <label class="input-group-text">Every</label>
+                                                        <input onchange="set_task_repeat('{{item.id}}')" value="{{item.interval_value}}" type="number" min="1" class = "form-control" id="interval_value{{item.id}}">
+                                                        <select onchange="set_task_repeat('{{item.id}}')" class="form-select text-white" id="interval_type{{item.id}}">
+                                                            {% for option in interval_type_options %}
+                                                                {% if item.interval_type == option %}
+                                                                <option selected value="{{option}}">{{option}}</option> 
+                                                                {% else %}
+                                                                <option value="{{option}}">{{option}}</option>
+                                                                {% endif %}
+                                                            {% endfor %}                                              
+                                                        </select>
+                                                    </div>
+                                                    <button class = "btn btn-secondary btn-sm" onclick="set_task_repeat('{{item.id}}',clear=true)">Clear</button>
+                                                </div>                                            
+                                            </div>  
                                             <div class = "collapse mt-1" id = "calendar-collapse{{item.id}}">
                                                 <div class = "card bg-hex-body d-flex justify-content-center">                                                    
                                                     <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
