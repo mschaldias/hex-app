@@ -14,6 +14,22 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function toggle_edit(items,item_id){
+
+    item_text = $(`#item${item_id} #item-text`)
+    if (item_text.attr('contenteditable') != 'true'){
+        item_text.attr('contenteditable','true');
+        item_text.focus();
+        item_text.after(`<button id = "submit" class = "btn btn-success mx-auto"><i class="fa-solid fa-check"></i></button>`)
+        $(`#item${item_id} #submit`).click(
+            function(){
+                item_text = $(`#item${item_id} #item-text`)
+                edit(items,item_id,item_text.text())
+                item_text.attr('contenteditable','false');
+                $(`#item${item_id} #submit`).remove()
+            });
+    }
+}
 
 function set_task_repeat(item_id,clear=false){
 
