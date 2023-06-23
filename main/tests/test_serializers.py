@@ -139,13 +139,11 @@ class TaskSerializerTest(TestCase):
                 weekday_todolist = self.board.todolist_set.get(name__startswith=test['weekday'])
                 task = weekday_todolist.task_set.create(text = f"{test['weekday']} Test", **task_create_params)
                 data = {'complete':True}
-                year,week_num,day_of_week = timezone.localtime().isocalendar()
-                #set current_datetime to current week's Wednesday
-                current_datetime = (datetime.fromisocalendar(year,week_num,3)).replace(tzinfo=timezone.get_current_timezone())
+                current_datetime = datetime(2023, 5, 17, 21, 39, 56, 388401, tzinfo=timezone.get_current_timezone())
                 task_serializer = TaskSerializer(task, data = data,context={'current_datetime':current_datetime} ,partial=True)
 
                 self.assertTrue(task_serializer.is_valid())
-                task_serializer.save()
+                task_serializer.save(complete=True)
                 self.assertEqual(task.todolist,expected_todolist)
         
 
