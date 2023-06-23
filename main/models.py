@@ -73,7 +73,7 @@ class Board(models.Model):
             self.archive(week_todolists,datetime=dt)
             
             week_todolists.delete()                
-            self.initialize_week(next_week=next_week) 
+            self.initialize_week(next_week=next_week,given_datetime=self.start_date) 
 
             for task in futurelog.task_set.all():
                 board_start_date = self.start_date.astimezone(tz)
