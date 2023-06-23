@@ -57,6 +57,7 @@
     .datepicker table tr td .century.focused     {
         background-color: #006dcc;
         background-image:  linear-gradient(to bottom, #0088cc, #0044cc);
+
     }
 </style>
 {% endblock %}
@@ -87,6 +88,7 @@
                     <i class="fa-solid fa-rotate"></i> This week
                     </button>   
                     <button id = "migrate" name = "migrate" value = "migrate" type = "submit" class = "btn btn-success mt-1">
+
                         <i class="fa-solid fa-arrow-right"></i> Migrate
                     </button>   
                 </form>
@@ -152,6 +154,7 @@
                                 <div class = "d-flex justify-content">   
                                     <div class = "input-group " style= "cursor:auto">
                                             <div class= "input-group-text bg-hex-sidenav border-hex" >
+
                                                 {% if item.complete == True %}
                                                     <input class = "form-check-input bg-hex-topnav" type="checkbox" name = "{{item.id}}"  , onclick="checkbox_click(name)" checked>
                                                 {%else%}
@@ -183,6 +186,7 @@
                                             {% endif %}
                                         {% endif %}
                                     </div>                                          
+
                                 </div>
                                 <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
                                     <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
@@ -216,6 +220,7 @@
                                         <div class = "card bg-hex-body d-flex justify-content-center">                                    
                                             <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
                                             <script>set_datepicker('{{item.id}}',"{{item.due_date|date:'c'}}")</script> 
+
                                     </div>
                                 </div>                                                                                                                                
                             </div>
@@ -239,6 +244,7 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         {% if not week %}
                             <a class = "btn btn-card btn-primary btn-sm"  href="/{{resource}}/{{list.id}}" >
+
                                 <h5 id = "header-text">{{list}}</h5>
                             </a> 
                             <div>
@@ -300,6 +306,7 @@
                                         <div class = "input-group" style= "cursor:auto">
                                             {% if items == "tasks" %}
                                                 <div class= "input-group-text bg-hex-sidenav border-hex" >
+
                                                     {% if item.complete == True %}
                                                         <input class = "form-check-input bg-hex-topnav" type="checkbox", name = "{{item.id}}"  , onclick="checkbox_click(name)" checked>
                                                     {%else%}
@@ -314,6 +321,7 @@
                                         
                                             <div id = "item-text" class = "form-control bg-hex-topnav border-white text-white text-start li-text" spellcheck = "false" contenteditable="false" onclick = "toggle_edit('{{items}}','{{item.id}}')">{{item}}</div> 
                                             <button id="item-config" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-0 text-white text-start mx-auto">
+
                                                 <i class="fa-solid fa-angle-down"></i>
                                             </button>
                                         </div>
@@ -337,6 +345,7 @@
                                         {% endif %}
                                     </div> 
                                     {% endif %}
+
                                     <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
                                         {% if items == "tasks" and not week %}
                                         <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
@@ -374,6 +383,7 @@
                                                 <div class = "card bg-hex-body d-flex justify-content-center">                                                    
                                                     <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
                                                     <script>set_datepicker('{{item.id}}',"{{item.due_date|date:'c'}}")</script>                                                             
+
                                             </div>                                                    
                                         {% endif %}
                                     </div>                                                                                                                                

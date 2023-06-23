@@ -1,6 +1,7 @@
 from django import template
 from main.models import Board,ToDoList,Task
 from django.template.defaultfilters import stringfilter
+
 register = template.Library()
 
 @register.filter
@@ -16,3 +17,4 @@ def queryset(value):
 @stringfilter
 def remove_last_char(value):
     return value[:-1]
+

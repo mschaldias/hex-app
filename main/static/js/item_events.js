@@ -82,6 +82,7 @@ function set_task_repeat(item_id,clear=false){
 }
 
 function edit(resource,item_id,value){
+
     key = ""
     data={}
     if( resource == "tasks"){
@@ -93,6 +94,7 @@ function edit(resource,item_id,value){
     else if (resource == "boards" ){
         key = "name"
     }
+
     data = {"id":item_id,[key]:value}
 
     $.ajax(
@@ -330,6 +332,7 @@ function sortable_event(resource,list_id){
     );
 }
 function set_datepicker(element_id,date){
+
     options = {
         todayHighlight:true,
         clearBtn:true,
@@ -339,6 +342,7 @@ function set_datepicker(element_id,date){
     if (date){
         $(`#datepicker${element_id}`).datepicker('update',new Date(date));
     }
+
     $(`#datepicker${element_id}`).on('changeDate', function() {
         value = $(`#datepicker${element_id}`).datepicker('getDate');
         set_task_date(element_id,value);
