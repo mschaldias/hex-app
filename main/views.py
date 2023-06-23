@@ -106,6 +106,7 @@ def week(request):
                                                         "localdate":localdate,
                                                         "logs":logs,
                                                         "interval_type_options":['days','weeks','months','years'],
+
                                                         })  
 
 

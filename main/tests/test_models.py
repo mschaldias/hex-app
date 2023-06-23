@@ -8,7 +8,6 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-
 timezones = ['America/New_York','America/Vancouver','America/Sao_Paulo','UTC']
 class UserModelTest(TestCase):
     def setUp(self):

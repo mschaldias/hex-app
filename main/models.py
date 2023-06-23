@@ -124,6 +124,7 @@ class Task(models.Model):
     valid_interval_types = RegexValidator(r'^(days|weeks|months|years)$', "Only 'days','weeks','months' or 'years' are allowed.")
     interval_type = models.CharField(validators=[valid_interval_types],max_length=6,blank=True)
 
+
     class Meta:
         ordering = ('position',)
         
@@ -137,6 +138,7 @@ class Task(models.Model):
                 self.complete = False
                 self.todolist = self.todolist.board.todolist_set.get(name='futurelog')
                 self.save()
+
     
     def __str__(self):
         return self.text

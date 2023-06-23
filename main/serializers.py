@@ -50,6 +50,7 @@ class TaskSerializer(serializers.ModelSerializer):
         return instance
 
 
+
 class ToDoListSerializer(serializers.ModelSerializer):
 
     # user = serializers.ReadOnlyField(source='user.username')
@@ -73,6 +74,7 @@ class ToDoListSerializer(serializers.ModelSerializer):
                         task.prev_date = task.due_date
                     else:
                         task.prev_date = None
+
                     task.due_date = None 
                 task.position = position
                 task.todolist = instance
