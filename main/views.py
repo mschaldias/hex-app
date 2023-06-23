@@ -103,10 +103,10 @@ def week(request):
                                                         "items":"tasks",
                                                         "title":'week',
                                                         "create_resources":False,
-                                                        "futurelog":futurelog,
-                                                        "backlog":backlog,
                                                         "localdate":localdate,
-                                                        "logs":logs
+                                                        "logs":logs,
+                                                        "interval_type_options":['days','weeks','months','years'],
+
                                                         })  
 
 

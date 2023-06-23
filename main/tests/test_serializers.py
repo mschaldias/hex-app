@@ -93,6 +93,58 @@ class TaskSerializerTest(TestCase):
                 
             timezone.deactivate()
 
+    def test_interval_updates(self):
+        futurelog = self.futurelog
+        task = Task.objects.create(todolist=futurelog,text='test text')
+        data = {'interval_type':'weeks','interval_value':'1'}
+        task_serializer = TaskSerializer(task, data = data,partial=True)
+
+        self.assertTrue(task_serializer.is_valid())
+        task_serializer.save()
+        self.assertEqual(task.interval_type,'weeks')
+        self.assertEqual(task.interval_value,1)
+
+    def test_interval_updates_none(self):
+        futurelog = self.futurelog
+        task = Task.objects.create(todolist=futurelog,text='test text')
+        data = {'interval_type':'','interval_value':None}
+        task_serializer = TaskSerializer(task, data = data,partial=True)
+
+        self.assertTrue(task_serializer.is_valid())
+        task_serializer.save()
+                
+        self.assertEquals(task.interval_type,'')
+        self.assertIsNone(task.interval_value)
+
+    def test_complete_recurring_task(self):
+
+        test_assign_futurelog = {'interval_type':'months', 
+                                 'interval_value':2, 
+                                 'weekday':'Monday',
+                                 'expected_todolist': 'futurelog',
+                                 'msg': 'test_assign_futurelog'
+                                }        
+        test_assign_weekday = {'interval_type':'days', 
+                                'interval_value':1, 
+                                'weekday':'Wednesday',
+                                'expected_todolist': 'Thursday',
+                                'msg': 'test_assign_weekday'
+                                }
+        tests = [test_assign_futurelog,test_assign_weekday]
+        
+        for test in tests:
+            with self.subTest(msg=f"{test['msg']}", test=test):
+                expected_todolist = self.board.todolist_set.get(name__startswith=test['expected_todolist'])
+                task_create_params={'interval_type':test['interval_type'],'interval_value':test['interval_value']}
+                weekday_todolist = self.board.todolist_set.get(name__startswith=test['weekday'])
+                task = weekday_todolist.task_set.create(text = f"{test['weekday']} Test", **task_create_params)
+                data = {'complete':True}
+                current_datetime = datetime(2023, 5, 17, 21, 39, 56, 388401, tzinfo=timezone.get_current_timezone())
+                task_serializer = TaskSerializer(task, data = data,context={'current_datetime':current_datetime} ,partial=True)
+
+                self.assertTrue(task_serializer.is_valid())
+                task_serializer.save(complete=True)
+                self.assertEqual(task.todolist,expected_todolist)
 
 class BoardSerializerTest(TestCase):
     def test_board_create_week_raises_exception(self):

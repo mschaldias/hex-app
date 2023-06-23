@@ -6,6 +6,7 @@ from main.models import Board,ToDoList,Task
 from django.db.models import Q
 from django.utils import timezone
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 timezones = ['America/New_York','America/Vancouver','America/Sao_Paulo','UTC']
 class UserModelTest(TestCase):
@@ -23,6 +24,24 @@ class UserModelTest(TestCase):
         self.assertEqual(board.todolist_set.exclude(date=None).count(),7)
 
 
+class TaskModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username='test', password='test_password')
+        cls.week_board = cls.user.board_set.get(category='week')
+        cls.futurelog = cls.week_board.todolist_set.get(name = 'futurelog')
+
+    def test_set_recurring(self):
+        kwargs = {'months':2}
+        task = self.futurelog.task_set.create(text='test',complete=True,interval_type='months',interval_value=2)
+        datetime = timezone.localtime()
+        task.set_recurring(datetime=datetime)
+
+        self.assertEqual(task.prev_date,datetime)
+        self.assertEqual(task.due_date,datetime + relativedelta(**kwargs))
+        self.assertFalse(task.complete)
+
+        
 class BoardModelTest(TestCase):
 
     @classmethod

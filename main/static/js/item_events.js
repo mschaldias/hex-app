@@ -14,9 +14,75 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function toggle_edit(items,item_id){
+
+    item_text = $(`#item${item_id} #item-text`)
+    if (item_text.attr('contenteditable') != 'true'){
+        item_text.attr('contenteditable','true');
+        item_text.focus();
+        item_text.after(`<button id = "submit" class = "btn btn-success mx-auto"><i class="fa-solid fa-check"></i></button>`)
+        $(`#item${item_id} #submit`).click(
+            function(){
+                item_text = $(`#item${item_id} #item-text`)
+                edit(items,item_id,item_text.text())
+                item_text.attr('contenteditable','false');
+                $(`#item${item_id} #submit`).remove()
+            });
+    }
+}
+
+function set_task_repeat(item_id,clear=false){
+
+    interval_value = $(`#interval_value${item_id}`).val()
+    interval_type = $(`#interval_type${item_id}`).val()
+    data = {}
+    if (clear) {
+        $(`#interval_value${item_id}`).val(null)   
+        data = {"interval_value": null, "interval_type":''}
+        $(`#repeat-collapse${item_id}`).collapse("hide")
+        $(`#item-collapse${item_id}`).collapse("hide") 
+    }    
+    else if (interval_value && interval_type){
+        data = {"interval_value": interval_value,"interval_type":interval_type}
+    }
+       
+    $.ajax(
+        {
+            type: 'PUT',
+            url: `/api/tasks/${item_id}`,
+            contentType: 'application/json',
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+            dataType: 'json',
+            data: JSON.stringify(data),
+            success: (data,msg,xhr) => {
+                console.log(msg,xhr.status)  
+                if (data.interval_type && data.interval_value){ 
+                    if (data.interval_value == 1){
+                        data.interval_type = data.interval_type.replace(/.$/, '');
+                    }
+                        
+                    text = `Every ${data.interval_value} ${data.interval_type}`
+                }else{
+                    text = ''
+                }  
+                $(`#item${item_id} .task-repeat-text`).text(text)
+                       
+            },
+            error: (data,msg,xhr) =>{
+                console.log(data.responseText);
+                response = JSON.parse(data.responseText)["interval_value"]
+                $("#charFieldError .modal-title").text(response);
+                $('#charFieldError').modal("show")
+            }
+        }
+    );
+
+}
 
 function edit(resource,item_id,value){
-    // debugger;
+
     key = ""
     data={}
     if( resource == "tasks"){
@@ -265,14 +331,18 @@ function sortable_event(resource,list_id){
         }
     );
 }
-function set_datepicker(element_id){
+function set_datepicker(element_id,date){
+
     options = {
         todayHighlight:true,
         clearBtn:true,
         todayBtn:"linked", 
     }  
     $(`#datepicker${element_id}`).datepicker(options);
-    
+    if (date){
+        $(`#datepicker${element_id}`).datepicker('update',new Date(date));
+    }
+
     $(`#datepicker${element_id}`).on('changeDate', function() {
         value = $(`#datepicker${element_id}`).datepicker('getDate');
         set_task_date(element_id,value);
