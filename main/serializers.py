@@ -19,6 +19,9 @@ class TaskSerializer(serializers.ModelSerializer):
             current_date = current_datetime.date()
             validated_data_keys = validated_data.keys()
 
+            if 'complete' in validated_data_keys:
+                instance.set_hex()   
+
             if validated_data.get('complete') or ('interval_type' in validated_data_keys and 'interval_value' in validated_data_keys):
                 instance.set_recurring(datetime=current_datetime)
 
@@ -79,7 +82,8 @@ class ToDoListSerializer(serializers.ModelSerializer):
                 task.position = position
                 task.todolist = instance
                 if instance.date:
-                    task.due_date = (datetime.combine(instance.date, datetime.min.time())).replace(tzinfo=timezone.get_current_timezone())
+                    if not (task.hex or task.prev_hex):
+                        task.due_date = (datetime.combine(instance.date, datetime.min.time())).replace(tzinfo=timezone.get_current_timezone())
                 position+=1
                 task.save()
 

@@ -163,8 +163,29 @@ function set_task_date(item_id,value){
     );
 }
 
+function update_streak_display(){
 
-function checkbox_click(item_id){
+    $.ajax(
+        {
+            type: 'GET',
+            url: document.URL,
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+            success: (data) => {
+                        parser = new DOMParser();
+                        doc = parser.parseFromString(data, "text/html");
+                        new_element = doc.getElementById('streak-display')
+                        $('#streak-display').replaceWith(new_element)
+                    },
+            error: (error) =>{
+                console.log(error);
+            }
+        }
+    );
+}
+
+function checkbox_click(item_id,item_hex,item_prev_hex){
 
     $.ajax(
         {
@@ -181,6 +202,9 @@ function checkbox_click(item_id){
             }),
             success: (data,msg,xhr) => {
                 console.log(msg,xhr.status)
+                if (item_hex || item_prev_hex){
+                    update_streak_display();
+                }
             },
             error: (error) =>{
                 console.log(error);
@@ -195,7 +219,7 @@ function delete_button(resource,item_id,card=false){
     if (card){
         element = document.getElementById(`card${item_id}`);
     }
-    element.remove();
+    
     $.ajax(
         {
             type: 'DELETE',
@@ -210,15 +234,19 @@ function delete_button(resource,item_id,card=false){
             }),
             success: (data,msg,xhr) => {
                 console.log(msg,xhr.status)
+                element.remove();
             },
             error: (error) =>{
                 console.log(error);
+                response = JSON.parse(error.responseText)
+                $("#charFieldError .modal-title").text(response);
+                $('#charFieldError').modal("show")
             }
         }
     );
 };
 
-function append_new_item(list_id,element_id,card,log=false){ 
+function append_new_item(list_id,element_id,card,replace=false,hexlog=false,weekday=false){ 
     $.ajax(
         {
             type: 'GET',
@@ -229,24 +257,28 @@ function append_new_item(list_id,element_id,card,log=false){
             success: (data) => {
                         parser = new DOMParser();
                         doc = parser.parseFromString(data, "text/html");
-                        if (log){  
+                        // console.log(`replace: ${replace}, hexlog ${hexlog}, weekday ${weekday}`)
+                        if (replace){  
                             element = doc.getElementById(`${element_id}`)
                             $(`#${element_id}`).replaceWith(element)
-                            initialize_sortable('todolists',`${element_id}`)   
-                            let task_ids = document.querySelectorAll(`#${CSS.escape(element_id)}  li[id]`);
-                            for (let i = 0; i < task_ids.length; i++) {
-                                set_datepicker(task_ids[i].id.replace(/\D/g, ""));
-                            }                                       
+                            initialize_sortable('todolists',`${element_id}`,hexlog=hexlog,weekday=weekday)
+                            if (!hexlog){
+                                let task_ids = document.querySelectorAll(`#${CSS.escape(element_id)}  li[id]`);
+                                for (let i = 0; i < task_ids.length; i++) {
+                                    set_datepicker(task_ids[i].id.replace(/\D/g, ""));
+                                }
+                            }                                                              
                         }                        
-                        if (card) {
+                        else if (card) {
                             element = doc.getElementById(`card${element_id}`)
                             $(`#cards`).append(element);
-                        }else{
+                        }
+                        else{
                             element = doc.getElementById(`item${element_id}`)
                             $(`#${list_id}`).append(element);
-                            initialize_sortable('todolists',list_id)
+                            initialize_sortable('todolists',list_id,hexlog=false,weekday=weekday)
+                            set_datepicker(element_id)
                         };
-                        set_datepicker(element_id)      
                     },
             error: (error) =>{
                 console.log(error);
@@ -255,7 +287,7 @@ function append_new_item(list_id,element_id,card,log=false){
     );
 }
 
-function create_button(resource,list_id,value="",card=false){
+function create_button(resource,list_id,value="",card=false,weekday=false){
     key = ""
     data = {}
     if (resource  == "tasks"){
@@ -288,7 +320,7 @@ function create_button(resource,list_id,value="",card=false){
             dataType: 'json',
             success: (data,msg,xhr) => {
                         console.log(msg,xhr.status);
-                        append_new_item(list_id,data.id,card);
+                        append_new_item(list_id,data.id,card,replace=false,hexlog=false,weekday=weekday);
                     },
             error: (data,msg,xhr) =>{
                 console.log(JSON.parse(data.responseText)[key][0])
@@ -300,7 +332,7 @@ function create_button(resource,list_id,value="",card=false){
     );       
 };
 
-function sortable_event(resource,list_id){
+function sortable_event(resource,list_id,replace=false,hexlog=false,weekday=false){
     let ids = document.querySelectorAll(`#${CSS.escape(list_id)}  li[id]`);
     let ids_list = [];
     for (let i = 0; i < ids.length; i++) {
@@ -323,7 +355,7 @@ function sortable_event(resource,list_id){
             dataType: 'json',
             success: (data,msg,xhr) => {
                         console.log(msg,xhr.status)                        
-                        append_new_item(`${data.name}`,`${data.id}`,card=false,log=true)
+                        append_new_item(`${data.name}`,`${data.id}`,card=false,replace=replace,hexlog=hexlog,weekday=weekday)
                     },
             error: (error) =>{
                 console.log(error);
@@ -351,23 +383,78 @@ function set_datepicker(element_id,date){
     });  
 }
 
-function initialize_sortable(resource,list_id){
-
-    var list = document.getElementById(list_id);
-    Sortable.create(list, {
-        animation: 100,
-        group: 'list-1',
-        draggable: '.draggable',
-        handle: '.handle',
-        sort: true,
-        filter: '.sortable-disabled',
-        chosenClass: 'chosen',
-        onAdd: function () {
-            sortable_event(resource,list_id);
-        },
-        onUpdate: function () {
-            sortable_event(resource,list_id)
-        },
-    });  
-
+function initialize_sortable(resource,list_id, hexlog=false, weekday=false){
+    list = document.getElementById(list_id);
+    if (list) {
+        if (weekday) {
+            Sortable.create(list, {
+                animation: 100,
+                group: {
+                    name:'weekday',
+                    put:true      
+                },
+                draggable: '.draggable',
+                handle: '.handle',
+                sort: true,
+                filter: '.sortable-disabled',
+                chosenClass: 'chosen',
+                onAdd: function () {
+                    sortable_event(resource,list_id,replace=true,hexlog=false,weekday=true);
+                },
+                onUpdate: function () {
+                    sortable_event(resource,list_id)
+                },
+            });            
+        }    
+        else if (hexlog){
+            Sortable.create(list, {
+                animation: 100,
+                group: {
+                    name:'hexlog',
+                    put: function(to,from){
+                        if (!from.el.querySelector('.list-group-item-hex-dark.chosen')){
+                            return false 
+                        }
+                        return true
+                    }
+                },
+                draggable: '.draggable',
+                handle: '.handle',
+                sort: true,
+                filter: '.sortable-disabled',
+                chosenClass: 'chosen',
+                onAdd: function () {
+                    sortable_event(resource,list_id,replace=true,hexlog=true);
+                },
+                onUpdate: function () {
+                    sortable_event(resource,list_id)
+                },
+            });
+        }    
+        else {
+            Sortable.create(list, {
+                animation: 100,
+                group: {
+                    name:'log',
+                    put: function(to,from){
+                        if (from.el.querySelector('.list-group-item-hex-dark.chosen')){
+                            return false                    
+                        }
+                        return true
+                    }
+                },
+                draggable: '.draggable',
+                handle: '.handle',
+                sort: true,
+                filter: '.sortable-disabled',
+                chosenClass: 'chosen',
+                onAdd: function () {
+                    sortable_event(resource,list_id,replace=true);
+                },
+                onUpdate: function () {
+                    sortable_event(resource,list_id)
+                },
+            });
+        }
+    }
 } 

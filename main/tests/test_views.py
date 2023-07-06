@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.test import Client
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -6,10 +7,35 @@ from main.serializers import TaskSerializer
 from http import HTTPStatus
 from django.utils import timezone
 
+from main.views import week_utils
+
 
 #TODO test that any can access home page
 #TODO test that only authenticated user can access Boards and Week pages
 #TODO test if templates are correct?
+
+class WeekUtilsTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):       
+        cls.user = User.objects.create_user(username='test', password='test_password')
+        cls.board = cls.user.board_set.get(category='week')
+
+    def test_set_zero_streak(self):
+        self.user.profile.hex_streak = 100
+        self.user.profile.save()
+        board = self.board
+        backlog = board.todolist_set.get(name="backlog")
+        task = backlog.task_set.create()
+        board.hex()
+
+        week_utils(board,timezone.now()+timedelta(weeks=1))
+
+        self.assertEquals(self.user.profile.hex_streak,0)
+        self.assertFalse(task.hex)
+        self.assertFalse(task.prev_hex)
+        self.assertFalse(task.complete)
+        self.assertIn(task,backlog.task_set.all())
 
 class TasksViewTest(TestCase):
     @classmethod

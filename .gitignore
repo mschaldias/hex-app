@@ -2,7 +2,11 @@ django_commands.txt
 db.sqlite3
 register/migrations/__pycache__
 todoapp/__pycache__
-main/migrations/__pycache__
-main/__pycache__
-register/__pycache__
+main/migrations/*
+!main/migrations/__init__.py
+register/migrations/*
+!register/migrations/__init__.py
+*.pyc
+launch.json
+settings.json
 
