@@ -61,23 +61,24 @@ def boards(request,id=None):
                                                       "resource_name": "board",
                                                       })           
 
-def migration(request):
+@login_required(login_url='/login/')
+def action(request):
     if request.method == "POST":
         board = request.user.board_set.get(category="week")        
         if request.POST.get("migrate"):
             board.migrate_week(next_week=True,dt=board.due_date)
         elif request.POST.get("current_week"): 
-            dt = (datetime.combine(timezone.localtime(), datetime.min.time())).replace(tzinfo=timezone.get_current_timezone()) #datetime is 23:59 current day local time as UTC
+            dt = (datetime.combine(timezone.localtime()-timedelta(days=1), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())#datetime is 23:59 day before current day localtime
             board.migrate_week(dt=dt) 
+        elif request.POST.get("hex"):
+            board.hex()
                  
     return redirect("/week/")
 
-@login_required(login_url='/login/')
-def week(request):
 
-    #this board is to be created for each new user using a signal
-    #TODO : ensure this board can't be edited or deleted 
-    board = request.user.board_set.get(category="week")
+def week_utils(board,now):
+    if now > board.due_date:
+        board.migrate_week(next_week=True,dt=board.due_date,now=now,tz=timezone.get_current_timezone())
 
     #board always has this list which can't be edited or deleted
     archive = board.todolist_set.get(name="archive")
@@ -86,15 +87,18 @@ def week(request):
     backlog = board.todolist_set.get(name="backlog")
     futurelog = board.todolist_set.get(name="futurelog")
 
-    now = timezone.now()
-    if now > board.due_date:
-        board.migrate_week(next_week=True,dt=board.due_date)
+@login_required(login_url='/login/')
+def week(request):
+
+    #this board is created for each new user using a signal
+    board = request.user.board_set.get(category="week")
+
+    week_utils(board,timezone.now())
 
     localdate = timezone.localdate()
 
     #archive complete tasks from backlog and futurelog
-    logs = board.todolist_set.filter(name__in=['backlog','futurelog'])
-    board.archive(logs)   
+    logs = board.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
     week_todolists = board.todolist_set.exclude(date=None)
     return render(request, "main/resource_view.html",{"lists": week_todolists,
                                                         "week":True,
