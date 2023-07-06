@@ -160,10 +160,28 @@ class Task(models.Model):
     interval_value = models.PositiveIntegerField(validators=[MinValueValidator(1),MaxValueValidator(100)],null=True)
     valid_interval_types = RegexValidator(r'^(days|weeks|months|years)$', "Only 'days','weeks','months' or 'years' are allowed.")
     interval_type = models.CharField(validators=[valid_interval_types],max_length=6,blank=True)
+    hex = models.BooleanField(default=False)
+    prev_hex = models.BooleanField(default=False)
 
 
     class Meta:
         ordering = ('position',)
+
+    def set_hex(self):
+        profile = self.todolist.board.owner.profile
+        if self.hex:
+            if self.complete and not self.prev_hex:
+                profile.hex_streak += 1
+                self.hex = False
+                self.prev_hex = True
+        elif not self.complete and self.prev_hex:
+                profile.hex_streak -=1
+                profile.full_clean() #call to validator
+                self.hex = True
+                self.prev_hex = False
+        
+        self.save()  
+        profile.save()
         
     def set_recurring(self,datetime=timezone.localtime()):
         if self.interval_type and self.interval_value:
@@ -173,6 +191,8 @@ class Task(models.Model):
                 self.due_date = datetime + relativedelta(**kwargs)
                 self.prev_date = datetime
                 self.complete = False
+                self.hex = False
+                self.prev_hex = False
                 self.todolist = self.todolist.board.todolist_set.get(name='futurelog')
                 self.save()
 
