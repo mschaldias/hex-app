@@ -30,6 +30,7 @@ class TaskModelTest(TestCase):
         cls.user = User.objects.create_user(username='test', password='test_password')
         cls.week_board = cls.user.board_set.get(category='week')
         cls.futurelog = cls.week_board.todolist_set.get(name = 'futurelog')
+        cls.hexlog = cls.week_board.todolist_set.get(name = 'hexlog')
 
     def test_set_recurring(self):
         kwargs = {'months':2}
@@ -41,6 +42,27 @@ class TaskModelTest(TestCase):
         self.assertEqual(task.due_date,datetime + relativedelta(**kwargs))
         self.assertFalse(task.complete)
 
+    def test_set_hex_complete(self):
+
+        task = self.futurelog.task_set.create(text='test',complete=True,hex=True)
+        task.set_hex()
+
+        self.assertFalse(task.hex)
+        self.assertTrue(task.prev_hex)
+        self.assertTrue(task.complete)
+        self.assertEquals(self.user.profile.hex_streak,1)
+
+    def test_set_hex_prev_hex_incomplete(self):
+
+        task = self.futurelog.task_set.create(text='test',complete=False,hex=False,prev_hex=True)
+        self.user.profile.hex_streak = 1
+        self.user.profile.save()
+        task.set_hex()
+
+        self.assertTrue(task.hex)
+        self.assertFalse(task.prev_hex)
+        self.assertFalse(task.complete)
+        self.assertEquals(self.user.profile.hex_streak,0)
         
 class BoardModelTest(TestCase):
 
@@ -89,7 +111,7 @@ class BoardModelTest(TestCase):
         for todolist in todolists:
             todolist.task_set.create(text=f"task in {todolist}",complete=True)
             count +=1
-        self.assertEqual(todolists.count(),9)
+        self.assertEqual(todolists.count(),10)
         self.week_board.archive(todolists)
         self.assertEqual(archive.task_set.count(),count)
 
@@ -154,5 +176,19 @@ class BoardModelTest(TestCase):
 
         # task2 should be in weekday with date datetime_next_week
         self.assertIn(futurelog_task2,weekday_todolists.get(date=datetime_next_week).task_set.all())
+
+    def test_hex(self):
+        backlog = self.week_board.todolist_set.get(name='backlog')
+        hexlog = self.week_board.todolist_set.get(name='hexlog')
+
+        task1 = backlog.task_set.create(text='task1')
+        task2 = backlog.task_set.create(text='task2')
+
+        expected_backlog_count = backlog.task_set.count()-1
+        expected_hexlog_count = hexlog.task_set.count()+1
+
+        self.assertTrue(self.week_board.hex())
+        self.assertEquals(backlog.task_set.count(),expected_backlog_count)
+        self.assertEquals(hexlog.task_set.count(),expected_hexlog_count)
         
 
