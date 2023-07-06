@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User
-from .models import Board,ToDoList,Task
+from .models import Board, Profile,ToDoList,Task
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET,require_POST
 from django.shortcuts import render
@@ -12,9 +12,7 @@ from http import HTTPStatus
 from django.http import Http404
 from django.utils import timezone
 from datetime import datetime, timedelta
-from tzlocal import get_localzone
 from django.db.models import Q
-
 
 MAX_ITEMS = 10000
 
@@ -86,6 +84,15 @@ def week_utils(board,now):
     #board always has these lists which can't be edited or deleted
     backlog = board.todolist_set.get(name="backlog")
     futurelog = board.todolist_set.get(name="futurelog")
+    hexlog = board.todolist_set.get(name="hexlog")
+
+    # if there are any incomplete hexed tasks, hex streak goes to 0
+    # hexed tasks are unhexed and moved to backlog
+    overdue_hexed = Task.objects.filter(todolist__board=board,complete=False,hex=True,due_date__lt=now)    
+    if overdue_hexed:
+        overdue_hexed.update(hex=False,todolist=backlog)
+        board.owner.profile.hex_streak = 0
+        board.owner.profile.save()
 
 @login_required(login_url='/login/')
 def week(request):
@@ -107,12 +114,12 @@ def week(request):
                                                         "items":"tasks",
                                                         "title":'week',
                                                         "create_resources":False,
+                                                        "hex_streak":board.owner.profile.hex_streak,
+                                                        "hex_streak_range":range(board.owner.profile.hex_streak),
                                                         "localdate":localdate,
                                                         "logs":logs,
                                                         "interval_type_options":['days','weeks','months','years'],
-
-                                                        })  
-
+                                                        })
 
 #API Views:
 @login_required(login_url='/login/')

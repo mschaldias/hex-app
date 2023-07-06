@@ -8,6 +8,13 @@ from dateutil.relativedelta import relativedelta
 
 # Create your models here.
 
+class Profile(models.Model):
+    owner = models.OneToOneField(User, on_delete=models.CASCADE,primary_key=True)
+    hex_streak = models.IntegerField(default=0,validators=[MinValueValidator(0)])
+
+    def __str__(self):
+        return f"owner:{self.owner}, streak: {self.hex_streak}"
+
 class Board(models.Model):                       
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=200,default="new board")
