@@ -30,6 +30,7 @@ class TaskModelTest(TestCase):
         cls.user = User.objects.create_user(username='test', password='test_password')
         cls.week_board = cls.user.board_set.get(category='week')
         cls.futurelog = cls.week_board.todolist_set.get(name = 'futurelog')
+        cls.archive = cls.week_board.todolist_set.get(name = 'archive')
         cls.hexlog = cls.week_board.todolist_set.get(name = 'hexlog')
 
     def test_set_recurring(self):
@@ -37,10 +38,32 @@ class TaskModelTest(TestCase):
         task = self.futurelog.task_set.create(text='test',complete=True,interval_type='months',interval_value=2)
         datetime = timezone.localtime()
         task.set_recurring(datetime=datetime)
+        next_task = task.next_task
 
-        self.assertEqual(task.prev_date,datetime)
-        self.assertEqual(task.due_date,datetime + relativedelta(**kwargs))
-        self.assertFalse(task.complete)
+        self.assertIsNotNone(next_task)
+        self.assertEqual(next_task.prev_date,datetime)
+        self.assertEqual(next_task.due_date,datetime + relativedelta(**kwargs))
+        self.assertFalse(next_task.complete)
+
+    def test_set_recurring_incomplete(self):
+        task = self.futurelog.task_set.create(text='test',complete=True,interval_type='months',interval_value=2)
+        datetime = timezone.localtime()
+        task.set_recurring(datetime=datetime)
+        task.complete = False
+        task.set_recurring(datetime=datetime)
+
+        self.assertIsNone(task.next_task)
+
+    def test_set_recurring_archive(self):
+        task = self.futurelog.task_set.create(text='test',complete=True,interval_type='months',interval_value=2)
+        datetime = timezone.localtime()
+        task.set_recurring(datetime=datetime)
+        next_task = task.next_task
+        next_task.complete = True
+        next_task.set_recurring(datetime=datetime)
+
+        self.assertIn(task,self.archive.task_set.all())
+        self.assertTrue(next_task.complete)
 
     def test_set_hex_complete(self):
 

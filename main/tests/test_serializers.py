@@ -146,7 +146,7 @@ class TaskSerializerTest(TestCase):
 
                 self.assertTrue(task_serializer.is_valid())
                 task_serializer.save()
-                self.assertEqual(task.todolist,expected_todolist)
+                self.assertEqual(task.next_task.todolist,expected_todolist)
 
 class BoardSerializerTest(TestCase):
     def test_board_create_week_raises_exception(self):
