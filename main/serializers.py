@@ -20,9 +20,11 @@ class TaskSerializer(serializers.ModelSerializer):
             validated_data_keys = validated_data.keys()
 
             if 'complete' in validated_data_keys:
-                instance.set_hex()   
+                instance.set_hex()
+                if instance.interval_type and instance.interval_value:
+                    instance.set_recurring(datetime=current_datetime)   
 
-            if validated_data.get('complete') or ('interval_type' in validated_data_keys and 'interval_value' in validated_data_keys):
+            if ('interval_type' in validated_data_keys and 'interval_value' in validated_data_keys):
                 instance.set_recurring(datetime=current_datetime)
 
             todolist = instance.todolist
@@ -31,7 +33,7 @@ class TaskSerializer(serializers.ModelSerializer):
             if 'due_date' in validated_data_keys:
                 if todolist.name == 'backlog' and not due_date:
                     instance.prev_date=None
-            if due_date:                
+            if due_date and not instance.complete:                
                 if todolist.name == 'backlog': 
                     #if backlog task due_date is changed to after board due_date, task is assigned to futurelog
                     if due_date.date() > board.due_date.date():
