@@ -162,6 +162,7 @@ class Task(models.Model):
     interval_type = models.CharField(validators=[valid_interval_types],max_length=6,blank=True)
     hex = models.BooleanField(default=False)
     prev_hex = models.BooleanField(default=False)
+    next_task = models.OneToOneField('self',default=None,null=True,on_delete=models.SET_DEFAULT)
 
 
     class Meta:
@@ -186,15 +187,37 @@ class Task(models.Model):
     def set_recurring(self,datetime=timezone.localtime()):
         if self.interval_type and self.interval_value:
             interval_type_options = ['days','weeks','months','years']
-            kwargs = {x:self.interval_value for x in interval_type_options if x == self.interval_type}
+            interval_kwargs = {x:self.interval_value for x in interval_type_options if x == self.interval_type}
             if self.complete:
-                self.due_date = datetime + relativedelta(**kwargs)
-                self.prev_date = datetime
-                self.complete = False
-                self.hex = False
-                self.prev_hex = False
-                self.todolist = self.todolist.board.todolist_set.get(name='futurelog')
-                self.save()
+                if hasattr(self,'task'):
+                    #if this instance is a previous task's next_task, set that task's next_task to None and move it to archive 
+                    prev_task = self.task
+                    prev_task.next_task = None
+                    prev_task.todolist = self.todolist.board.todolist_set.get(name='archive')
+                    prev_task.save()  
+                #create next recurring task
+                prev_date = datetime
+                due_date = datetime + relativedelta(**interval_kwargs)
+                task_kwargs = {'text':self.text,
+                               'interval_type':self.interval_type,
+                               'interval_value':self.interval_value,
+                               'prev_date':prev_date,
+                               'due_date':due_date}
+                board = self.todolist.board   
+                futurelog = board.todolist_set.get(name='futurelog')
+                next_task = futurelog.task_set.create(**task_kwargs) 
+                self.next_task = next_task
+                week_day_todolist = board.todolist_set.filter(date=due_date.astimezone(timezone.get_current_timezone()).date())
+                if week_day_todolist: next_task.todolist = week_day_todolist.first()
+                next_task.save()
+
+            else:
+                if self.next_task:
+                    task = self.next_task
+                    self.next_task = None
+                    task.delete()
+
+            self.save()
 
     
     def __str__(self):
