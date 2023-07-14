@@ -94,6 +94,65 @@ def week_utils(board,now):
         board.owner.profile.hex_streak = 0
         board.owner.profile.save()
 
+login_required(login_url='/login/')
+@require_GET
+def hex_streak(request):
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':                                
+        profile = request.user.profile
+        if not profile: raise Http404
+        return render(request,"main/hex_streak.html", {
+                                                 "hex_streak":profile.hex_streak,
+                                                 "hex_streak_range":range(profile.hex_streak)
+                                                })
+    raise Http404
+
+login_required(login_url='/login/')
+@require_GET
+def card(request,resource_name,id=None):
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':                                
+        resource = None
+        if resource_name == "todolists":
+            resource = ToDoList.objects.filter(id=id,board__owner=request.user).first()
+        elif resource_name == "boards":
+            resource = Board.objects.filter(id=id,owner=request.user).first()
+        if not resource:  raise Http404
+
+        return render(request,"main/card.html", {
+                                                 "resource":resource,
+                                                 "resource_name":resource_name,
+                                                })
+    raise Http404
+
+@login_required(login_url='/login/')
+@require_GET
+def list(request,resource_name,id=None):
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':                                
+        items = li = board = None
+        context = {}
+        if resource_name == "todolists":
+            items = "tasks"
+            li = ToDoList.objects.filter(id=id,board__owner=request.user).first()
+            if li: 
+                board = li.board
+                if board.category == 'week':
+                    context['week'] = True
+                    context['interval_type_options']=['days','weeks','months','years']
+                    if li.date: context['weekday'] = True
+        elif resource_name == "boards":
+            items = "todolists"
+            board = Board.objects.filter(id=id,owner=request.user).first()
+            if board: li = board
+        
+        if not (li and board):    raise Http404
+
+        params = {"resource_name":resource_name,"board":board,"list":li,"items":items}
+        context['card_styles'] = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark'}
+        context['item_styles'] = {'backlog':'list-group-item-hex-danger','futurelog':'list-group-item-hex-primary'}   
+        context.update(params)
+
+        return render(request,"main/list.html", context)
+    raise Http404
+
 @login_required(login_url='/login/')
 def week(request):
 
