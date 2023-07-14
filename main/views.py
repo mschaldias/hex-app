@@ -27,11 +27,12 @@ def todolists(request,id):
     todolists = ToDoList.objects.filter(board__owner = request.user,id=id)
     if not todolists: raise Http404
     
-    return render(request,"main/resource_view.html",{"lists": todolists,
-                                                     "resource":"todolists",
-                                                     "parent":board,
+    return render(request,"main/resource_view.html",{"resources": todolists,
+                                                     "resource_name":"todolists",
+                                                     "board":board,
                                                      "items":"tasks",
                                                      "create_resources":False,
+                                                     "weekday":False
                                                      })  
 
 @require_GET
@@ -42,21 +43,20 @@ def boards(request,id=None):
         board = boards.filter(id=id).first()
         if not board: raise Http404
         todolists = ToDoList.objects.filter(board__owner = request.user,board__id=id)
-        return render(request, "main/resource_view.html",{"lists": todolists,
+        return render(request, "main/resource_view.html",{"resources": todolists,
                                                           "parent": board,
-                                                          "resource":"todolists",
+                                                          "board": board,
+                                                          "resource_name":"todolists",
                                                           "items":"tasks",
                                                           "title":board.name,
                                                           "create_resources":True,
-                                                          "resource_name": "todolist",
                                                           })  
 
-    return render(request, "main/resource_view.html",{"lists":boards,
-                                                      "resource":"boards",
+    return render(request, "main/resource_view.html",{"resources":boards,
+                                                      "resource_name":"boards",
                                                       "items":"todolists",
                                                       "title":"Boards",
                                                       "create_resources":True,
-                                                      "resource_name": "board",
                                                       })           
 
 @login_required(login_url='/login/')
@@ -104,20 +104,24 @@ def week(request):
 
     localdate = timezone.localdate()
 
-    #archive complete tasks from backlog and futurelog
     logs = board.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
+    card_styles = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark'}
+    item_styles = {'backlog':'list-group-item-hex-danger','futurelog':'list-group-item-hex-primary'}
+
     week_todolists = board.todolist_set.exclude(date=None)
-    return render(request, "main/resource_view.html",{"lists": week_todolists,
+    return render(request, "main/resource_view.html",{  "resources": week_todolists,
+                                                        "resource_name":"todolists",
+                                                        "logs":logs,
                                                         "week":True,
-                                                        "parent": board,
-                                                        "resource":"todolists",
+                                                        "board": board,
                                                         "items":"tasks",
+                                                        "card_styles":card_styles,
+                                                        "item_styles":item_styles,
                                                         "title":'week',
                                                         "create_resources":False,
                                                         "hex_streak":board.owner.profile.hex_streak,
                                                         "hex_streak_range":range(board.owner.profile.hex_streak),
                                                         "localdate":localdate,
-                                                        "logs":logs,
                                                         "interval_type_options":['days','weeks','months','years'],
                                                         })
 

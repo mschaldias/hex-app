@@ -1,46 +1,124 @@
-{% extends "main/base.html" %}
-
-{% block title %}View List{% endblock %}
-
-{% block content %}
-<div class = "row justify-content-center">
-    <div class = "col-8 mt-5">
-    <h1>{{ls.name}}</h1>
-        <form id = "listform" method="post" action="">
-            {% csrf_token %}
-            {% for item in ls.item_set.all %}
-                
-                <div class = "input-group mb-3">
-                    <div class = "input-group-prepend">
-                        <div class= "input-group-text" >
-                            
-                            {% if item.complete == True %}
-                                <input class = "form-check-input" type="checkbox", value = "clicked", name = "c{{item.id}}" onchange="document.getElementById('listform').submit()" checked>
-                            {%else%}
-                                <input class = "form-check-input" type="checkbox", value = "clicked", name = "c{{item.id}}" onchange="document.getElementById('listform').submit()">
-                            {%endif%}
-        
+{% load custom_tags %}
+<ul class="list-group mb-3" id="{{list.id}}">
+    {% for item in list|queryset %}
+        {% if item.hex or item.prev_hex %}
+        <li class="list-group-item list-group-item-action list-group-item-hex-dark draggable" id = "item{{item.id}}">
+        {% elif list.name in item_styles %}
+        <li class="list-group-item list-group-item-action {{item_styles|dict_key:list.name}} draggable" id = "item{{item.id}}">
+        {% else %}
+        <li class="list-group-item list-group-item-action list-group-item-hex draggable" id = "item{{item.id}}">
+        {% endif %}    
+            <div class = "handle card-body" >
+                <div class = "input-group">
+                    {% if items == 'tasks' %}
+                    <div class= "input-group-text bg-hex-sidenav border-hex">
+                        {% if item.complete %}
+                        <input class = "form-check-input bg-hex-topnav" type="checkbox" onclick="checkbox_click('{{item.id}}','{{item.hex}}','{{item.prev_hex}}')" checked>
+                        {%else%}
+                        <input class = "form-check-input bg-hex-topnav" type="checkbox" onclick="checkbox_click('{{item.id}}','{{item.hex}}','{{item.prev_hex}}')">
+                        {%endif%}                       
+                    </div>
+                    {% else %}
+                        <a class = "input-group-text bg-hex-sidenav border-0" href="/{{items}}/{{item.id}}"></a>
+                    {% endif %}
+                    {% if item.hex or item.prev_hex %}
+                    <div id = "item-text" class = "form-control bg-dark li-text" spellcheck = "false" contenteditable="false" >{{item}}</div> 
+                    {% elif list.name in item_styles  %}
+                    <div id = "item-text" class = "form-control {{item_styles|dict_key:list.name}}  li-text" spellcheck = "false" contenteditable="false" onclick = "toggle_edit('{{items}}','{{item.id}}')">{{item}}</div> 
+                    {% else %}
+                    <div id = "item-text" class = "form-control bg-hex-topnav  li-text" spellcheck = "false" contenteditable="false" onclick = "toggle_edit('{{items}}','{{item.id}}')">{{item}}</div>
+                    {% endif %}
+                    <button id="item-config" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-hex text-white mx-auto">
+                        <i class="fa-solid fa-angle-down"></i>
+                    </button>
+                </div>
+                {% if items == "tasks" and week and not weekday %}
+                <div class = "mt-1 d-flex justify-content-between">
+                {% else %}
+                <div class = "mt-1">
+                {% endif %}
+                {% if items == "tasks" and not weekday%}
+                    <div class = "task-due-date-text">
+                        {% if item.due_date%}
+                        <i class="fa-solid fa-calendar"></i>     
+                        {{item.due_date|date:"D M d Y"}}
+                        {%elif item.prev_date%}
+                        <i class="fa-solid fa-calendar"></i>  
+                        {{item.prev_date|date:"D M d Y"}}
+                        {% endif %} 
+                    </div>
+                {% endif %}                                    
+                {% if items == "tasks" and week %}
+                <div class = "task-repeat-text d-flex justify-content-end">
+                    {% if item.interval_type and item.interval_value %}
+                        {% if item.interval_value == 1 %}
+                        Every {{item.interval_value}} {{item.interval_type|remove_last_char}}
+                        {% else %}
+                        Every {{item.interval_value}} {{item.interval_type}}
+                        {% endif %}
+                    {% endif %}
+                </div>
+                {% endif %}
+                </div>
+                {% if not item.hex and not item.prev_hex %}
+                <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
+                    {% if items == "tasks" and not weekday %}
+                    <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
+                        <i class="fa-solid fa-calendar"></i>                                                   
+                    </button>                                                
+                    {% endif %}
+                    {% if items == "tasks" and week%}
+                    <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#repeat-collapse{{item.id}}" aria-expanded="false" aria-controls="repeat-collapse{{item.id}}">
+                        Repeat
+                    </button>
+                    {%endif%}
+                    <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{items}}','{{item.id}}')"> 
+                        <i class="fa fa-minus"></i>
+                    </button>                                                
+                    {% if items == "tasks" and week%}
+                    <div class = "collapse mt-1" id = "repeat-collapse{{item.id}}">
+                        <div class="card card-body bg-hex-body">                                            
+                            <div class="input-group input-group-sm mb-3">
+                                <label class="input-group-text">Every</label>
+                                <input onchange="set_task_repeat('{{item.id}}')" value="{{item.interval_value}}" type="number" min="1" class = "form-control" id="interval_value{{item.id}}">
+                                <select onchange="set_task_repeat('{{item.id}}')" class="form-select" id="interval_type{{item.id}}">
+                                    {% for option in interval_type_options %}
+                                        {% if item.interval_type == option %}
+                                        <option selected value="{{option}}">{{option}}</option> 
+                                        {% else %}
+                                        <option value="{{option}}">{{option}}</option>
+                                        {% endif %}
+                                    {% endfor %}                                              
+                                </select>
+                            </div>
+                            <button class = "btn btn-secondary btn-sm" onclick="set_task_repeat('{{item.id}}',clear=true)">Clear</button>
+                        </div>                                            
+                    </div>
+                    {% endif %}
+                    {% if items == "tasks" and not weekday%}
+                    <div class = "collapse mt-1" id = "calendar-collapse{{item.id}}">
+                        <div class = "card bg-hex-body d-flex justify-content-center">                                                    
+                            <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
+                            <script>set_datepicker('{{item.id}}',"{{item.due_date|date:'c'}}")</script>
                         </div>
-                    </div>
-                    <input type="text", value = "{{item.text}}" name = "e{{item.id}}" class = "form-control" onchange="document.getElementById('listform').submit()">
-                    <div class = "input-group-append">
-                        <button type="submit", name = "removeItem", value = "r{{item.id}}", class="btn btn-danger"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
-                
-                {%endfor%}  
-        
-            <div class = "input-group mb-3">
-                <input type="text", class = "form-control" name = "newText", placeholder="New Item">
-                <div class = "input-group-append">
-                    
-                    <button type = "submit", name = "newItem", value = "newItem", class = "btn btn-success" ><i class="fa fa-plus"></i></button>
-                </div>
-                
+                    </div>  
+                    {% endif %}
+                </div>  
+                {%endif%}
             </div>
-
-        </form>
-        </div>
-    </div>
-
-{% endblock %}
+            {% if week and todolist.name == 'hexlog' and not board.hexable%} 
+            <script>
+                $(`#item${'{{item.id}}'}`).removeClass("draggable");
+                $(`#item${'{{item.id}} .handle'}`).attr("style","cursor:default");
+            </script>  
+            {% endif %}  
+        </li>
+    {% endfor %}
+{% if week and board.hexable and todolist.name == 'hexlog' %}
+<script>initialize_sortable('{{resource_name}}','{{list.id}}',hexlog=true)</script>    
+{% elif week and weekday %}
+<script>initialize_sortable('{{resource_name}}','{{list.id}}',hexlog=false,weekday=true)</script>
+{% else %}
+<script>initialize_sortable('{{resource_name}}','{{list.id}}')</script>
+{% endif %}
+</ul>

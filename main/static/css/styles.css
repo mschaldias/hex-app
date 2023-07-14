@@ -83,9 +83,9 @@ body {
     background-color: var(--hex-text) !important;
   }
   
-
   .list-group-item-hex {
     background-color: var(--hex-topnav);
+    color: white;
   }
   .list-group-item-hex.list-group-item-action:hover, .list-group-item-hex.list-group-item-action:focus,.list-group-item-hex.list-group-item-action:active {
     background-color: var(--hex-topnav-dark) !important;
@@ -117,3 +117,26 @@ body {
     --bs-border-opacity: 1;
     border-color: var(--hex-sidenav) !important;
   }
+
+.today {
+  background-color: rgb(255, 0, 191);
+}
+
+.weekday{
+  background-color: var(--hex-sidenav)
+
+}
+
+.btn.today{
+  border: 0px ;
+  background-color: var(--hex-sidenav);
+  color:white;
+  cursor:default;
+}
+
+.btn.weekday{
+  border: 0px ;
+  background-color:var(--hex-topnav-dark);
+  color:white;
+  cursor:default;
+}
