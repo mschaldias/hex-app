@@ -15,7 +15,6 @@ function getCookie(name) {
 }
 
 function toggle_edit(items,item_id){
-
     item_text = $(`#item${item_id} #item-text`)
     if (item_text.attr('contenteditable') != 'true'){
         item_text.attr('contenteditable','true');
@@ -32,7 +31,6 @@ function toggle_edit(items,item_id){
 }
 
 function set_task_repeat(item_id,clear=false){
-
     interval_value = $(`#interval_value${item_id}`).val()
     interval_type = $(`#interval_type${item_id}`).val()
     data = {}
@@ -44,16 +42,11 @@ function set_task_repeat(item_id,clear=false){
     }    
     else if (interval_value && interval_type){
         data = {"interval_value": interval_value,"interval_type":interval_type}
-    }
-       
-    $.ajax(
-        {
-            type: 'PUT',
+    }  
+    $.ajax({type: 'PUT',
             url: `/api/tasks/${item_id}`,
             contentType: 'application/json',
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-              },
+            headers: {"X-CSRFToken": getCookie("csrftoken")},
             dataType: 'json',
             data: JSON.stringify(data),
             success: (data,msg,xhr) => {
@@ -76,13 +69,10 @@ function set_task_repeat(item_id,clear=false){
                 $("#charFieldError .modal-title").text(response);
                 $('#charFieldError').modal("show")
             }
-        }
-    );
-
+    });
 }
 
 function edit(resource,item_id,value){
-
     key = ""
     data={}
     if( resource == "tasks"){
@@ -97,14 +87,10 @@ function edit(resource,item_id,value){
 
     data = {"id":item_id,[key]:value}
 
-    $.ajax(
-        {
-            type: 'PUT',
+    $.ajax({type: 'PUT',
             url: `/api/${resource}/${item_id}`,
             contentType: 'application/json',
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-              },
+            headers: {"X-CSRFToken": getCookie("csrftoken")},
             dataType: 'json',
             data: JSON.stringify(data),
             success: (data,msg,xhr) => {
@@ -122,20 +108,11 @@ function edit(resource,item_id,value){
                 $("#charFieldError .modal-title").text(response);
                 $('#charFieldError').modal("show")
             }
-        }
-    );
-};
+    });
+}
 
 function set_task_date(item_id,value){
-    const options = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      };
-    $.ajax(
-        {
-            type: 'PUT',
+    $.ajax({type: 'PUT',
             url: "/api/tasks/"+item_id,
             contentType: 'application/json',
             headers: {
@@ -156,40 +133,12 @@ function set_task_date(item_id,value){
                 }                              
                 $(`#item${item_id} .task-due-date-text`).html(html)
             },
-            error: (error) =>{
-                console.log(error);
-            }
-        }
-    );
-}
-
-function update_streak_display(){
-
-    $.ajax(
-        {
-            type: 'GET',
-            url: document.URL,
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-              },
-            success: (data) => {
-                        parser = new DOMParser();
-                        doc = parser.parseFromString(data, "text/html");
-                        new_element = doc.getElementById('streak-display')
-                        $('#streak-display').replaceWith(new_element)
-                    },
-            error: (error) =>{
-                console.log(error);
-            }
-        }
-    );
+            error: (error) =>{console.log(error);}
+    });
 }
 
 function checkbox_click(item_id,item_hex,item_prev_hex){
-
-    $.ajax(
-        {
-            type: 'PUT',
+    $.ajax({type: 'PUT',
             url: "/api/tasks/"+item_id,
             contentType: 'application/json',
             headers: {
@@ -202,16 +151,15 @@ function checkbox_click(item_id,item_hex,item_prev_hex){
             }),
             success: (data,msg,xhr) => {
                 console.log(msg,xhr.status)
-                if (item_hex || item_prev_hex){
-                    update_streak_display();
+                if (item_hex == "True"|| item_prev_hex == "True"){
+                    replace_element('/hex_streak/','streak-display')
                 }
+                if (data.interval_type && data.interval_value){
+                    replace_element(document.URL,'board',scripts=true)
+                }                
             },
-            error: (error) =>{
-                console.log(error);
-            }
-        }
-    );
-};
+            error: (error) =>{console.log(error);}
+})}
 
 function delete_button(resource,item_id,card=false){
     item_id = item_id
@@ -220,14 +168,10 @@ function delete_button(resource,item_id,card=false){
         element = document.getElementById(`card${item_id}`);
     }
     
-    $.ajax(
-        {
-            type: 'DELETE',
+    $.ajax({type: 'DELETE',
             url: `/api/${resource}/${item_id}`,
             contentType: 'application/json',
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-              },
+            headers: {"X-CSRFToken": getCookie("csrftoken")},
             dataType: 'json',
             data: JSON.stringify({
                 id: item_id,
@@ -242,76 +186,98 @@ function delete_button(resource,item_id,card=false){
                 $("#charFieldError .modal-title").text(response);
                 $('#charFieldError').modal("show")
             }
-        }
-    );
+    });
 };
 
-function append_new_item(list_id,element_id,card,replace=false,hexlog=false,weekday=false){ 
-    $.ajax(
-        {
-            type: 'GET',
-            url: document.URL,
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-              },
+function run_scripts(element) {
+    Array.from(element.querySelectorAll("script"))
+      .forEach( oldScriptEl => {
+        const newScriptEl = document.createElement("script");
+        Array.from(oldScriptEl.attributes).forEach( attr => {
+          newScriptEl.setAttribute(attr.name, attr.value) 
+        });
+        const scriptText = document.createTextNode(oldScriptEl.innerHTML);
+        newScriptEl.appendChild(scriptText);   
+        oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
+});}
+
+function replace_element(url,element_id,scripts=false){
+    $.ajax({type: 'GET',
+            url: url,
+            headers: {"X-CSRFToken": getCookie("csrftoken")},
             success: (data) => {
                         parser = new DOMParser();
                         doc = parser.parseFromString(data, "text/html");
-                        // console.log(`replace: ${replace}, hexlog ${hexlog}, weekday ${weekday}`)
-                        if (replace){  
-                            element = doc.getElementById(`${element_id}`)
-                            $(`#${element_id}`).replaceWith(element)
-                            initialize_sortable('todolists',`${element_id}`,hexlog=hexlog,weekday=weekday)
-                            if (!hexlog){
-                                let task_ids = document.querySelectorAll(`#${CSS.escape(element_id)}  li[id]`);
-                                for (let i = 0; i < task_ids.length; i++) {
-                                    set_datepicker(task_ids[i].id.replace(/\D/g, ""));
-                                }
-                            }                                                              
-                        }                        
-                        else if (card) {
-                            element = doc.getElementById(`card${element_id}`)
+                        element = doc.getElementById(element_id)
+                        $(`#${element_id}`).replaceWith(element)
+                        if (scripts){
+                            run_scripts(element)   
+                        }                                                                                                           
+                    },
+            error: (error) => {console.log(error)}
+    });
+}
+
+function append_new_item(parent_model,parent_id,item_id,card){
+    if (card){
+        url = `/card/${parent_model}/${item_id}/`      
+    }
+    else {
+        url = `/list/${parent_model}/${parent_id}/`
+    }
+    $.ajax(
+        {  type: 'GET',
+            url: url,
+            headers: {"X-CSRFToken": getCookie("csrftoken")},
+            success: (data) => {
+                        parser = new DOMParser();
+                        doc = parser.parseFromString(data, "text/html");                                              
+                        if (card) {
+                            console.log(data)
+                            element = doc.getElementById(`card${item_id}`)
                             $(`#cards`).append(element);
                         }
                         else{
-                            element = doc.getElementById(`item${element_id}`)
-                            $(`#${list_id}`).append(element);
-                            initialize_sortable('todolists',list_id,hexlog=false,weekday=weekday)
-                            set_datepicker(element_id)
-                        };
+                            element = doc.getElementById(`item${item_id}`)
+                            $(`#${parent_id}`).append(element);
+                            if (parent_model=='todolist'){
+                                set_datepicker(item_id)
+                            }                            
+                        };                       
                     },
-            error: (error) =>{
-                console.log(error);
-            }
-        }
-    );
+            error: (error) =>{console.log(error);}
+    })
 }
 
-function create_button(resource,list_id,value="",card=false,weekday=false){
+function create_button(items,parent_id,value="",card=false){
     key = ""
     data = {}
-    if (resource  == "tasks"){
+    resource_name = ""
+    if (items  == "tasks"){
         key="todolist"
-        data = {[key]:list_id}
+        data = {[key]:parent_id}
+        resource_name = "todolists"
     }
-    if (resource == "todolists"){
+    if (items == "todolists"){
         key = "board"
-        data = {[key]:list_id}
+        data = {[key]:parent_id}
         if (value !== ""){
             data["name"]=value
         }
+        resource_name = "boards"
+        if (card){
+            resource_name = "todolists"
+        }
     }
-    
-    if (resource == "boards"){
+    if (items == "boards"){
         if (value !== ""){
             key = "name"
             data = {[key]:value};
+            resource_name = "boards"
         }
     }
-    $.ajax(
-        {
-            type: 'POST',
-            url: `/api/${resource}/`,
+    $.ajax({type: 'POST',
+            url: `/api/${items}/`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -320,7 +286,7 @@ function create_button(resource,list_id,value="",card=false,weekday=false){
             dataType: 'json',
             success: (data,msg,xhr) => {
                         console.log(msg,xhr.status);
-                        append_new_item(list_id,data.id,card,replace=false,hexlog=false,weekday=weekday);
+                        append_new_item(resource_name,parent_id,data.id,card);
                     },
             error: (data,msg,xhr) =>{
                 console.log(JSON.parse(data.responseText)[key][0])
@@ -328,25 +294,22 @@ function create_button(resource,list_id,value="",card=false,weekday=false){
                 $('#charFieldError').modal("show")
                 console.log(error);
             }
-        }
-    );       
-};
+    });       
+}
 
-function sortable_event(resource,list_id,replace=false,hexlog=false,weekday=false){
+function sortable_event(resource_name,list_id,replace=false){
     let ids = document.querySelectorAll(`#${CSS.escape(list_id)}  li[id]`);
     let ids_list = [];
     for (let i = 0; i < ids.length; i++) {
         ids_list.push(ids[i].id.replace(/\D/g, ""));
     }   
     data = {"task_set":ids_list,"id":list_id}
-    if (resource == "boards"){
+    if (resource_name == "boards"){
         data = {"todolist_set":ids_list,"id":list_id}
+        replace = false
     }
-    
-    $.ajax(
-        {
-            type: 'PUT',
-            url: `/api/${resource}/${list_id}`,
+    $.ajax({type: 'PUT',
+            url: `/api/${resource_name}/${list_id}`,
             contentType: 'application/json',
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
@@ -354,17 +317,18 @@ function sortable_event(resource,list_id,replace=false,hexlog=false,weekday=fals
             data: JSON.stringify(data),
             dataType: 'json',
             success: (data,msg,xhr) => {
-                        console.log(msg,xhr.status)                        
-                        append_new_item(`${data.name}`,`${data.id}`,card=false,replace=replace,hexlog=hexlog,weekday=weekday)
+                        console.log(msg,xhr.status)
+                        if (replace){
+                            replace_element(`/list/${resource_name}/${data.id}/`,data.id,scripts=true)
+                        }
+                       
                     },
             error: (error) =>{
                 console.log(error);
             }
-        }
-    );
+    });
 }
 function set_datepicker(element_id,date){
-
     options = {
         todayHighlight:true,
         clearBtn:true,
@@ -374,7 +338,6 @@ function set_datepicker(element_id,date){
     if (date){
         $(`#datepicker${element_id}`).datepicker('update',new Date(date));
     }
-
     $(`#datepicker${element_id}`).on('changeDate', function() {
         value = $(`#datepicker${element_id}`).datepicker('getDate');
         set_task_date(element_id,value);
@@ -383,7 +346,7 @@ function set_datepicker(element_id,date){
     });  
 }
 
-function initialize_sortable(resource,list_id, hexlog=false, weekday=false){
+function initialize_sortable(resource_name,list_id, hexlog=false, weekday=false){
     list = document.getElementById(list_id);
     if (list) {
         if (weekday) {
@@ -399,10 +362,10 @@ function initialize_sortable(resource,list_id, hexlog=false, weekday=false){
                 filter: '.sortable-disabled',
                 chosenClass: 'chosen',
                 onAdd: function () {
-                    sortable_event(resource,list_id,replace=true,hexlog=false,weekday=true);
+                    sortable_event(resource_name,list_id,replace=true,hexlog=false,weekday=true);
                 },
                 onUpdate: function () {
-                    sortable_event(resource,list_id)
+                    sortable_event(resource_name,list_id)
                 },
             });            
         }    
@@ -412,10 +375,7 @@ function initialize_sortable(resource,list_id, hexlog=false, weekday=false){
                 group: {
                     name:'hexlog',
                     put: function(to,from){
-                        if (!from.el.querySelector('.list-group-item-hex-dark.chosen')){
-                            return false 
-                        }
-                        return true
+                        return Sortable.dragged.classList.contains('list-group-item-hex-dark')
                     }
                 },
                 draggable: '.draggable',
@@ -424,10 +384,10 @@ function initialize_sortable(resource,list_id, hexlog=false, weekday=false){
                 filter: '.sortable-disabled',
                 chosenClass: 'chosen',
                 onAdd: function () {
-                    sortable_event(resource,list_id,replace=true,hexlog=true);
+                    sortable_event(resource_name,list_id,replace=true,hexlog=true);
                 },
                 onUpdate: function () {
-                    sortable_event(resource,list_id)
+                    sortable_event(resource_name,list_id)
                 },
             });
         }    
@@ -437,10 +397,7 @@ function initialize_sortable(resource,list_id, hexlog=false, weekday=false){
                 group: {
                     name:'log',
                     put: function(to,from){
-                        if (from.el.querySelector('.list-group-item-hex-dark.chosen')){
-                            return false                    
-                        }
-                        return true
+                        return !Sortable.dragged.classList.contains('list-group-item-hex-dark')
                     }
                 },
                 draggable: '.draggable',
@@ -449,10 +406,10 @@ function initialize_sortable(resource,list_id, hexlog=false, weekday=false){
                 filter: '.sortable-disabled',
                 chosenClass: 'chosen',
                 onAdd: function () {
-                    sortable_event(resource,list_id,replace=true);
+                    sortable_event(resource_name,list_id,replace=true);
                 },
                 onUpdate: function () {
-                    sortable_event(resource,list_id)
+                    sortable_event(resource_name,list_id)
                 },
             });
         }
