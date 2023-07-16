@@ -65,7 +65,7 @@ def action(request):
         board = request.user.board_set.get(category="week")
         current_timezone = timezone.get_current_timezone()
         if request.POST.get("migrate"):
-            board.migrate_week(next_week=True,dt=board.due_date,tz=current_timezone)
+            board.migrate_week(forward=True,next_week=True,dt=board.due_date,tz=current_timezone)
         elif request.POST.get("current_week"): 
             dt = (datetime.combine(timezone.localtime()-timedelta(days=1), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())#datetime is 23:59 day before current day localtime
             board.migrate_week(dt=dt,tz=current_timezone) 
