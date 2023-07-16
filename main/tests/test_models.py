@@ -163,6 +163,17 @@ class BoardModelTest(TestCase):
                 self.assertEqual(backlog.task_set.count(),count)
             timezone.deactivate()
 
+    def test_migrate_forward(self):
+        true_now = timezone.now()
+        fake_now = true_now + timedelta(weeks=4)
+        self.week_board.migrate_week(forward=True,dt=self.week_board.due_date,now=fake_now)
+
+        _, this_week_num, _ = true_now.isocalendar()
+        expected_week_num = this_week_num + 4
+        _,board_week_num,_ = self.week_board.start_date.isocalendar()
+
+        self.assertEqual(expected_week_num,board_week_num)
+
     def test_migrate_next_week(self):
         futurelog = self.week_board.todolist_set.get(name='futurelog')
         backlog = self.week_board.todolist_set.get(name='backlog')
@@ -185,7 +196,7 @@ class BoardModelTest(TestCase):
             task = todolist.task_set.create(text=f"task in {todolist} should go to backlog",due_date=due_date)
             incomplete_weekday_tasks.append(task)
         
-        self.week_board.migrate_week(next_week=True,dt=self.week_board.due_date)
+        self.week_board.migrate_week(forward=True,next_week=True,dt=self.week_board.due_date)
 
         # task1 should be in futurelog
         self.assertIn(futurelog_task1, futurelog.task_set.all())

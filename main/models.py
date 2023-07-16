@@ -50,7 +50,7 @@ class Board(models.Model):
         self.due_date = dt
         self.save()
 
-    def migrate_week(self,next_week=False,dt=None,now=timezone.now(),tz=timezone.get_current_timezone()):
+    def migrate_week(self,forward=False,next_week=False,dt=None,now=timezone.now(),tz=timezone.get_current_timezone()):
         if self.category != 'week': raise IncorrectBoardCategoryError
         week_todolists = self.todolist_set.exclude(date=None)
         futurelog = self.todolist_set.get(name="futurelog")
@@ -58,18 +58,18 @@ class Board(models.Model):
         hexlog = self.todolist_set.get(name="hexlog")
         
         #board is in a future week and and we are migrating back to current week
-        if (not next_week) and self.start_date > now:
+        if (not forward) and self.start_date > now:
                 for week_todolist in week_todolists:
                     week_todolist.task_set.update(todolist=futurelog)
                 week_todolists.delete()
-                self.initialize_week(given_datetime=False,next_week=next_week)
+                self.initialize_week()
                 board_start_date = self.start_date.astimezone(tz)
                 board_due_date = self.due_date.astimezone(tz)
                 for task in backlog.task_set.all():
                     if task.due_date:
                         task_due_date = task.due_date.astimezone(tz)
                         if board_start_date <= task_due_date <= board_due_date :
-                            task.todolist = week_todolists.get(date=task.due_date)
+                            task.todolist = week_todolists.get(date=task_due_date.date())
                         elif task_due_date > board_due_date:
                             task.todolist = futurelog
                         task.save()
@@ -77,22 +77,22 @@ class Board(models.Model):
                 self.save()
                 
         #board is in current week and and we are backlogging incomplete tasks up to today and archiving complete tasks
-        elif not next_week:
+        elif not forward:
             logs = self.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
             self.archive(logs)
             self.archive(week_todolists,datetime=dt)
             self.hexable = True
             self.save()
 
-        #migrate to next week
+        #migrate to future week
         else:
             #all complete tasks in board are moved to archive, 
             #tasks with due date up to datetime are moved to backlog
             self.archive(week_todolists,datetime=dt)
             backlog.task_set.filter(hex=True).update(todolist=hexlog)
-            week_todolists.delete()                
-            self.initialize_week(next_week=next_week,given_datetime=self.start_date) 
-
+            week_todolists.delete()
+            if next_week: self.initialize_week(next_week=next_week,given_datetime=self.start_date) 
+            else: self.initialize_week(given_datetime=now) 
             for task in futurelog.task_set.all():
                 board_start_date = self.start_date.astimezone(tz)
                 board_due_date = self.due_date.astimezone(tz)
