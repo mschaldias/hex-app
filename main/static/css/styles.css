@@ -6,6 +6,7 @@
     --hex-topnav: #576CBC;
     --hex-text: #A5D7E8;
     --hex-topnav-dark: #3c59ce;
+    --hex-today-pink: rgb(255, 0, 191);
 }
 
 body {
@@ -118,8 +119,8 @@ body {
     border-color: var(--hex-sidenav) !important;
   }
 
-.today {
-  background-color: rgb(255, 0, 191);
+.card-header.today {
+  background-color: var(--hex-today-pink);
 }
 
 .weekday{
