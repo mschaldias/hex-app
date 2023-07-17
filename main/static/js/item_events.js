@@ -240,7 +240,7 @@ function append_new_item(parent_model,parent_id,item_id,card){
                         else{
                             element = doc.getElementById(`item${item_id}`)
                             $(`#${parent_id}`).append(element);
-                            if (parent_model=='todolist'){
+                            if (parent_model=='todolists'){
                                 set_datepicker(item_id)
                             }                            
                         };                       
