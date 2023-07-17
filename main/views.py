@@ -113,14 +113,17 @@ def card(request,resource_name,id=None):
     if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':                                
         resource = None
         if resource_name == "todolists":
+            items = "tasks"
             resource = ToDoList.objects.filter(id=id,board__owner=request.user).first()
         elif resource_name == "boards":
+            items = "todolists"
             resource = Board.objects.filter(id=id,owner=request.user).first()
         if not resource:  raise Http404
 
         return render(request,"main/card.html", {
                                                  "resource":resource,
                                                  "resource_name":resource_name,
+                                                 "items":items,
                                                 })
     raise Http404
 
