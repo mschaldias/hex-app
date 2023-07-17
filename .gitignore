@@ -9,4 +9,4 @@ register/migrations/*
 *.pyc
 launch.json
 settings.json
-
+.env
