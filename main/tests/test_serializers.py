@@ -60,6 +60,7 @@ class TaskSerializerTest(TestCase):
 
         for tz in timezones:
             timezone.activate(tz)
+            self.board.initialize_week()
             with self.subTest(msg=f"Testing with timezone {tz}", tz=tz):
                 task = Task.objects.create(todolist=self.backlog,text='test text')
                 now = timezone.localtime()
