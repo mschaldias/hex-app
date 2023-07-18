@@ -2,14 +2,13 @@
 <ul class="list-group mb-3" id="{{list.id}}">
     {% for item in list|queryset %}
         {% if item.hex or item.prev_hex %}
-        <li class="list-group-item list-group-item-action list-group-item-hex-dark draggable" id = "item{{item.id}}">
+        <li class="list-group-item list-group-item-action list-group-item-hex-dark draggable handle" id = "item{{item.id}}">
         {% elif list.name in item_styles %}
-        <li class="list-group-item list-group-item-action {{item_styles|dict_key:list.name}} draggable" id = "item{{item.id}}">
+        <li class="list-group-item list-group-item-action {{item_styles|dict_key:list.name}} draggable handle" id = "item{{item.id}}">
         {% else %}
-        <li class="list-group-item list-group-item-action list-group-item-hex draggable" id = "item{{item.id}}">
+        <li class="list-group-item list-group-item-action list-group-item-hex draggable handle" id = "item{{item.id}}">
         {% endif %}    
-            <div class = "handle card-body" >
-                <div class = "input-group">
+                <div class = "input-group my-2">
                     {% if items == 'tasks' %}
                     <div class= "input-group-text bg-hex-sidenav border-hex">
                         {% if item.complete %}
@@ -105,7 +104,6 @@
                     {% endif %}
                 </div>  
                 {%endif%}
-            </div>
             {% if week and todolist.name == 'hexlog' and not board.hexable%} 
             <script>
                 $(`#item${'{{item.id}}'}`).removeClass("draggable");
