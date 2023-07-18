@@ -8,6 +8,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
 from .tokens import account_activation_token
+from django.contrib.auth.views import  PasswordResetCompleteView,PasswordResetDoneView
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -66,3 +67,16 @@ def register(request):
         form = UserCreationForm()
 
     return render(request, "register/register.html", {"form":form})
+
+class PasswordResetCompleteView(PasswordResetCompleteView):
+    def dispatch(self, *args, **kwargs):
+        super().dispatch(*args, **kwargs)
+        messages.success(self.request,'Your password has been reset successfully. You may sign in now.')
+        return redirect('login')
+    
+class PasswordResetDoneView(PasswordResetDoneView):
+    def dispatch(self, *args, **kwargs):
+        response = super().dispatch(*args, **kwargs)
+        message = render_to_string('registration/password_reset_sent.html')
+        messages.success(self.request,message)
+        return redirect('password_reset')
