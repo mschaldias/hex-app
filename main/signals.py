@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save, pre_delete
-from django.contrib.auth.models import User
 from django.dispatch import receiver
 from .models import Board, Profile,ToDoList 
+from django.contrib.auth import get_user_model
+User = get_user_model()
  
 @receiver(post_save, sender=User)
 def create_board(sender, instance, created, **kwargs):
@@ -19,3 +20,9 @@ def create_board(sender, instance, created, **kwargs):
 def create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.get_or_create(owner=instance)
+
+@receiver(post_save, sender=User)
+def set_username(sender, instance, created, **kwargs):
+    if created:
+        instance.username = instance.email
+        instance.save()

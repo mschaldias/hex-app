@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.contrib.auth.models import User
 from main.custom_exceptions import IncorrectBoardCategoryError
 from main.models import Board,ToDoList,Task
 from django.db.models import Q
@@ -7,13 +6,16 @@ from main.serializers import BoardSerializer, TaskSerializer, ToDoListSerializer
 from django.utils import timezone
 from datetime import datetime, timedelta
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 timezones = ['America/New_York','America/Vancouver','America/Sao_Paulo','UTC']
 
 class TaskSerializerTest(TestCase):
         
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='test', password='test_password')
+        cls.user = User.objects.create_user(email='test', password='test_password')
         cls.board = Board.objects.get(owner=cls.user,category='week')
         cls.backlog = cls.board.todolist_set.get(name='backlog')
         cls.futurelog = cls.board.todolist_set.get(name='futurelog')

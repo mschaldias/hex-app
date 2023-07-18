@@ -1,12 +1,13 @@
 from random import choice
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import datetime
 from main.custom_exceptions import IncorrectBoardCategoryError
 from django.core.validators import MinValueValidator,MaxValueValidator,RegexValidator
 from dateutil.relativedelta import relativedelta
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
 # Create your models here.
 
 class Profile(models.Model):

@@ -1,6 +1,5 @@
 import random
 from django.test import TestCase
-from django.contrib.auth.models import User
 from main.custom_exceptions import IncorrectBoardCategoryError
 from main.models import Board,ToDoList,Task
 from django.db.models import Q
@@ -8,10 +7,13 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 timezones = ['America/New_York','America/Vancouver','America/Sao_Paulo','UTC']
 class UserModelTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='test', password='test_password')
+        self.user = User.objects.create_user(email='test', password='test_password')
 
     def test_new_user_has_week_board(self):
         board = self.user.board_set.get(category='week')
@@ -27,7 +29,7 @@ class UserModelTest(TestCase):
 class TaskModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='test', password='test_password')
+        cls.user = User.objects.create_user(email='test', password='test_password')
         cls.week_board = cls.user.board_set.get(category='week')
         cls.futurelog = cls.week_board.todolist_set.get(name = 'futurelog')
         cls.archive = cls.week_board.todolist_set.get(name = 'archive')
@@ -91,7 +93,7 @@ class BoardModelTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='test', password='test_password')
+        cls.user = User.objects.create_user(email='test', password='test_password')
         cls.week_board = cls.user.board_set.get(category='week')     
         cls.board = Board.objects.create(owner=cls.user,category='main')
         
