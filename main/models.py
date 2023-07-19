@@ -38,14 +38,15 @@ class Board(models.Model):
         year, week_num, day_of_week = given_datetime.isocalendar()
         if next_week:week_num+=1            
         day_of_week=1
-
+        position = 3
         tz = timezone.get_current_timezone()
         self.start_date = (datetime.fromisocalendar(year,week_num,day_of_week)).replace(tzinfo=tz)
         for day_of_week in range(1,8):
             dt = (datetime.fromisocalendar(year,week_num,day_of_week)).replace(tzinfo=tz)
             date = dt.date()
             name = f"{date.strftime('%A')} {date}"
-            self.todolist_set.create(name=name,date=date)
+            self.todolist_set.create(name=name,date=date,position=position)
+            position+=1
         
         dt = (datetime.combine(dt, datetime.max.time())).replace(tzinfo=tz) #sets dt to 23:59 local time
         self.due_date = dt

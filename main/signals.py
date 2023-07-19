@@ -9,9 +9,9 @@ def create_board(sender, instance, created, **kwargs):
     if created:
         board = Board.objects.create(owner=instance,category='week',name='week board')
         board.todolist_set.create(name="archive")
-        board.todolist_set.create(name="backlog")
-        board.todolist_set.create(name="futurelog")
-        board.todolist_set.create(name="hexlog")
+        board.todolist_set.create(name="backlog",position=0)
+        board.todolist_set.create(name="futurelog",position=1)
+        board.todolist_set.create(name="hexlog",position=2)
         board.hexable = True
         board.initialize_week()
 
