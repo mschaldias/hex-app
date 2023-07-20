@@ -1,10 +1,11 @@
 name: Django CI
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop" , "release"]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop" , "release"]
 
 jobs:
   build:
@@ -25,5 +26,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run Tests
+      env:
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+        DEBUG: True
       run: |
-        python manage.py test
+        python manage.py makemigrations
+        python manage.py test --noinput
