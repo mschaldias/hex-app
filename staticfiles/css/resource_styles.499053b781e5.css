@@ -46,6 +46,13 @@
     {
     background-color:var(--hex-topnav-dark) !important;
     }
+    .datepicker table tr td.today, 
+    .datepicker table tr td.today.disabled, 
+    .datepicker table tr td.today.disabled:hover, 
+    .datepicker table tr td.today:hover {
+        background-image: linear-gradient(to bottom,var(--hex-today-pink),var(--hex-today-pink)) !important;
+        color: white !important;
+    }
     .datepicker table tr td .month.focused,
     .datepicker table tr td .year.focused,
     .datepicker table tr td .decade.focused,

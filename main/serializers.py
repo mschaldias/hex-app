@@ -36,7 +36,7 @@ class TaskSerializer(serializers.ModelSerializer):
             if due_date and not instance.complete:                
                 if todolist.name == 'backlog': 
                     #if backlog task due_date is changed to after board due_date, task is assigned to futurelog
-                    if due_date.date() > board.due_date.date():
+                    if due_date > board.due_date:
                         futurelog = board.todolist_set.get(name='futurelog')
                         instance.todolist = futurelog
                 elif todolist.name == 'futurelog':

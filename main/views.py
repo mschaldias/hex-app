@@ -62,12 +62,13 @@ def boards(request,id=None):
 @login_required(login_url='/login/')
 def action(request):
     if request.method == "POST":
-        board = request.user.board_set.get(category="week")        
+        board = request.user.board_set.get(category="week")
+        current_timezone = timezone.get_current_timezone()
         if request.POST.get("migrate"):
-            board.migrate_week(next_week=True,dt=board.due_date)
+            board.migrate_week(forward=True,next_week=True,dt=board.due_date,tz=current_timezone)
         elif request.POST.get("current_week"): 
             dt = (datetime.combine(timezone.localtime()-timedelta(days=1), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())#datetime is 23:59 day before current day localtime
-            board.migrate_week(dt=dt) 
+            board.migrate_week(dt=dt,tz=current_timezone) 
         elif request.POST.get("hex"):
             board.hex()
                  
@@ -76,7 +77,7 @@ def action(request):
 
 def week_utils(board,now):
     if now > board.due_date:
-        board.migrate_week(next_week=True,dt=board.due_date,now=now,tz=timezone.get_current_timezone())
+        board.migrate_week(forward=True,dt=board.due_date,now=now,tz=timezone.get_current_timezone())
 
     #board always has this list which can't be edited or deleted
     archive = board.todolist_set.get(name="archive")
@@ -112,14 +113,17 @@ def card(request,resource_name,id=None):
     if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':                                
         resource = None
         if resource_name == "todolists":
+            items = "tasks"
             resource = ToDoList.objects.filter(id=id,board__owner=request.user).first()
         elif resource_name == "boards":
+            items = "todolists"
             resource = Board.objects.filter(id=id,owner=request.user).first()
         if not resource:  raise Http404
 
         return render(request,"main/card.html", {
                                                  "resource":resource,
                                                  "resource_name":resource_name,
+                                                 "items":items,
                                                 })
     raise Http404
 
@@ -158,7 +162,6 @@ def week(request):
 
     #this board is created for each new user using a signal
     board = request.user.board_set.get(category="week")
-
     week_utils(board,timezone.now())
 
     localdate = timezone.localdate()

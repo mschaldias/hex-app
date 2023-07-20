@@ -1,0 +1,42 @@
+name: hex
+channels:
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - _openmp_mutex=5.1=1_gnu
+  - ca-certificates=2023.05.30=h06a4308_0
+  - ld_impl_linux-64=2.38=h1181459_1
+  - libffi=3.4.4=h6a678d5_0
+  - libgcc-ng=11.2.0=h1234567_1
+  - libgomp=11.2.0=h1234567_1
+  - libstdcxx-ng=11.2.0=h1234567_1
+  - ncurses=6.4=h6a678d5_0
+  - openssl=1.1.1u=h7f8727e_0
+  - pip=23.1.2=py39h06a4308_0
+  - python=3.9.15=h7a1cb2a_2
+  - readline=8.2=h5eee18b_0
+  - setuptools=67.8.0=py39h06a4308_0
+  - sqlite=3.41.2=h5eee18b_0
+  - tk=8.6.12=h1ccaba5_0
+  - tzdata=2023c=h04d1e81_0
+  - wheel=0.38.4=py39h06a4308_0
+  - xz=5.4.2=h5eee18b_0
+  - zlib=1.2.13=h5eee18b_0
+  - pip:
+      - asgiref==3.7.2
+      - crispy-bootstrap4==2022.1
+      - dj-database-url==2.0.0
+      - django==4.2.3
+      - django-crispy-forms==2.0
+      - djangorestframework==3.14.0
+      - gunicorn==21.1.0
+      - packaging==23.1
+      - psycopg2-binary==2.9.6
+      - python-dateutil==2.8.2
+      - python-decouple==3.8
+      - pytz==2023.3
+      - six==1.16.0
+      - sqlparse==0.4.4
+      - typing-extensions==4.7.1
+      - whitenoise==6.5.0
+prefix: /home/mariana/anaconda3/envs/hex

@@ -6,6 +6,7 @@
     --hex-topnav: #576CBC;
     --hex-text: #A5D7E8;
     --hex-topnav-dark: #3c59ce;
+    --hex-today-pink: rgb(255, 0, 191);
 }
 
 body {
@@ -28,6 +29,10 @@ body {
 
   .top-navbar{
     height: 56px
+  }
+
+  .side-footer{
+    overflow-wrap:break-word;
   }
 
   .nav-link {
@@ -89,6 +94,8 @@ body {
   }
   .list-group-item-hex.list-group-item-action:hover, .list-group-item-hex.list-group-item-action:focus,.list-group-item-hex.list-group-item-action:active {
     background-color: var(--hex-topnav-dark) !important;
+    color:white;
+
   }
 
 
@@ -96,7 +103,9 @@ body {
     background-color: #0463c9 !important
   }
   .list-group-item-hex-primary.list-group-item-action:hover, .list-group-item-hex-primary.list-group-item-action:focus {
-    background-color: #0551a3 !important
+    background-color: #0551a3 !important;
+    color:white;
+
   }
 
   .list-group-item-hex-dark {
@@ -104,13 +113,16 @@ body {
   }
   .list-group-item-hex-dark.list-group-item-action:hover, .list-group-item-hex-dark.list-group-item-action:focus,.list-group-item-hex-dark.list-group-item-action:active {
     background-color: #131517;
+    color:white;
+
   }
 
   .list-group-item-hex-danger, .bg-hex-danger {
     background-color: #ab1f2c !important
   }
   .list-group-item-hex-danger.list-group-item-action:hover, .list-group-item-hex-danger.list-group-item-action:focus {
-    background-color: #8f1c27 !important
+    background-color: #8f1c27 !important;
+    color:white;
   }
 
   .border-hex {
@@ -118,8 +130,8 @@ body {
     border-color: var(--hex-sidenav) !important;
   }
 
-.today {
-  background-color: rgb(255, 0, 191);
+.card-header.today {
+  background-color: var(--hex-today-pink);
 }
 
 .weekday{
@@ -140,3 +152,26 @@ body {
   color:white;
   cursor:default;
 }
+
+.btn-hex{
+  background-color:var(--hex-topnav);
+  color:white
+
+}
+
+.btn-hex:active,
+.btn-hex:focus,
+.btn-hex:hover {
+  background-color:var(--hex-topnav-dark);
+  color: white
+}
+
+.custom-form{
+  background-color: var(--hex-sidenav);
+  color: white;
+  border:0;
+}
+
+.form-text.text-muted{
+color: var(--hex-text) !important;
+}   

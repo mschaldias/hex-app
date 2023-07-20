@@ -1,12 +1,13 @@
 from random import choice
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import datetime
 from main.custom_exceptions import IncorrectBoardCategoryError
 from django.core.validators import MinValueValidator,MaxValueValidator,RegexValidator
 from dateutil.relativedelta import relativedelta
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
 # Create your models here.
 
 class Profile(models.Model):
@@ -37,20 +38,21 @@ class Board(models.Model):
         year, week_num, day_of_week = given_datetime.isocalendar()
         if next_week:week_num+=1            
         day_of_week=1
-
+        position = 3
         tz = timezone.get_current_timezone()
         self.start_date = (datetime.fromisocalendar(year,week_num,day_of_week)).replace(tzinfo=tz)
         for day_of_week in range(1,8):
             dt = (datetime.fromisocalendar(year,week_num,day_of_week)).replace(tzinfo=tz)
             date = dt.date()
             name = f"{date.strftime('%A')} {date}"
-            self.todolist_set.create(name=name,date=date)
+            self.todolist_set.create(name=name,date=date,position=position)
+            position+=1
         
         dt = (datetime.combine(dt, datetime.max.time())).replace(tzinfo=tz) #sets dt to 23:59 local time
         self.due_date = dt
         self.save()
 
-    def migrate_week(self,next_week=False,dt=None,now=timezone.now(),tz=timezone.get_current_timezone()):
+    def migrate_week(self,forward=False,next_week=False,dt=None,now=timezone.now(),tz=timezone.get_current_timezone()):
         if self.category != 'week': raise IncorrectBoardCategoryError
         week_todolists = self.todolist_set.exclude(date=None)
         futurelog = self.todolist_set.get(name="futurelog")
@@ -58,18 +60,18 @@ class Board(models.Model):
         hexlog = self.todolist_set.get(name="hexlog")
         
         #board is in a future week and and we are migrating back to current week
-        if (not next_week) and self.start_date > now:
+        if (not forward) and self.start_date > now:
                 for week_todolist in week_todolists:
                     week_todolist.task_set.update(todolist=futurelog)
                 week_todolists.delete()
-                self.initialize_week(given_datetime=False,next_week=next_week)
+                self.initialize_week()
                 board_start_date = self.start_date.astimezone(tz)
                 board_due_date = self.due_date.astimezone(tz)
                 for task in backlog.task_set.all():
                     if task.due_date:
                         task_due_date = task.due_date.astimezone(tz)
                         if board_start_date <= task_due_date <= board_due_date :
-                            task.todolist = week_todolists.get(date=task.due_date)
+                            task.todolist = week_todolists.get(date=task_due_date.date())
                         elif task_due_date > board_due_date:
                             task.todolist = futurelog
                         task.save()
@@ -77,22 +79,22 @@ class Board(models.Model):
                 self.save()
                 
         #board is in current week and and we are backlogging incomplete tasks up to today and archiving complete tasks
-        elif not next_week:
+        elif not forward:
             logs = self.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
             self.archive(logs)
             self.archive(week_todolists,datetime=dt)
             self.hexable = True
             self.save()
 
-        #migrate to next week
+        #migrate to future week
         else:
             #all complete tasks in board are moved to archive, 
             #tasks with due date up to datetime are moved to backlog
             self.archive(week_todolists,datetime=dt)
             backlog.task_set.filter(hex=True).update(todolist=hexlog)
-            week_todolists.delete()                
-            self.initialize_week(next_week=next_week,given_datetime=self.start_date) 
-
+            week_todolists.delete()
+            if next_week: self.initialize_week(next_week=next_week,given_datetime=self.start_date) 
+            else: self.initialize_week(given_datetime=now) 
             for task in futurelog.task_set.all():
                 board_start_date = self.start_date.astimezone(tz)
                 board_due_date = self.due_date.astimezone(tz)

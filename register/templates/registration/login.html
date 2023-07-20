@@ -1,22 +1,37 @@
 {% extends "main/base.html" %}
-
-{% block title %}
-    Login Here
-{% endblock %}
-
-{% load crispy_forms_tags %}
+{% block title  %}Login{% endblock title  %}
 
 {% block content %}
 
-<div class = "row justify-content-center mt-5">
-    <div class = "col-8">
-        <form method="post" class = "form-group">
-        {% csrf_token %}
-        {{form|crispy}}
-        <p><a href="/register">Create new account</a></p>
-        <button type="submit" class="btn btn-success">Login</button>
-        </form> 
+{% load crispy_forms_tags %}
+
+{% for error in form.errors.values %}
+<div class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-hidden="true"></button>
+    {{error}}
+</div>
+{% endfor %}
+
+<div class = "row justify-content-center">
+    <div class = "col-6 card bg-hex-sidenav px-0 border-0">
+        <div class = "card-header bg-hex-topnav-dark">
+            <div class="h2">Sign in with ToDoHex</div>
+        </div>
+        <form method="POST" class = "form-group custom-form mt-2">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class='custom-form form-control'>
+                {{field|as_crispy_field}}
+            </div>
+            {% endfor %}
+            <button type = "submit" class = "btn btn-primary m-2">Login</button>
+        </form>
+        <div class = "mt-4 mb-2 mx-2"> 
+            <a href="{% url 'password_reset' %}" class = "btn btn-hex">Reset password</a>
+            <a href="/register" class="btn btn-hex">Create new account</a>
+        </div>
     </div>
 </div>
-    
+
 {% endblock %}
+

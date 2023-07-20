@@ -1,14 +1,24 @@
 {%  extends "main/base.html" %}
 
 {% block title  %}Create an Acount {% endblock title  %}
-
 {% load crispy_forms_tags %}
 {% block content %}
-    <form method="POST" class = "form-group">
-        {% csrf_token %}
-        {{form|crispy}}
-        <button type = "submit" class = "btn btn-success">Register</button>
-    </form>
+<div class = "row justify-content-center">
+    <div class = "col-6 card bg-hex-sidenav px-0 border-0">
+        <div class = "card-header bg-hex-topnav-dark">
+            <div class="h2">Create a ToDoHex account</div>
+        </div>
+        <form method="POST" class = "custom-form form-group mt-2">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class='custom-form form-control'>
+                {{field|as_crispy_field}}
+            </div>
+            {% endfor %}
+            <button type = "submit" class = "btn btn-primary m-2">Register</button>
+        </form>   
+    </div>
+</div>
 {% endblock %}
 
 
