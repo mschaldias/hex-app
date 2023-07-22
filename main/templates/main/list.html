@@ -1,33 +1,21 @@
 {% load custom_tags %}
 <ul class="list-group mb-3" id="{{list.id}}">
     {% for item in list|queryset %}
-        {% if item.hex or item.prev_hex %}
-        <li class="list-group-item list-group-item-action list-group-item-hex-dark draggable handle" id = "item{{item.id}}">
-        {% elif list.name in item_styles %}
-        <li class="list-group-item list-group-item-action {{item_styles|dict_key:list.name}} draggable handle" id = "item{{item.id}}">
-        {% else %}
-        <li class="list-group-item list-group-item-action list-group-item-hex draggable handle" id = "item{{item.id}}">
-        {% endif %}    
+        <li class="list-group-item list-group-item-action {{item_styles|load_style:item}} draggable handle" id = "item{{item.id}}">
                 <div class = "input-group my-2">
                     {% if items == 'tasks' %}
-                    <div class= "input-group-text bg-hex-sidenav border-hex">
+                    <div class= "input-group-text {{item_styles|load_style:item}} border-0">
                         {% if item.complete %}
-                        <input class = "form-check-input bg-hex-topnav" type="checkbox" onclick="checkbox_click('{{item.id}}','{{item.hex}}','{{item.prev_hex}}')" checked>
+                        <input class = "form-check-input" type="checkbox" onclick="checkbox_click('{{item.id}}','{{item.hex}}','{{item.prev_hex}}')" checked>
                         {%else%}
-                        <input class = "form-check-input bg-hex-topnav" type="checkbox" onclick="checkbox_click('{{item.id}}','{{item.hex}}','{{item.prev_hex}}')">
+                        <input class = "form-check-input" type="checkbox" onclick="checkbox_click('{{item.id}}','{{item.hex}}','{{item.prev_hex}}')">
                         {%endif%}                       
                     </div>
                     {% else %}
-                        <a class = "input-group-text bg-hex-sidenav border-0" href="/{{items}}/{{item.id}}"></a>
+                    <a class = "input-group-text {{card_styles|load_style:item}} border-0" href="/{{items}}/{{item.id}}"></a>
                     {% endif %}
-                    {% if item.hex or item.prev_hex %}
-                    <div id = "item-text" class = "form-control bg-dark li-text" spellcheck = "false" contenteditable="false" >{{item}}</div> 
-                    {% elif list.name in item_styles  %}
-                    <div id = "item-text" class = "form-control {{item_styles|dict_key:list.name}}  li-text" spellcheck = "false" contenteditable="false" onclick = "toggle_edit('{{items}}','{{item.id}}')">{{item}}</div> 
-                    {% else %}
-                    <div id = "item-text" class = "form-control bg-hex-topnav  li-text" spellcheck = "false" contenteditable="false" onclick = "toggle_edit('{{items}}','{{item.id}}')">{{item}}</div>
-                    {% endif %}
-                    <button id="item-config" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn bg-hex-sidenav border-hex text-white mx-auto">
+                    <div id = "item-text" class = "form-control {{item_styles|load_style:item}}  border-white li-text border-0" spellcheck = "false" contenteditable="false" onclick="{{items|item_text_load_onclick:item}}">{{item}}</div> 
+                   <button id="item-config" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn {{item_styles|load_style:item}} border-0 text-white mx-auto">
                         <i class="fa-solid fa-angle-down"></i>
                     </button>
                 </div>
@@ -39,11 +27,12 @@
                 {% if items == "tasks" and not weekday%}
                     <div class = "task-due-date-text">
                         {% if item.due_date%}
-                        <i class="fa-solid fa-calendar"></i>     
-                        {{item.due_date|date:"D M d Y"}}
+                        <small><i class="fa-solid fa-calendar"></i>     
+                        {{item.due_date|date:"D M d Y"}}</small>
+                        
                         {%elif item.prev_date%}
-                        <i class="fa-solid fa-calendar"></i>  
-                        {{item.prev_date|date:"D M d Y"}}
+                        <small><i class="fa-solid fa-calendar"></i>  
+                        {{item.prev_date|date:"D M d Y"}}</small>
                         {% endif %} 
                     </div>
                 {% endif %}                                    
@@ -51,9 +40,9 @@
                 <div class = "task-repeat-text d-flex justify-content-end">
                     {% if item.interval_type and item.interval_value %}
                         {% if item.interval_value == 1 %}
-                        Every {{item.interval_value}} {{item.interval_type|remove_last_char}}
+                        <small>Every {{item.interval_value}} {{item.interval_type|remove_last_char}}</small>
                         {% else %}
-                        Every {{item.interval_value}} {{item.interval_type}}
+                        <small>Every {{item.interval_value}} {{item.interval_type}}</small>
                         {% endif %}
                     {% endif %}
                 </div>
