@@ -269,10 +269,10 @@ function create_button(items,parent_id,value="",card=false){
         }
     }
     if (items == "boards"){
+        resource_name = "boards"
         if (value !== ""){
             key = "name"
             data = {[key]:value};
-            resource_name = "boards"
         }
     }
     $.ajax({type: 'POST',
