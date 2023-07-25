@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     "main.apps.MainConfig",
     "register.apps.RegisterConfig",
     "rest_framework",
+    "mobiledetect",
+
 ]
 
 MIDDLEWARE = [
@@ -64,7 +66,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'main.middleware.TimezoneMiddleware',
+    "main.middleware.TimezoneMiddleware",
+    "mobiledetect.middleware.DetectMiddleware",
 ]
 
 
