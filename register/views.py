@@ -9,6 +9,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
 from .tokens import account_activation_token
 from django.contrib.auth.views import  PasswordResetCompleteView,PasswordResetDoneView
+from django.contrib.auth.decorators import login_required
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -50,6 +51,12 @@ def activateEmail(request, user, to_email):
     else:
         messages.error(request, f'There was a problem sending confirmation email to {to_email}, please confirm email is correct.')
 
+def deleteEmail(to_email):
+    mail_subject = 'Your ToDoHex account has been deleted'
+    email = EmailMessage(mail_subject, 'Sorry to see you go. Your ToDoHex account has been deleted.', to=[to_email])
+    email.content_subtype = "html"
+    email.send()
+
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
@@ -67,6 +74,18 @@ def register(request):
         form = UserCreationForm()
 
     return render(request, "register/register.html", {"form":form})
+
+@login_required(login_url='/login/')
+def account_settings(request):
+    if request.method == "POST":
+        user = request.user
+        email = user.email
+        user.delete()
+        deleteEmail(email)
+        messages.success(request, f"ToDoHex account <b>{email}</b> was deleted")
+        return redirect("/")
+            
+    return render(request, "account_settings.html", {})
 
 class PasswordResetCompleteView(PasswordResetCompleteView):
     def dispatch(self, *args, **kwargs):
