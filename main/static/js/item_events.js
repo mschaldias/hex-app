@@ -350,6 +350,8 @@ function initialize_sortable(resource_name,list_id, hexlog=false, weekday=false)
     if (list) {
         if (weekday) {
             Sortable.create(list, {
+                delay: 100,
+                delayOnTouchOnly: true, 
                 animation: 100,
                 group: {
                     name:'weekday',
@@ -370,6 +372,8 @@ function initialize_sortable(resource_name,list_id, hexlog=false, weekday=false)
         }    
         else if (hexlog){
             Sortable.create(list, {
+                delay: 100,
+                delayOnTouchOnly: true, 
                 animation: 100,
                 group: {
                     name:'hexlog',
@@ -392,6 +396,8 @@ function initialize_sortable(resource_name,list_id, hexlog=false, weekday=false)
         }    
         else {
             Sortable.create(list, {
+                delay: 100, 
+	            delayOnTouchOnly: true, 
                 animation: 100,
                 group: {
                     name:'log',

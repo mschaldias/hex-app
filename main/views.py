@@ -15,6 +15,8 @@ from datetime import datetime, timedelta
 from django.db.models import Q
 
 MAX_ITEMS = 10000
+CARD_STYLES = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark','weekday':'bg-hex-sidenav'}
+ITEM_STYLES = {'backlog':'list-group-item-hex-danger','futurelog':'list-group-item-hex-primary','hexlog':'list-group-item-hex-dark','weekday':'list-group-item-hex'}
 
 @require_GET
 def home(request):
@@ -32,7 +34,9 @@ def todolists(request,id):
                                                      "board":board,
                                                      "items":"tasks",
                                                      "create_resources":False,
-                                                     "weekday":False
+                                                     "weekday":False,
+                                                     "item_styles":ITEM_STYLES,
+                                                     "card_styles":CARD_STYLES,
                                                      })  
 
 @require_GET
@@ -50,6 +54,8 @@ def boards(request,id=None):
                                                           "items":"tasks",
                                                           "title":board.name,
                                                           "create_resources":True,
+                                                          "item_styles":ITEM_STYLES,
+                                                          "card_styles":CARD_STYLES,
                                                           })  
 
     return render(request, "main/resource_view.html",{"resources":boards,
@@ -57,6 +63,8 @@ def boards(request,id=None):
                                                       "items":"todolists",
                                                       "title":"Boards",
                                                       "create_resources":True,
+                                                      'item_styles':ITEM_STYLES,
+                                                      'card_styles':CARD_STYLES,
                                                       })           
 
 @login_required(login_url='/login/')
@@ -150,8 +158,8 @@ def list(request,resource_name,id=None):
         if not (li and board):    raise Http404
 
         params = {"resource_name":resource_name,"board":board,"list":li,"items":items}
-        context['card_styles'] = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark'}
-        context['item_styles'] = {'backlog':'list-group-item-hex-danger','futurelog':'list-group-item-hex-primary'}   
+        context['card_styles'] = CARD_STYLES
+        context['item_styles'] = ITEM_STYLES
         context.update(params)
 
         return render(request,"main/list.html", context)
@@ -159,7 +167,7 @@ def list(request,resource_name,id=None):
 
 @login_required(login_url='/login/')
 def week(request):
-
+    
     #this board is created for each new user using a signal
     board = request.user.board_set.get(category="week")
     week_utils(board,timezone.now())
@@ -167,8 +175,7 @@ def week(request):
     localdate = timezone.localdate()
 
     logs = board.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
-    card_styles = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark'}
-    item_styles = {'backlog':'list-group-item-hex-danger','futurelog':'list-group-item-hex-primary'}
+   
 
     week_todolists = board.todolist_set.exclude(date=None)
     return render(request, "main/resource_view.html",{  "resources": week_todolists,
@@ -177,8 +184,8 @@ def week(request):
                                                         "week":True,
                                                         "board": board,
                                                         "items":"tasks",
-                                                        "card_styles":card_styles,
-                                                        "item_styles":item_styles,
+                                                        "card_styles":CARD_STYLES,
+                                                        "item_styles":ITEM_STYLES,
                                                         "title":'week',
                                                         "create_resources":False,
                                                         "hex_streak":board.owner.profile.hex_streak,
