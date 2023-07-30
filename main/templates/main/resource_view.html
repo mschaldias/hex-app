@@ -59,11 +59,11 @@
             <div class="collapse" id="collapse-create">
                 <div class = "card bg-hex-sidenav">
                     <div class = "card-body">
-                        <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource_name}}','{{parent.id}}',$('#resource-name').val(),card=true);" method = "dialog">
+                        <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource_category}}','{{parent.id}}',this.name.value,card=true);" method = "dialog">
                             {% csrf_token %}
                             <p>
-                            <label for="resource-name">{{resource_name|remove_last_char}} name:</label>
-                            <input type="text" id="resource-name" value= "new {{resource_name|remove_last_char}}" class = "form-control bg-hex-topnav border border-hex text-white">   
+                            <label for="resource-name">{{resource_category|remove_last_char}} name:</label>
+                            <input name = "name" type="text" id="resource-name" value= "new {{resource_category|remove_last_char}}" class = "form-control bg-transparent text-white" maxlength=200>   
                             </p>
                             <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Close</button>
                             <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Submit</button>
@@ -77,35 +77,7 @@
     <div id = "board">
         <div class="row d-flex justify-content-center" id="logs">
             {% for todolist in logs %}
-            <div class="col-xl-3 col-md-6 mb-3">
-                {% if todolist.name in card_styles %}
-                    <div class="card {{card_styles|dict_key:todolist.name}}" id = "card{{todolist}}">
-                {% else %}
-                    <div class="card bg-hex-sidenav" id = "card{{todolist}}">
-                {% endif %}
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <a class = "btn btn-card btn-sm weekday" >
-                            <h5 id = "header-text" >{{todolist.name}}</h5>                                
-                        </a> 
-                        <div>   
-                            <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{todolist.id}}" aria-expanded="false" aria-controls="collapse{{todolist.id}}">
-                                <i class="fas fa-angle-down"></i>
-                            </button>  
-                            {% if todolist.name != 'hexlog'%}
-                            <button  id = "create_button" class="btn btn-success", onclick = "create_button('{{items}}','{{todolist.id}}')">
-                                <i class="fa fa-plus"></i>
-                            </button> 
-                            {% endif %}
-                        </div>
-                    </div> 
-                    <div class = "collapse show" id = "collapse{{todolist.id}}">
-                        <div class="card-body">
-                            {% include 'main/list.html' with list=todolist%}
-                        </div>
-                    </div>            
-                </div>
-            </div>
-            
+            {% include 'main/card.html' with week=True style=card_styles|dict_key:todolist.name resource=todolist %}
             {% endfor %}        
         </div>    
         <div class = "row mt-3 d-flex justify-content-center" id = "cards">
@@ -117,12 +89,41 @@
                     {% include 'main/card.html' with weekday=True style="weekday"%}
                 {% endif %}
             {% else %}
-                {% include 'main/card.html' %}
+                {% include 'main/card.html' with style="weekday" %}
             {% endif %}
-                
             {%endfor%}              
         </div>
     </div>
-
 </div>
+
+{% if items == 'tasks' and not item.hex and not item.prev_hex %}
+<div class="modal fade" id="task-modal" tabindex="-1" aria-labelledby="task-modal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
+      <div id = "task-modal-content" class="modal-content bg-dark"></div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    var task_modal = document.getElementById('task-modal')
+    if (task_modal) {
+        task_modal.addEventListener('show.bs.modal', function (event) {
+            // Button that triggered the modal
+            var button = event.relatedTarget
+            // Extract info from data-bs-* attributes
+            var item_id = button.getAttribute('data-bs-item-id')
+            // Update the modal's content.
+            url = `/task_modal/${item_id}`
+            replace_element(url,'task-modal-content',scripts=true)
+        })        
+    }
+    $('#task-modal').on('shown.bs.modal', function () {
+        $(this).find('textarea').each(function () {
+            set_height(this)           
+        });
+     })
+    $('textarea').each(function () {
+        set_height(this)           
+    });
+ </script>
 {% endblock %}

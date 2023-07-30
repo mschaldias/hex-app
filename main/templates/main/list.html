@@ -1,111 +1,103 @@
 {% load custom_tags %}
 <ul class="list-group mb-3" id="{{list.id}}">
     {% for item in list|queryset %}
-        <li class="list-group-item list-group-item-action {{item_styles|load_style:item}} draggable handle" id = "item{{item.id}}">
-                <div class = "input-group my-2">
+    <li class="list-group-item list-group-item-action {{item_styles|load_style:item}} draggable handle px-2" id = "item{{item.id}}">
+            <div class = "my-2">
+                <div class = "d-flex align-items-center gap-2">
                     {% if items == 'tasks' %}
-                    <div class= "input-group-text {{item_styles|load_style:item}} border-0">
+                    <div class= "bg-transparent border-0">
                         {% if item.complete %}
                         <input class = "form-check-input" type="checkbox" onclick="checkbox_click('{{item.id}}','{{item.hex}}','{{item.prev_hex}}')" checked>
                         {%else%}
                         <input class = "form-check-input" type="checkbox" onclick="checkbox_click('{{item.id}}','{{item.hex}}','{{item.prev_hex}}')">
                         {%endif%}                       
                     </div>
-                    {% else %}
-                    <a class = "input-group-text {{card_styles|load_style:item}} border-0" href="/{{items}}/{{item.id}}"></a>
                     {% endif %}
-                    <div id = "item-text" class = "form-control {{item_styles|load_style:item}}  border-white li-text border-0" spellcheck = "false" contenteditable="false" onclick="{{items|item_text_load_onclick:item}}">{{item}}</div> 
-                   <button id="item-config" data-bs-toggle="collapse" data-bs-target="#item-collapse{{item.id}}" aria-expanded="false" aria-controls="item_collapse{{item.id}}" class = "btn {{item_styles|load_style:item}} border-0 text-white mx-auto">
-                        <i class="fa-solid fa-angle-down"></i>
-                    </button>
-                </div>
-                {% if items == "tasks" and week and not weekday %}
-                <div class = "mt-1 d-flex justify-content-between">
-                {% else %}
-                <div class = "mt-1">
-                {% endif %}
-                {% if items == "tasks" and not weekday%}
-                    <div class = "task-due-date-text">
-                        {% if item.due_date%}
-                        <small><i class="fa-solid fa-calendar"></i>     
-                        {{item.due_date|date:"D M d Y"}}</small>
-                        
-                        {%elif item.prev_date%}
-                        <small><i class="fa-solid fa-calendar"></i>  
-                        {{item.prev_date|date:"D M d Y"}}</small>
-                        {% endif %} 
-                    </div>
-                {% endif %}                                    
-                {% if items == "tasks" and week %}
-                <div class = "task-repeat-text d-flex justify-content-end">
-                    {% if item.interval_type and item.interval_value %}
-                        {% if item.interval_value == 1 %}
-                        <small>Every {{item.interval_value}} {{item.interval_type|remove_last_char}}</small>
+                    <div id="item-container" class = "d-flex align-items-center justify-content-between flex-grow-1">
+                        {% if not items == 'tasks' %}
+                        <a id="item-text" class = "border-0 li-text mx-2" href="/{{items}}/{{item.id}}">{{item}}</a>
                         {% else %}
-                        <small>Every {{item.interval_value}} {{item.interval_type}}</small>
+                        <div id="item-text" class = "li-text">{{item}}</div>
                         {% endif %}
-                    {% endif %}
-                </div>
-                {% endif %}
-                </div>
-                {% if not item.hex and not item.prev_hex %}
-                <div class = "collapse mt-1" id = "item-collapse{{item.id}}">
-                    {% if items == "tasks" and not weekday %}
-                    <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#calendar-collapse{{item.id}}" aria-expanded="false" aria-controls="calendar-collapse{{item.id}}">
-                        <i class="fa-solid fa-calendar"></i>                                                   
-                    </button>                                                
-                    {% endif %}
-                    {% if items == "tasks" and week%}
-                    <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#repeat-collapse{{item.id}}" aria-expanded="false" aria-controls="repeat-collapse{{item.id}}">
-                        Repeat
-                    </button>
-                    {%endif%}
-                    <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{items}}','{{item.id}}')"> 
-                        <i class="fa fa-minus"></i>
-                    </button>                                                
-                    {% if items == "tasks" and week%}
-                    <div class = "collapse mt-1" id = "repeat-collapse{{item.id}}">
-                        <div class="card card-body bg-hex-body">                                            
-                            <div class="input-group input-group-sm mb-3">
-                                <label class="input-group-text">Every</label>
-                                <input onchange="set_task_repeat('{{item.id}}')" value="{{item.interval_value}}" type="number" min="1" class = "form-control" id="interval_value{{item.id}}">
-                                <select onchange="set_task_repeat('{{item.id}}')" class="form-select" id="interval_type{{item.id}}">
-                                    {% for option in interval_type_options %}
-                                        {% if item.interval_type == option %}
-                                        <option selected value="{{option}}">{{option}}</option> 
-                                        {% else %}
-                                        <option value="{{option}}">{{option}}</option>
-                                        {% endif %}
-                                    {% endfor %}                                              
-                                </select>
-                            </div>
-                            <button class = "btn btn-secondary btn-sm" onclick="set_task_repeat('{{item.id}}',clear=true)">Clear</button>
-                        </div>                                            
-                    </div>
-                    {% endif %}
-                    {% if items == "tasks" and not weekday%}
-                    <div class = "collapse mt-1" id = "calendar-collapse{{item.id}}">
-                        <div class = "card bg-hex-body d-flex justify-content-center">                                                    
-                            <div class="card-body date mx-auto" id="datepicker{{item.id}}"></div>
-                            <script>set_datepicker('{{item.id}}',"{{item.due_date|date:'c'}}")</script>
+                        {% if not item.hex and not item.prev_hex %}
+                            <button id="dropdown" data-bs-toggle="dropdown"  aria-expanded="false" class = "btn dropdown-toggle bg-transparent border-0 text-white" type="button" id = "item-config-dropdown">
+                            </button> 
+                            <ul class = "dropdown-menu dropdown-menu-dark" aria-labelledby="item-config-dropdown">
+                                <button class = "dropdown-item" onclick="toggle('#item{{item.id}} #item-container','#item{{item.id}} #item-edit',dragabble_id='#item{{item.id}}')">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                {% if items == "tasks"%}
+                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#task-modal" data-bs-item-id="{{item.id}}">
+                                    <i class="fa-solid fa-up-right-from-square"></i> Open Task
+                                </button>
+                                {% endif %}
+                                
+                                <button  id = "delete_button" class="dropdown-item text-danger", onclick = "delete_button('{{items}}','{{item.id}}')">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </ul>
                         </div>
-                    </div>  
+                        {%endif%}                          
+                    <form id="item-edit" method="dialog" action="#" onsubmit="edit('{{items}}','{{item.id}}',this.item_input.value),toggle('#item{{item.id}} #item-container','#item{{item.id}} #item-edit',dragabble_id='#item{{item.id}}')" class = "input-group hidden gap-1">
+                        {% csrf_token %}
+                        <div class = "d-flex flex-grow-1 gap-1">
+                            {% if items == 'tasks' %}
+                            <input name ="item_input" id="input" type="text" class = "form-control bg-transparent text-white" maxlength=300 value="{{item}}">
+                            {% else %}
+                            <input name ="item_input" id="input" type="text" class = "form-control bg-transparent text-white" maxlength=200 value="{{item}}">
+                            {% endif %} 
+                            <button type = "submit" class = "btn btn-success border-0 text-white">
+                            <i class="fa-solid fa-check"></i>
+                            </button>
+                            <button type="button" class = "btn btn-secondary border-0 text-white", onclick="toggle('#item{{item.id}} #item-container','#item{{item.id}} #item-edit',dragabble_id='#item{{item.id}}')">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </form> 
+                </div>                   
+            </div>
+            {% if items == "tasks" and week and not weekday %}
+            <div class = "mt-1 d-flex justify-content-between small">
+            {% else %}
+            <div class = "mt-1 small">
+            {% endif %}
+            {% if items == "tasks" and not weekday%}
+                <div class = "task-due-date-text">
+                    {% if item.due_date%}
+                    <i class="fa-solid fa-calendar"></i>     
+                    {{item.due_date|date:"D M d Y"}}
+                    
+                    {%elif item.prev_date%}
+                    <i class="fa-solid fa-calendar"></i>  
+                    {{item.prev_date|date:"D M d Y"}}
+                    {% endif %} 
+                </div>
+            {% endif %} 
+            {% if items == "tasks" and week %}
+            <div class = "task-repeat-text d-flex justify-content-end">
+                {% if item.interval_type and item.interval_value %}
+                    {% if item.interval_value == 1 %}
+                    Every {{item.interval_value}} {{item.interval_type|remove_last_char}}
+                    {% else %}
+                    Every {{item.interval_value}} {{item.interval_type}}
                     {% endif %}
-                </div>  
-                {%endif%}
-            {% if week and todolist.name == 'hexlog' and not board.hexable%} 
-            <script>
-                $(`#item${'{{item.id}}'}`).removeClass("draggable");
-                $(`#item${'{{item.id}} .handle'}`).attr("style","cursor:default");
-            </script>  
-            {% endif %}  
-        </li>
+                {% endif %}
+            </div>
+            {% endif %}
+            </div>
+        {% if week and todolist.name == 'hexlog' and not board.hexable%} 
+        <script>
+            $(`#item${'{{item.id}}'}`).removeClass("draggable");
+            $(`#item${'{{item.id}} .handle'}`).attr("style","cursor:default");
+        </script>  
+        {% endif %}
+    </li>
     {% endfor %}
-{% if week and board.hexable and todolist.name == 'hexlog' %}
-<script>initialize_sortable('{{resource_name}}','{{list.id}}',hexlog=true)</script>    
-{% elif week and weekday %}
-<script>initialize_sortable('{{resource_name}}','{{list.id}}',hexlog=false,weekday=true)</script>
-{% else %}
-<script>initialize_sortable('{{resource_name}}','{{list.id}}')</script>
-{% endif %}
+    {% if week and board.hexable and todolist.name == 'hexlog' %}
+    <script>initialize_sortable('{{resource_category}}','{{list.id}}',hexlog=true)</script>    
+    {% elif week and weekday %}
+    <script>initialize_sortable('{{resource_category}}','{{list.id}}',hexlog=false,weekday=true)</script>
+    {% else %}
+    <script>initialize_sortable('{{resource_category}}','{{list.id}}')</script>
+    {% endif %}
 </ul>
