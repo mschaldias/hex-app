@@ -26,11 +26,16 @@
 </head>
 
 <body>
-  
+    <!-- Side-Nav -->
+    <div class="side-navbar d-flex flex-column" id="sidebar">
+        {% block sidebar %}
+        {% endblock %}
+    </div>
+
     <!-- Main Wrapper -->
-    <div class="my-container">    
+    <div class="my-container">
         <!-- Top Nav -->
-        <div class="top-navbar bg-hex-topnav-dark border-bottom d-flex justify-content-between align-items-center px-2">
+        <div class="top-navbar bg-hex-topnav border-bottom d-flex justify-content-evenly align-items-center px-2">
             <a class="nav-link btn" id="" href="/"> <b>ToDoHex</b>
             </a>
             {% if user.is_authenticated %}
@@ -47,25 +52,27 @@
             <a class="nav-link btn" href="/register">
                 <i class="fa-solid fa-user-plus"></i> Register
             </a>
-            {% endif %}              
+            {% endif %}
 
             {% if user.is_authenticated %}
             <div class = "d-flex justify-content-end align-items-center">
                 <div class="nav-item dropdown">
                     <a class="nav-link btn dropdown-toggle" id="navbarDropdown" href="#" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">   
-                        <li class = "px-3"><a href=""></a>{{user}}</li>      
-                        <div class="dropdown-divider"></div>         
-                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
-                        <div class="dropdown-divider"></div>   
-                        <li><a class="dropdown-item text-danger" href="/account_settings">Delete Account</a></li>
-                    </ul>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="navbarDropdown">   
+                            <li class = "px-3"><a href=""></a>{{user}}</li>      
+                            <div class="dropdown-divider"></div>         
+                            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                            <div class="dropdown-divider"></div>   
+                            <li><a class="dropdown-item text-danger" href="/account_settings">Delete Account</a></li>
+                        </ul>
+                    </a>
                 </div>
             </div>
             {%endif%}
-            <!--End Top Nav -->      
-        </div>       
+
+        </div>
+        <!--End Top Nav -->
 
         <div class="container-fluid px-4">
             <div class="mt-4" id = "messages">
@@ -99,25 +106,12 @@
             {% block content %}
             {% endblock %}
 
-            <div class="modal" id="charFieldError" tabindex="-1">
-                <div class="modal-dialog modal-sm">
-                    <div class="modal-content bg-hex-sidenav">
-                        <div type="button" class="btn btn-danger active"><i class="fa-solid fa-circle-exclamation"></i>
-                        </div>
-                        <div class="modal-header border-0">
-                            <div class="modal-title text-red">Modal title</div>
-                        </div>
-                        <div class="modal-footer border-0">
-                            <button type="button" class="btn btn-secondary col-12"
-                                data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- custom js -->
         <script>
+       
+            document.querySelector("#menu-btn").addEventListener("click", () => {toggleSidebar()});
             setTimeZone();
         </script>
 </body>

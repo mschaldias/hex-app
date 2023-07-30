@@ -16,114 +16,146 @@
 <link href="{% static 'css/resource_styles.css' %}" rel="stylesheet" type="text/css" />
 
 {% endblock %}
+
+{% block sidebar %}
+    {% if not request.device.is_mobile %}
+    <div class = "overflow-auto h-100">
+    <nav class="top-navbar d-flex flex-column border-bottom">
+        <a class="btn btn-lg text-white" >Logs</a>
+    </nav>
+    <div class="" id="logs">
+        {% for todolist in logs %}
+        {% include 'main/card.html' with week=True style=card_styles|dict_key:todolist.name resource=todolist cols='col-12' spacing="mb-0" %}
+        {% endfor %}        
+    </div>       
+    </div>    
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 <div>
-    <div class = "row mt-4">   
-        {% if not week %}
-            <h1>{{title}}</h1>
-        {% else %}
-        <div>
-            <h1>{{board.start_date|date:"M Y"}}</h1>
-            {% include 'main/hex_streak.html'   %}
-        </div>
-        {% endif %}
-        <div class = "col-xl-3 col-md-6 mt-3">
-            {% if create_resources %}
-                <button class = "btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse-create" aria-expanded="false" aria-controls="collapse-create">
-                <i class="fa-regular fa-square-plus"></i> Create
-                </button>                
-            {%else%}
-                {% if week %}
-                <form action="/action/" method = "post">
-                    {% csrf_token %}
-                    <button id = "current_week" name = "hex" value = "hex" type = "submit" class = "btn btn-success mt-1">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Hex
-                    </button>  
-                    {% if not board.hexable %}
-                        <script>$('#current_week').attr('disabled','disabled')</script>
-                    {% endif %}
-                    <button id = "current_week" name = "current_week" value = "current_week" type = "submit" class = "btn btn-success mt-1">
-                    <i class="fa-solid fa-rotate"></i> This week
-                    </button>   
-                    <button id = "migrate" name = "migrate" value = "migrate" type = "submit" class = "btn btn-success mt-1">
-                        <i class="fa-solid fa-arrow-right"></i> Migrate
-                    </button>   
-                </form>
-                {% else %}
-                <a class = "btn btn-card btn-primary btn-sm" href="/boards/{{board.id}}" >
-                    <h5 id = "header-text" href = "/">Return to board: {{board}}</h5>
-                </a> 
-                {% endif %}                
-            {% endif %}
-            <p>
-            <div class="collapse" id="collapse-create">
-                <div class = "card bg-hex-sidenav">
-                    <div class = "card-body">
-                        <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource_category}}','{{parent.id}}',this.name.value,card=true);" method = "dialog">
-                            {% csrf_token %}
-                            <p>
-                            <label for="resource-name">{{resource_category|remove_last_char}} name:</label>
-                            <input name = "name" type="text" id="resource-name" value= "new {{resource_category|remove_last_char}}" class = "form-control bg-transparent text-white" maxlength=200>   
-                            </p>
-                            <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Close</button>
-                            <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Submit</button>
-                        </form>
-                    </div>
-                </div>
+        {% if week %}
+        <div class = "d-flex">
+            {% if not request.device.is_mobile %}
+            <div>
+                <button class="btn btn-hex m-1 mx-auto" id="menu-btn"><i class="fas fa-bars"></i> Logs</button>
             </div>
-            </p>
+            {% endif %}
+            <div class = "row mx-auto d-flex">
+                <h1>{{board.start_date|date:"M Y"}}</h1>
+            </div>           
+            <div class = "d-flex justify-content-end">
+                <b>Hex Streak: {{hex_streak}}</b>
+            </div>  
         </div>
-    </div>  
-    <div id = "board">
-        <div class="row d-flex justify-content-center" id="logs">
-            {% for todolist in logs %}
-            {% include 'main/card.html' with week=True style=card_styles|dict_key:todolist.name resource=todolist %}
-            {% endfor %}        
-        </div>    
+        <div class= "d-flex justify-content-center">
+            <form action="/action/" method = "post">
+                {% csrf_token %}
+                <button id = "current_week" name = "hex" value = "hex" type = "submit" class = "btn btn-hex mt-1">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Hex
+                </button>  
+                {% if not board.hexable %}
+                    <script>$('#current_week').attr('disabled','disabled')</script>
+                {% endif %}
+                <button id = "current_week" name = "current_week" value = "current_week" type = "submit" class = "btn btn-hex mt-1">
+                <i class="fa-solid fa-rotate"></i> This week
+                </button>   
+                <button id = "migrate" name = "migrate" value = "migrate" type = "submit" class = "btn btn-hex mt-1">
+                    <i class="fa-solid fa-arrow-right"></i> Migrate
+                </button>   
+            </form>
+        </div>
+        {% else %}
+            {% if create_resources %}
+            <div class = "">
+                <div class = "d-flex justify-content-center">
+                    <h1>{{title}}</h1>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <button class = "btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-create" aria-expanded="false" aria-controls="collapse-create">
+                        <i class="fa-regular fa-square-plus"></i> Create
+                    </button>
+                </div>
+                <div class = "d-flex justify-content-center">
+                        
+                    <div class="row collapse mt-2 col-xl-3 col-md-6 " id="collapse-create">
+                        <div class = "card bg-hex-sidenav">
+                            <div class = "card-body">
+                                <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource_category}}','{{parent.id}}',this.name.value,card=true);" method = "dialog">
+                                    {% csrf_token %}
+                                    <p>
+                                    <label for="resource-name">{{resource_category|remove_last_char}} name:</label>
+                                    <input name = "name" type="text" id="resource-name" value= "new {{resource_category|remove_last_char}}" class = "form-control bg-transparent text-white" maxlength=200>   
+                                    </p>
+                                    <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Close</button>
+                                    <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target= "#collapse-create">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            </div>        
+            {% else %}
+            <a class = "btn btn-card btn-primary btn-sm" href="/boards/{{board.id}}" >
+                <h5 id = "header-text" href = "/">Return to board: {{board}}</h5>
+            </a> 
+            {% endif %}
+                
+        {% endif %}
+
+    {% if request.device.is_mobile %}
+    <div class="row mt-3 d-flex justify-content-center" id="logs">
+        {% for todolist in logs %}
+        {% include 'main/card.html' with week=True style=card_styles|dict_key:todolist.name resource=todolist spacing="mb-3" %}
+        {% endfor %}        
+    </div> 
+    {% endif %}
+
+    <div id = "board">       
         <div class = "row mt-3 d-flex justify-content-center" id = "cards">
             {% for resource in resources %}
             {% if week %}
                 {% if resource.date == localdate %}
-                    {% include 'main/card.html' with weekday=True style="today"%}
+                    {% include 'main/card.html' with weekday=True style="today" %}
                 {% else %}
-                    {% include 'main/card.html' with weekday=True style="weekday"%}
+                    {% include 'main/card.html' with weekday=True style="weekday"  %}
                 {% endif %}
             {% else %}
-                {% include 'main/card.html' with style="weekday" %}
-            {% endif %}
-            {%endfor%}              
+                {% include 'main/card.html' with style="weekday"  %}
+            {% endif %}     
+            {%endfor%}    
         </div>
     </div>
-</div>
 
-{% if items == 'tasks' and not item.hex and not item.prev_hex %}
-<div class="modal fade" id="task-modal" tabindex="-1" aria-labelledby="task-modal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
-      <div id = "task-modal-content" class="modal-content bg-dark"></div>
+    {% if items == 'tasks' and not item.hex and not item.prev_hex %}
+    <div class="modal fade" id="task-modal" tabindex="-1" aria-labelledby="task-modal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
+        <div id = "task-modal-content" class="modal-content bg-dark"></div>
+        </div>
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-<script>
-    var task_modal = document.getElementById('task-modal')
-    if (task_modal) {
-        task_modal.addEventListener('show.bs.modal', function (event) {
-            // Button that triggered the modal
-            var button = event.relatedTarget
-            // Extract info from data-bs-* attributes
-            var item_id = button.getAttribute('data-bs-item-id')
-            // Update the modal's content.
-            url = `/task_modal/${item_id}`
-            replace_element(url,'task-modal-content',scripts=true)
-        })        
-    }
-    $('#task-modal').on('shown.bs.modal', function () {
-        $(this).find('textarea').each(function () {
+    <script>
+        var task_modal = document.getElementById('task-modal')
+        if (task_modal) {
+            task_modal.addEventListener('show.bs.modal', function (event) {
+                // Button that triggered the modal
+                var button = event.relatedTarget
+                // Extract info from data-bs-* attributes
+                var item_id = button.getAttribute('data-bs-item-id')
+                // Update the modal's content.
+                url = `/task_modal/${item_id}`
+                replace_element(url,['task-modal-content'],scripts=true)
+            })        
+        }
+        $('#task-modal').on('shown.bs.modal', function () {
+            $(this).find('textarea').each(function () {
+                set_height(this)           
+            });
+        })
+        $('textarea').each(function () {
             set_height(this)           
         });
-     })
-    $('textarea').each(function () {
-        set_height(this)           
-    });
- </script>
+    </script>
+</div>
 {% endblock %}

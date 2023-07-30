@@ -1,5 +1,13 @@
+{% if cols %}
+<div class="{{cols}}" id = "card{{resource.id}}">
+{%else%}
 <div class="col-xl-3 col-md-6" id = "card{{resource.id}}">
+{% endif %}
+    {% if spacing %}
+    <div class="card {{style}} {{spacing}}  border-0">   
+    {% else %}
     <div class="card {{style}} mb-3 border-0">
+    {% endif %}
         <div class="card-header d-flex justify-content-between align-items-center gap-2">
             {% if not week %}
             <a id = "header-link" class = "header-content btn btn-hex btn-card btn-sm"  href="/{{resource_category}}/{{resource.id}}" >

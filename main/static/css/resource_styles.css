@@ -1,21 +1,24 @@
 .list-group-item-hex, .bg-hex {
     background-color: #01306e !important;
+    color:white;
 }
-.list-group-item-hex.list-group-item-action:hover, .list-group-item-hex.list-group-item-action:focus {
-    background-color: var(--hex-topnav-dark) !important;
+.list-group-item-hex.list-group-item-action:hover, .list-group-item-hex.list-group-item-action:focus, .list-group-item-hex.list-group-item-action:active  {
+    background-color: var(--hex-topnav) !important;
     color:white;
 }
 
 .list-group-item-hex-primary, .bg-hex-primary {
-    background-color: #084eb8 !important
+    background-color: #084eb8 !important;
+    color:white;
 }
-.list-group-item-hex-primary.list-group-item-action:hover, .list-group-item-hex-primary.list-group-item-action:focus {
+.list-group-item-hex-primary.list-group-item-action:hover, .list-group-item-hex-primary.list-group-item-action:focus,.list-group-item-hex-primary.list-group-item-action:active  {
     background-color: #0551a3 !important;
     color:white;
 }
 
 .list-group-item-hex-dark {
-    background-color: #1c1f22
+    background-color: #1c1f22;
+    color:white;
 }
 .list-group-item-hex-dark.list-group-item-action:hover, .list-group-item-hex-dark.list-group-item-action:focus,.list-group-item-hex-dark.list-group-item-action:active {
     background-color: #131517;
@@ -23,16 +26,17 @@
 }
 
 .list-group-item-hex-danger, .bg-hex-danger {
-    background-color: #ab1f2c !important
+    background-color: #ab1f2c !important;
+    color:white;
 }
-.list-group-item-hex-danger.list-group-item-action:hover, .list-group-item-hex-danger.list-group-item-action:focus {
+.list-group-item-hex-danger.list-group-item-action:hover, .list-group-item-hex-danger.list-group-item-action:focus, .list-group-item-hex-danger.list-group-item-action:active  {
     background-color: #8f1c27 !important;
     color:white;
 }
 
 .chosen {
     color: #fff;
-    background-color: var(--hex-topnav-dark);
+    background-color: var(--hex-topnav);
 }
 .sortable-ghost {
     opacity: 0;
@@ -44,8 +48,8 @@
 }
 .li-text{
     white-space:normal !important;
-    word-wrap: break-word; 
-    max-width:85%;
+    word-wrap: break-word;
+    overflow-wrap:anywhere;
     color:white !important;
 }
 .streak-display {
@@ -65,24 +69,25 @@
 }
 
 .card.today {
-    border: solid 3px!important;
-    border-color: var(--hex-today-pink)!important;
-}      
+    background-color: #090e38;
+}
       
 .weekday{
     background-color: var(--hex-sidenav)
 }
 
-.btn.today{
-    border: 0px ;
-    /* background-color: var(--hex-topnav-dark); */
-    color:white;
-    cursor:default;
+.btn-hex {
+    background-color: transparent ;
+    background-color: var(--hex-topnav) ;
 }
 
-.btn.weekday{
+.btn-hex:hover {
+    background-color:var(--hex-topnav-dark) !important;
+}
+
+.btn.today{
     border: 0px ;
-    background-color:transparent;
+    /* background-color: var(--hex-topnav); */
     color:white;
     cursor:default;
 }
@@ -97,7 +102,7 @@
 .datepicker table tr td .year:hover,
 .datepicker table tr td .decade:hover,
 .datepicker table tr td .century:hover {
-    background-color:var(--hex-topnav-dark) !important;
+    background-color:var(--hex-topnav) !important;
 }
 .datepicker table tr td.today, 
 .datepicker table tr td.today.disabled, 
@@ -119,12 +124,12 @@
     border:2px solid;
     border-color:white!important;
     border-radius: 50%!important;
-    width: 20px;
-    height: 20px;
-    margin: 0;
 }
 
 /* .form-check-input:checked{
     background-color: #198754!important;
 } */
 
+.hidden {
+    display: none !important;
+}

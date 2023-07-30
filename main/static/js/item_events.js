@@ -55,9 +55,6 @@ function set_task_repeat(item_id,clear=false){
             },
             error: (data,msg,xhr) =>{
                 console.log(data.responseText);
-                response = JSON.parse(data.responseText)["interval_value"]
-                $("#charFieldError .modal-title").text(response);
-                $('#charFieldError').modal("show")
             }
     });
 }
@@ -100,9 +97,6 @@ function edit(resource,item_id,value){
             },
             error: (data,msg,xhr) =>{
                 console.log(data.responseText);
-                response = JSON.parse(data.responseText)[key][0]
-                $("#charFieldError .modal-title").text(response);
-                $('#charFieldError').modal("show")
             }
     });
 }
@@ -128,6 +122,7 @@ function set_task_date(item_id,value){
                     html = ''
                 }                              
                 $(`#item${item_id} .task-due-date-text`).html(html)
+                replace_element(document.URL,['board','logs'],scripts=true)
             },
             error: (error) =>{console.log(error);}
     });
@@ -148,10 +143,10 @@ function checkbox_click(item_id,item_hex,item_prev_hex){
             success: (data,msg,xhr) => {
                 console.log(msg,xhr.status)
                 if (item_hex == "True"|| item_prev_hex == "True"){
-                    replace_element('/hex_streak/','streak-display')
+                    replace_element('/hex_streak/',['streak-display'])
                 }
                 if (data.interval_type && data.interval_value){
-                    replace_element(document.URL,'board',scripts=true)
+                    replace_element(document.URL,['board','logs'],scripts=true)
                 }                
             },
             error: (error) =>{console.log(error);}
@@ -178,9 +173,6 @@ function delete_button(resource,item_id,card=false){
             },
             error: (error) =>{
                 console.log(error);
-                response = JSON.parse(error.responseText)
-                $("#charFieldError .modal-title").text(response);
-                $('#charFieldError').modal("show")
             }
     });
 };
@@ -197,18 +189,20 @@ function run_scripts(element) {
         oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
 });}
 
-function replace_element(url,element_id,scripts=false){
+function replace_element(url,element_ids,scripts=false){
     $.ajax({type: 'GET',
             url: url,
             headers: {"X-CSRFToken": getCookie("csrftoken")},
             success: (data) => {
                         parser = new DOMParser();
                         doc = parser.parseFromString(data, "text/html");
-                        element = doc.getElementById(element_id)
-                        $(`#${element_id}`).replaceWith(element)
+                        for (id of element_ids) {
+                            element = doc.getElementById(id)
+                            $(`#${id}`).replaceWith(element)
                         if (scripts){
                             run_scripts(element)   
                         }                                                                                                           
+                        }                                                                                                    
                     },
             error: (error) => {console.log(error)}
     });
@@ -236,13 +230,8 @@ function append_new_item(parent_model,parent_id,item_id,card){
                         }
                         else{
                             element = doc.getElementById(`item${item_id}`)
-                            modal = doc.getElementById(`item_modal${item_id}`)
                             $(`#${parent_id}`).append(element);
                             run_scripts(element)
-                            if (modal){
-                                $(`#${parent_id}`).append(modal);
-                                run_scripts(modal)
-                            }                     
                         };                       
                     },
             error: (error) =>{console.log(error);}
@@ -289,9 +278,6 @@ function create_button(items,parent_id,value="",card=false){
                         append_new_item(resource_category,parent_id,data.id,card);
                     },
             error: (data,msg,xhr) =>{
-                console.log(JSON.parse(data.responseText)[key][0])
-                $("#charFieldError .modal-title").text(JSON.parse(data.responseText)[key][0]);
-                $('#charFieldError').modal("show")
                 console.log(error);
             }
     });       
@@ -319,9 +305,8 @@ function sortable_event(resource_category,list_id,replace=false){
             success: (data,msg,xhr) => {
                         console.log(msg,xhr.status)
                         if (replace){
-                            replace_element(`/list/${resource_category}/${data.id}/`,data.id,scripts=true)
+                            replace_element(`/list/${resource_category}/${data.id}/`,[data.id],scripts=true)
                         }
-                       
                     },
             error: (error) =>{
                 console.log(error);
