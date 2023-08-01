@@ -199,9 +199,9 @@ function replace_element(url,element_ids,scripts=false){
                         for (id of element_ids) {
                             element = doc.getElementById(id)
                             $(`#${id}`).replaceWith(element)
-                        if (scripts){
-                            run_scripts(element)   
-                        }                                                                                                           
+                            if (scripts){
+                                run_scripts(element)   
+                            }  
                         }                                                                                                    
                     },
             error: (error) => {console.log(error)}
@@ -231,7 +231,7 @@ function append_new_item(parent_model,parent_id,item_id,card){
                         else{
                             element = doc.getElementById(`item${item_id}`)
                             $(`#${parent_id}`).append(element);
-                            run_scripts(element)
+                            run_scripts(element)                  
                         };                       
                     },
             error: (error) =>{console.log(error);}
@@ -332,76 +332,28 @@ function set_datepicker(element_id,date){
 function initialize_sortable(resource_category,list_id, hexlog=false, weekday=false){
     list = document.getElementById(list_id);
     if (list) {
-        if (weekday) {
-            Sortable.create(list, {
-                delay: 100,
-                delayOnTouchOnly: true, 
-                animation: 100,
-                group: {
-                    name:'weekday',
-                    put:true      
-                },
-                draggable: '.draggable',
-                handle: '.handle',
-                sort: true,
-                filter: '.sortable-disabled',
-                chosenClass: 'chosen',
-                onAdd: function () {
-                    sortable_event(resource_category,list_id,replace=true,hexlog=false,weekday=true);
-                },
-                onUpdate: function () {
-                    sortable_event(resource_category,list_id)
-                },
-            });            
-        }    
-        else if (hexlog){
-            Sortable.create(list, {
-                delay: 100,
-                delayOnTouchOnly: true, 
-                animation: 100,
-                group: {
-                    name:'hexlog',
-                    put: function(to,from){
-                        return Sortable.dragged.classList.contains('list-group-item-hex-dark')
-                    }
-                },
-                draggable: '.draggable',
-                handle: '.handle',
-                sort: true,
-                filter: '.sortable-disabled',
-                chosenClass: 'chosen',
-                onAdd: function () {
-                    sortable_event(resource_category,list_id,replace=true,hexlog=true);
-                },
-                onUpdate: function () {
-                    sortable_event(resource_category,list_id)
-                },
-            });
-        }    
-        else {
-            Sortable.create(list, {
-                delay: 100, 
-	            delayOnTouchOnly: true, 
-                animation: 100,
-                group: {
-                    name:'log',
-                    put: function(to,from){
-                        return !Sortable.dragged.classList.contains('list-group-item-hex-dark')
-                    }
-                },
-                draggable: '.draggable',
-                handle: '.handle',
-                sort: true,
-                filter: '.sortable-disabled',
-                chosenClass: 'chosen',
-                onAdd: function () {
-                    sortable_event(resource_category,list_id,replace=true);
-                },
-                onUpdate: function () {
-                    sortable_event(resource_category,list_id)
-                },
-            });
-        }
+        Sortable.create(list, {
+            delay: 100,
+            delayOnTouchOnly: true, 
+            animation: 100,
+            group: {
+                name:'weekday',
+                pull: function(to,from){
+                    return !Sortable.dragged.classList.contains('list-group-item-hex-dark')
+                }      
+            },
+            draggable: '.draggable',
+            handle: '.handle',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'chosen',
+            onAdd: function () {
+                sortable_event(resource_category,list_id,replace=true,hexlog=false,weekday=true);
+            },
+            onUpdate: function () {
+                sortable_event(resource_category,list_id)
+            },
+        });            
     }
 }
 

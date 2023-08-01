@@ -78,7 +78,8 @@ def action(request):
             dt = (datetime.combine(timezone.localtime()-timedelta(days=1), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())#datetime is 23:59 day before current day localtime
             board.migrate_week(dt=dt,tz=current_timezone) 
         elif request.POST.get("hex"):
-            board.hex()
+            today_date = timezone.localtime().date()
+            board.hex(today_date)
                  
     return redirect("/week/")
 
@@ -93,7 +94,6 @@ def week_utils(board,now):
     #board always has these lists which can't be edited or deleted
     backlog = board.todolist_set.get(name="backlog")
     futurelog = board.todolist_set.get(name="futurelog")
-    hexlog = board.todolist_set.get(name="hexlog")
 
     # if there are any incomplete hexed tasks, hex streak goes to 0
     # hexed tasks are unhexed and moved to backlog
@@ -192,7 +192,7 @@ def week(request):
 
     localdate = timezone.localdate()
 
-    logs = board.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
+    logs = board.todolist_set.filter(name__in=['backlog','futurelog'])
    
     week_todolists = board.todolist_set.exclude(date=None)
     return render(request, "main/resource_view.html",{  "resources": week_todolists,
@@ -206,7 +206,7 @@ def week(request):
                                                         "title":'week',
                                                         "create_resources":False,
                                                         "hex_streak":board.owner.profile.hex_streak,
-                                                        "hex_streak_range":range(board.owner.profile.hex_streak),
+                                                        # "hex_streak_range":range(board.owner.profile.hex_streak),
                                                         "localdate":localdate,
                                                         })
 

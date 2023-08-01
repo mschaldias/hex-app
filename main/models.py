@@ -57,7 +57,6 @@ class Board(models.Model):
         week_todolists = self.todolist_set.exclude(date=None)
         futurelog = self.todolist_set.get(name="futurelog")
         backlog = self.todolist_set.get(name="backlog")
-        hexlog = self.todolist_set.get(name="hexlog")
         
         #board is in a future week and and we are migrating back to current week
         if (not forward) and self.start_date > now:
@@ -80,7 +79,7 @@ class Board(models.Model):
                 
         #board is in current week and and we are backlogging incomplete tasks up to today and archiving complete tasks
         elif not forward:
-            logs = self.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
+            logs = self.todolist_set.filter(name__in=['backlog','futurelog'])
             self.archive(logs)
             self.archive(week_todolists,datetime=dt)
             self.hexable = True
@@ -91,7 +90,6 @@ class Board(models.Model):
             #all complete tasks in board are moved to archive, 
             #tasks with due date up to datetime are moved to backlog
             self.archive(week_todolists,datetime=dt)
-            backlog.task_set.filter(hex=True).update(todolist=hexlog)
             week_todolists.delete()
             if next_week: self.initialize_week(next_week=next_week,given_datetime=self.start_date) 
             else: self.initialize_week(given_datetime=now) 
@@ -124,16 +122,17 @@ class Board(models.Model):
                         task.todolist = backlog
                 task.save()
 
-    def hex(self):
+    def hex(self,date):
         if self.category != 'week': raise IncorrectBoardCategoryError
         backlog = self.todolist_set.get(name="backlog")
         hexlog = self.todolist_set.get(name="hexlog")
         if self.hexable:
             tasks = list(backlog.task_set.filter(complete=False))
             if tasks:
+                todolist = self.todolist_set.get(date=date)
                 random_task = choice(tasks)
-                random_task.todolist = hexlog
-                random_task.due_date = self.due_date
+                random_task.todolist = todolist
+                random_task.due_date = (datetime.combine(date, datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())
                 random_task.hex = True
                 random_task.save()
                 return True
