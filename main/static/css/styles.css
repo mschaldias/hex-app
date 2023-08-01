@@ -3,9 +3,9 @@
 :root {
     --hex-body: #19376D;
     --hex-sidenav: #0B2447;
-    --hex-topnav: #576CBC;
+    --hex-topnav: #3c59ce;
     --hex-text: #A5D7E8;
-    --hex-topnav-dark: #3c59ce;
+    --hex-topnav-dark: #2f4ab4;
     --hex-today-pink: rgb(255, 0, 191);
 }
 
@@ -18,10 +18,10 @@ body {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   }
 .side-navbar {
-  width: 140px;
+  width: 20%;
   height: 100%;
   position: fixed;
-  margin-left: -300px;
+  margin-left: -20%;
   background-color:var(--hex-sidenav);
   transition: 0.3s;
   display: flex;
@@ -57,17 +57,17 @@ body {
 
 /* for main section */
 .active-cont {
-  margin-left: 140px;
+  margin-left: 20%;
   
 }
 
-#menu-btn {
+/* #menu-btn {
   background-color: #100901;
   color: #fff;
   margin-left: -35px;
-}
+} */
 
-  .bg-hex-body {
+.bg-hex-body {
   --bs-bg-opacity: 1;
   background-color: var(--hex-body) !important;
 }
@@ -80,8 +80,8 @@ body {
   background-color: var(--hex-topnav) !important;
 }
 
-.bg-hex-topnav-dark {
-  background-color: var(--hex-topnav-dark) !important;
+.bg-hex-topnav {
+  background-color: var(--hex-topnav) !important;
 }
   
 .bg-hex-text {
@@ -97,7 +97,7 @@ body {
 .btn-hex:active,
 .btn-hex:focus,
 .btn-hex:hover {
-  background-color:var(--hex-topnav-dark);
+  background-color:var(--hex-topnav);
   color: white
 }
 
