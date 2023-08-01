@@ -13,6 +13,7 @@ User = get_user_model()
 class Profile(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE,primary_key=True)
     hex_streak = models.IntegerField(default=0,validators=[MinValueValidator(0)])
+    archive_limit = models.IntegerField(default=50)
 
     def __str__(self):
         return f"owner:{self.owner}, streak: {self.hex_streak}"
@@ -116,6 +117,8 @@ class Board(models.Model):
         for todolist in todolists:
             for task in todolist.task_set.all():
                 if task.complete:
+                    if archive.task_set.count() >= self.owner.profile.archive_limit :
+                        archive.task_set.all().delete()
                     task.todolist = archive
                 elif datetime:
                     if task.due_date and task.due_date.astimezone(tz=timezone.get_current_timezone()) <= datetime.astimezone(tz=timezone.get_current_timezone()):
@@ -125,7 +128,6 @@ class Board(models.Model):
     def hex(self,date):
         if self.category != 'week': raise IncorrectBoardCategoryError
         backlog = self.todolist_set.get(name="backlog")
-        hexlog = self.todolist_set.get(name="hexlog")
         if self.hexable:
             tasks = list(backlog.task_set.filter(complete=False))
             if tasks:
