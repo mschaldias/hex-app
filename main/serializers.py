@@ -45,11 +45,10 @@ class TaskSerializer(serializers.ModelSerializer):
                         backlog = board.todolist_set.get(name='backlog')
                         instance.todolist = backlog
 
-                #if futurelog/backlog task due_date is between now and board.due_date then assign to week day
-                if todolist.name == 'backlog' or todolist.name == 'futurelog':
-                    if current_date <= due_date.date() <= board.due_date.astimezone(timezone.get_current_timezone()).date():
-                        week_day_todolist = board.todolist_set.get(date=due_date.astimezone(timezone.get_current_timezone()).date())
-                        instance.todolist = week_day_todolist
+                #if task due_date is between now and board.due_date then assign to week day
+                if current_date <= due_date.date() <= board.due_date.astimezone(timezone.get_current_timezone()).date():
+                    week_day_todolist = board.todolist_set.get(date=due_date.astimezone(timezone.get_current_timezone()).date())
+                    instance.todolist = week_day_todolist
    
         instance.save()    
         return instance
