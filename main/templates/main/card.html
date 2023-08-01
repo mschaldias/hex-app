@@ -49,7 +49,7 @@
         <div class="card-body">
             {% include 'main/list.html' with list=resource%}
             {% if week and resource.name != 'hexlog' or not week%}
-            <form id="create-form" action="#" method="dialog" onsubmit="create_button('{{items}}','{{resource.id}}',value=this.item_input.value)">
+            <form id="create-form" action="#" method="dialog" onsubmit="create_button('{{items}}','{{resource.id}}',value=this.item_input.value);this.item_input.value=''">
                 <div class = "d-flex gap-1">
                     {% if items == 'tasks' %}
                     <input name="item_input" type="text" class = "form-control bg-transparent text-white" maxlength=300>

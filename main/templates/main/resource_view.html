@@ -44,7 +44,7 @@
             <div class = "row mx-auto d-flex">
                 <h1>{{board.start_date|date:"M Y"}}</h1>
             </div>           
-            <div class = "d-flex justify-content-end">
+            <div id= "streak-display" class = "d-flex justify-content-end">
                 <b>Hex Streak: {{hex_streak}}</b>
             </div>  
         </div>
@@ -81,7 +81,7 @@
                     <div class="row collapse mt-2 col-xl-3 col-md-6 " id="collapse-create">
                         <div class = "card bg-hex-sidenav">
                             <div class = "card-body">
-                                <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource_category}}','{{parent.id}}',this.name.value,card=true);" method = "dialog">
+                                <form id = "create-resource-form" action="#" onsubmit="create_button('{{resource_category}}','{{parent.id}}',this.name.value,card=true);this.name.value='new {{resource_category|remove_last_char}}'" method = "dialog">
                                     {% csrf_token %}
                                     <p>
                                     <label for="resource-name">{{resource_category|remove_last_char}} name:</label>

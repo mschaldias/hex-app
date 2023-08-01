@@ -24,7 +24,7 @@
             <div class="input-group mx-auto">
                 <label class="input-group-text bg-transparent text-white">Every</label>
                 <input onchange="set_task_repeat('{{item.id}}')" value="{{item.interval_value}}" type="number" min="1" class = "form-control bg-transparent text-white" id="interval_value">
-                <select onchange="set_task_repeat('{{item.id}}')" class="form-select bg-transparent text-white" id="interval_type">
+                <select onchange="set_task_repeat('{{item.id}}')" class="form-select bg-dark text-white" id="interval_type">
                     {% for option in interval_type_options %}
                         {% if item.interval_type == option %}
                         <option selected value="{{option}}">{{option}}</option> 
