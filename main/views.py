@@ -15,6 +15,8 @@ from datetime import datetime, timedelta
 from django.db.models import Q
 
 MAX_ITEMS = 10000
+CARD_STYLES = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark','weekday':'bg-hex-sidenav'}
+ITEM_STYLES = {'backlog':'list-group-item-hex-danger','futurelog':'list-group-item-hex-primary','hexlog':'list-group-item-hex-dark','weekday':'list-group-item-hex'}
 
 @require_GET
 def home(request):
@@ -28,11 +30,13 @@ def todolists(request,id):
     if not todolists: raise Http404
     
     return render(request,"main/resource_view.html",{"resources": todolists,
-                                                     "resource_name":"todolists",
+                                                     "resource_category":"todolists",
                                                      "board":board,
                                                      "items":"tasks",
                                                      "create_resources":False,
-                                                     "weekday":False
+                                                     "weekday":False,
+                                                     "item_styles":ITEM_STYLES,
+                                                     "card_styles":CARD_STYLES,
                                                      })  
 
 @require_GET
@@ -46,17 +50,21 @@ def boards(request,id=None):
         return render(request, "main/resource_view.html",{"resources": todolists,
                                                           "parent": board,
                                                           "board": board,
-                                                          "resource_name":"todolists",
+                                                          "resource_category":"todolists",
                                                           "items":"tasks",
                                                           "title":board.name,
                                                           "create_resources":True,
+                                                          "item_styles":ITEM_STYLES,
+                                                          "card_styles":CARD_STYLES,
                                                           })  
 
     return render(request, "main/resource_view.html",{"resources":boards,
-                                                      "resource_name":"boards",
+                                                      "resource_category":"boards",
                                                       "items":"todolists",
                                                       "title":"Boards",
                                                       "create_resources":True,
+                                                      'item_styles':ITEM_STYLES,
+                                                      'card_styles':CARD_STYLES,
                                                       })           
 
 @login_required(login_url='/login/')
@@ -70,7 +78,8 @@ def action(request):
             dt = (datetime.combine(timezone.localtime()-timedelta(days=1), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())#datetime is 23:59 day before current day localtime
             board.migrate_week(dt=dt,tz=current_timezone) 
         elif request.POST.get("hex"):
-            board.hex()
+            today_date = timezone.localtime().date()
+            board.hex(today_date)
                  
     return redirect("/week/")
 
@@ -85,7 +94,6 @@ def week_utils(board,now):
     #board always has these lists which can't be edited or deleted
     backlog = board.todolist_set.get(name="backlog")
     futurelog = board.todolist_set.get(name="futurelog")
-    hexlog = board.todolist_set.get(name="hexlog")
 
     # if there are any incomplete hexed tasks, hex streak goes to 0
     # hexed tasks are unhexed and moved to backlog
@@ -94,6 +102,24 @@ def week_utils(board,now):
         overdue_hexed.update(hex=False,todolist=backlog)
         board.owner.profile.hex_streak = 0
         board.owner.profile.save()
+
+login_required(login_url='/login/')
+@require_GET
+def task_modal_template(request,id=None):
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':                                
+        task = Task.objects.filter(id=id,todolist__board__owner=request.user).first()
+        if not task: raise Http404
+        week = False
+        if task.todolist.board.category == 'week': 
+            week = True 
+
+        return render(request,"main/task_modal.html", {
+                                                 "item":task,
+                                                 "items":'tasks',
+                                                 "interval_type_options":['days','weeks','months','years'],
+                                                 "week":week,
+                                                })
+    raise Http404
 
 login_required(login_url='/login/')
 @require_GET
@@ -109,49 +135,49 @@ def hex_streak(request):
 
 login_required(login_url='/login/')
 @require_GET
-def card(request,resource_name,id=None):
+def card(request,resource_category,id=None):
     if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':                                
         resource = None
-        if resource_name == "todolists":
+        if resource_category == "todolists":
             items = "tasks"
             resource = ToDoList.objects.filter(id=id,board__owner=request.user).first()
-        elif resource_name == "boards":
+        elif resource_category == "boards":
             items = "todolists"
             resource = Board.objects.filter(id=id,owner=request.user).first()
         if not resource:  raise Http404
 
         return render(request,"main/card.html", {
                                                  "resource":resource,
-                                                 "resource_name":resource_name,
+                                                 "resource_category":resource_category,
                                                  "items":items,
+                                                 "style":'weekday',
                                                 })
     raise Http404
 
 @login_required(login_url='/login/')
 @require_GET
-def list(request,resource_name,id=None):
+def list(request,resource_category,id=None):
     if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':                                
         items = li = board = None
         context = {}
-        if resource_name == "todolists":
+        if resource_category == "todolists":
             items = "tasks"
             li = ToDoList.objects.filter(id=id,board__owner=request.user).first()
             if li: 
                 board = li.board
                 if board.category == 'week':
                     context['week'] = True
-                    context['interval_type_options']=['days','weeks','months','years']
                     if li.date: context['weekday'] = True
-        elif resource_name == "boards":
+        elif resource_category == "boards":
             items = "todolists"
             board = Board.objects.filter(id=id,owner=request.user).first()
             if board: li = board
         
         if not (li and board):    raise Http404
 
-        params = {"resource_name":resource_name,"board":board,"list":li,"items":items}
-        context['card_styles'] = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark'}
-        context['item_styles'] = {'backlog':'list-group-item-hex-danger','futurelog':'list-group-item-hex-primary'}   
+        params = {"resource_category":resource_category,"board":board,"list":li,"items":items}
+        context['card_styles'] = CARD_STYLES
+        context['item_styles'] = ITEM_STYLES
         context.update(params)
 
         return render(request,"main/list.html", context)
@@ -159,32 +185,29 @@ def list(request,resource_name,id=None):
 
 @login_required(login_url='/login/')
 def week(request):
-
+    
     #this board is created for each new user using a signal
     board = request.user.board_set.get(category="week")
     week_utils(board,timezone.now())
 
     localdate = timezone.localdate()
 
-    logs = board.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
-    card_styles = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark'}
-    item_styles = {'backlog':'list-group-item-hex-danger','futurelog':'list-group-item-hex-primary'}
-
+    logs = board.todolist_set.filter(name__in=['backlog','futurelog'])
+   
     week_todolists = board.todolist_set.exclude(date=None)
     return render(request, "main/resource_view.html",{  "resources": week_todolists,
-                                                        "resource_name":"todolists",
+                                                        "resource_category":"todolists",
                                                         "logs":logs,
                                                         "week":True,
                                                         "board": board,
                                                         "items":"tasks",
-                                                        "card_styles":card_styles,
-                                                        "item_styles":item_styles,
+                                                        "card_styles":CARD_STYLES,
+                                                        "item_styles":ITEM_STYLES,
                                                         "title":'week',
                                                         "create_resources":False,
                                                         "hex_streak":board.owner.profile.hex_streak,
-                                                        "hex_streak_range":range(board.owner.profile.hex_streak),
+                                                        # "hex_streak_range":range(board.owner.profile.hex_streak),
                                                         "localdate":localdate,
-                                                        "interval_type_options":['days','weeks','months','years'],
                                                         })
 
 #API Views:

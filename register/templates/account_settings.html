@@ -6,16 +6,15 @@
 <div class = "row justify-content-center">
     <div class = "col-xl-8 col-md-10 card bg-hex-sidenav px-0 border-0">
         <div class = "card-header bg-hex-topnav-dark">
-            <div class="h2">Create a ToDoHex account</div>
+            <div class="h2">Account Settings</div>
         </div>
-        <form method="POST" class = "custom-form form-group mt-2">
+        <div class = "h4 mt-2 mx-4">Delete account</div>
+        <form method="POST" class = "custom-form form-group">
             {% csrf_token %}
-            {% for field in form %}
-            <div class='custom-form form-control'>
-                {{field|as_crispy_field}}
+            <div class = "mx-4">
+                Are you sure you want to delete your account?
+            <button type = "submit" class = "btn btn-danger m-2">Delete</button>
             </div>
-            {% endfor %}
-            <button type = "submit" class = "btn btn-primary m-2">Register</button>
         </form>   
     </div>
 </div>

@@ -27,73 +27,51 @@
 
 <body>
     <!-- Side-Nav -->
-    <div class="side-navbar active-nav d-flex justify-content-between flex-column" id="sidebar">
-        <ul class="nav flex-column text-white w-100">
-            <nav class="top-navbar bg-hex-topnav-dark d-flex flex-column border-bottom">
-                <a class="btn btn-lg text-white" id="" href="/">ToDoHex</a>
-            </nav>
-
-            <div class="mt-4">
-                {% spaceless %}
-                {% if user.is_authenticated %}
-
-                <a class="nav-link p-3" href="/">
-                    <i class="fa-solid fa-house"></i>
-                    Home
-                </a>
-
-                <a class="nav-link p-3" href="/boards">
-                    <i class="fa-solid fa-list"></i>
-                    Boards
-                </a>
-                <a class="nav-link p-3" href="/week">
-                    <i class="fa-solid fa-calendar-week"></i>
-                    Week
-                </a>
-                {% else %}
-                <a class="nav-link p-3" href="/">
-                    <i class="fa-solid fa-house"></i>
-                    Home
-                </a>
-
-                <a class="nav-link p-3" href="/login">
-                    <i class="fa-solid fa-right-to-bracket"></i>
-                    Login
-                </a>
-                <a class="nav-link p-3" href="/register">
-                    <i class="fa-solid fa-user-plus"></i>
-                    Register
-                </a>
-                {%endif%}
-                {% endspaceless %}
-            </div>
-        </ul>
-        {% if user.is_authenticated %}
-        <div class="side-footer p-3">
-            <div class="small">Logged in as:</div>
-            {{user.username}}
-        </div>
-        {%endif%}
+    <div class="side-navbar d-flex flex-column" id="sidebar">
+        {% block sidebar %}
+        {% endblock %}
     </div>
 
     <!-- Main Wrapper -->
-    <div class="my-container active-cont">
+    <div class="my-container">
         <!-- Top Nav -->
-        <nav class="navbar top-navbar bg-hex-topnav px-5 border-bottom">
-            <a class="btn border-0 bg-hex-sidenav" id="menu-btn"><i class="fas fa-bars"></i></a>
+        <div class="top-navbar bg-hex-topnav border-bottom d-flex justify-content-evenly align-items-center px-2">
+            <a class="nav-link btn" id="" href="/"> <b>ToDoHex</b>
+            </a>
+            {% if user.is_authenticated %}
+            <a class="nav-link btn " href="/boards">
+                <i class="fa-solid fa-list"></i> Boards
+            </a>
+            <a class="nav-link btn " href="/week">
+                <i class="fa-solid fa-calendar-week"></i> Week
+            </a>                
+            {% else %}
+            <a class="nav-link btn" href="/login">
+                <i class="fa-solid fa-right-to-bracket"></i> Login
+            </a>
+            <a class="nav-link btn" href="/register">
+                <i class="fa-solid fa-user-plus"></i> Register
+            </a>
+            {% endif %}
 
             {% if user.is_authenticated %}
-            <div>
+            <div class = "d-flex justify-content-end align-items-center">
                 <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
+                    <a class="nav-link btn dropdown-toggle" id="navbarDropdown" href="#" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
-                    </ul>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="navbarDropdown">   
+                            <li class = "px-3"><a href=""></a>{{user}}</li>      
+                            <div class="dropdown-divider"></div>         
+                            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                            <div class="dropdown-divider"></div>   
+                            <li><a class="dropdown-item text-danger" href="/account_settings">Delete Account</a></li>
+                        </ul>
+                    </a>
                 </div>
             </div>
             {%endif%}
-        </nav>
+
+        </div>
         <!--End Top Nav -->
 
         <div class="container-fluid px-4">
@@ -128,26 +106,12 @@
             {% block content %}
             {% endblock %}
 
-            <div class="modal" id="charFieldError" tabindex="-1">
-                <div class="modal-dialog modal-sm">
-                    <div class="modal-content bg-hex-sidenav">
-                        <div type="button" class="btn btn-danger active"><i class="fa-solid fa-circle-exclamation"></i>
-                        </div>
-                        <div class="modal-header border-0">
-                            <div class="modal-title text-red">Modal title</div>
-                        </div>
-                        <div class="modal-footer border-0">
-                            <button type="button" class="btn btn-secondary col-12"
-                                data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- custom js -->
         <script>
-            toggleSidebar();
+       
+            document.querySelector("#menu-btn").addEventListener("click", () => {toggleSidebar()});
             setTimeZone();
         </script>
 </body>

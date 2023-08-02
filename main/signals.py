@@ -11,7 +11,6 @@ def create_board(sender, instance, created, **kwargs):
         board.todolist_set.create(name="archive")
         board.todolist_set.create(name="backlog",position=0)
         board.todolist_set.create(name="futurelog",position=1)
-        board.todolist_set.create(name="hexlog",position=2)
         board.hexable = True
         board.initialize_week()
 

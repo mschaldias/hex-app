@@ -1,5 +1,5 @@
 {% extends 'main/base.html' %}
-
+{% load static %}
 {% block title %}
 Home
 {% endblock %}
@@ -11,9 +11,11 @@ Home
             margin-bottom: 18px;
             font-size: large;
         }
-
         .text-shift{
             padding-left: 1em;
+        }
+        body {
+            background-color: var(--hex-sidenav);
         }
 
 
@@ -22,36 +24,25 @@ Home
 
 {% block content %}
 
-    <!-- <h1 class="mt-4">Home</h1> -->
 
 <div class = "row justify-content-center">
+    <div class = "mb-4">
+        <div class = "col-xl-8 col-md-10  bg-hex-sidenav px-0 border-0">
 
-    <div class = "col-8 card bg-hex-sidenav px-0 border-0">
-        <div class = "card-header bg-hex-topnav-dark">
-            <h1 class="text-center">ToDoHex: Your Ultimate Task Management Solution!</h1>
+
+        </div>
+        <h1 class="text-center">ToDoHex: A Simple Task Management Solution</h1>
+        <div class =" h4 text-center">
+            We've taken inspiration from the bullet journal system to bring you an intuitive and efficient way to track and migrate your tasks seamlessly.
 
         </div>
 
-        <div class = "card-body mt-2">
-            <p>Simplify your life and stay on top of your tasks with ToDoHex, the ultimate web application for managing your to-do lists. </p>
-            <p>We've taken inspiration from the bullet journal system to bring you an intuitive and efficient way to track and migrate your tasks seamlessly.</p>
+    </div>
 
-            <h2>Key Features:</h2>
-          
-            <ul>
-                <p><b>Organize with Boards:</b> Create boards to categorize your to-do lists effortlessly. Drag and drop your lists between boards to reorder and customize them to your liking.
-                </p>
-              
-              <p><b>Manage Todolists:</b> Your tasks find a home in todolists. Easily drag and drop tasks between different lists for smooth organization.</p>
-              <p><b>Edit Tasks with Ease:</b> Simply click on the text field of a task, make your changes, and confirm them with a click of the green checkmark button. Want to set a due date or delete a task? Just use the convenient dropdown menu next to each task.</p>
-            </ul>
-          
-            <h2>Welcome to the Week View:</h2>
 
-                <i>
-                    <p class="text-shift">The Week View takes task management to the next level, drawing inspiration from the bullet journal system. Here's what you can expect:</p>
-                </i>
-          
+    <div class = "col-xl-8 col-md-10 bg-hex-sidenav px-0 border-0">
+        <div class = "card-body">
+            <!-- <h4 class ="text-center">Week View:</h4> -->
                 <ul>
                     <li>
                         <p><b>Daily Todolists: </b>Each day of the week has its own dedicated todolist, ensuring you stay focused and organized.</p>
@@ -62,110 +53,33 @@ Home
                     <li>
                         <p><b>Futurelog for Upcoming Tasks:</b> Your future tasks find a home in the Futurelog. They will automatically move to their designated day when their due date arrives.</p>
                     </li>
-                    <li>
-                        <p><b>Hexlog for Hexed Tasks: </b>Feeling adventurous? Click the "Hex" button to randomly hex a task from the backlog. Hexed tasks can't be edited or deleted. Completing the hexed task before the end of the week boosts your hex streak. But be warned, leaving any incomplete hex tasks will reset your score to zero.</p>
-                    </li>
                 </ul>
 
-                <i>
-                    <p class="text-shift">Easy Migration and Repeat Options:<p>
-                </i>
+                <i><p class="text-shift">Easy Migration, Hex and Repeat Options:<p></i>
 
                 <ul>
                     <li>
                         <p><b>Migrate to the Next Week:</b> Hit the "Migrate" button to get a glimpse of the upcoming week. ToDoHex will automatically backlog tasks and move futurelog tasks to their respective days.</p>
                     </li>
                     <li>
+                        <p><b>Hex Tasks: </b>Feeling stuck? Click the "Hex" button to hex a random task from the backlog. Hexed tasks are due today and can't be postponed, edited or deleted. You'll have to complete them by the end of the day to keep your hex streak.</p>
+                    </li>
+                    <li>
                         <p><b>Repeat Tasks:</b> Never forget recurring tasks again! Tasks in the Week View have a repeat option in the dropdown menu. Set tasks to repeat at specific intervals from their completion date.</p>
                     </li>
                 </ul> 
-          
-           
         </div>
     </div>
 
+    {% if not request.device.is_mobile %}
+    <div class = "col-xl-8 col-md-4 d-flex align-items-center bg-hex-sidenav px-0 border-0">
+        <video style="width:100%;" muted autoplay loop>
+            <source src="{% static 'assets/demo.mp4' %}" type="video/mp4" />
+        </video>
+    </div>
+    {% endif %} 
+
 </div>
   
-
-    <!-- <div class = "row justify-content-center">
-        <div class = "col-8 card bg-hex-sidenav px-0 border-0">
-            <div class = "card-header bg-hex-topnav-dark">
-                <div class="h2 d-flex justify-content-center justify-content-between">Welcome to ToDoHex</div>
-            </div>
-
-            <div class = "card-body">
-                <p>ToDoHex is a web application for managing todolists and tasks. The week view is based on the bullet journal task tracking and migration system.</p>
-
-                <h3>Main Features</h3>
-                <div class = "p-2">
-                    <p class=""><a href="boards">Boards</a> are category groupings of your todolists, you can reorder and move todolists by dragging them between boards.
-                    </p>
-                    
-                    <p class=""><b>Todolists</b> are where your tasks go, you can also drag and drop tasks between todolists.
-                    </p>
-
-                    <p class=""><b>Tasks</b> can be edited by clicking on the text field and then confirming the change by clicking on the green checkmark button.
-                        Clicking the dropdown button beside a task allows you to set a date for it or delete it
-                    </p>
-                </div>
-                
-                <h3>Week View</h3>
-
-                <div class="p-2 ">
-                    <p>The <a href="week">week</a> page gives you a special type of board, inspired by the bullet journal system, where the todolists are assigned to each day of the week.
-                    There are also the backlog, futurelog and hexlog todolists.</p>
-
-                    <p>The <b>backlog</b> is where your overdue tasks go. Incomplete tasks are automatically moved there at the end of the week.
-                    You can also drag items into it, or click the "This week" button to backlog any incomplete tasks in the tolists before the current day</p>
-                    <p>The <b>futurelog</b>  is where future tasks go. Tasks are automatically moved from the futurelog into the day it is due.</p>
-                    <p>The <b>hexlog</b> is a log for hexed tasks. When you click the "Hex" button, a random task from the backlog gets hexed. 
-                    Completing the hexed task before the end of the week will increase your hex streak, but leaving any incomplete hex tasks by the end of 
-                    the week will reset the score to zero.
-                    </p>
-
-                    The "Migrate" button will show you a view of the next week, automatically backlogging any tasks and moving futurelog tasks to week days.
-                    Tasks in the week page also have a repeat option in their dropdown. Setting tasks to repeat at a given interval from the date they are completed.
-                </div>
-
-             
-
-            </div>
-         
-      
-        </div>
-    </div> -->
-
        
 {% endblock %}
-<!-- 
-ToDoHex: Your Ultimate Task Management Solution!
-
-Simplify your life and stay on top of your tasks with ToDoHex, the ultimate web application for managing your to-do lists. We've taken inspiration from the bullet journal system to bring you an intuitive and efficient way to track and migrate your tasks seamlessly.
-
-Key Features:
-
-    Organize with Boards: Create boards to categorize your to-do lists effortlessly. Drag and drop your lists between boards to reorder and customize them to your liking.
-
-    Manage Todolists: Your tasks find a home in todolists. Easily drag and drop tasks between different lists for smooth organization.
-
-    Edit Tasks with Ease: Simply click on the text field of a task, make your changes, and confirm them with a click of the green checkmark button. Want to set a due date or delete a task? Just use the convenient dropdown menu next to each task.
-
-Welcome to the Week View:
-
-Our Week View takes task management to the next level, drawing inspiration from the bullet journal system. Here's what you can expect:
-
-    Assigned Days: Each day of the week has its own dedicated todolist, ensuring you stay focused and organized.
-
-    Backlog for Overdue Tasks: Incomplete tasks automatically move to the backlog at the end of the week. You can also manually backlog incomplete tasks by clicking the "This week" button, making sure nothing slips through the cracks.
-
-    Futurelog for Upcoming Tasks: Your future tasks find a home in the Futurelog. They will automatically move to their designated day when their due date arrives.
-
-    Hexlog for Hexed Tasks: Feeling adventurous? Click the "Hex" button to randomly hex a task from the backlog. Completing the hexed task before the end of the week boosts your hex streak. But be warned, leaving any incomplete hex tasks will reset your score to zero.
-
-Easy Migration and Repeat Options:
-
-Planning ahead has never been easier:
-
-    Migrate to the Next Week: Hit the "Migrate" button to get a glimpse of the upcoming week. ToDoHex will automatically backlog tasks and move futurelog tasks to their respective days.
-
-    Repeat Tasks: Never forget recurring tasks again! Tasks in the Week View have a repeat option in the dropdown menu. Set tasks to repeat at specific intervals from their completion date. -->

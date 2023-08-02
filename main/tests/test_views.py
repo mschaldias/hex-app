@@ -1,11 +1,13 @@
 from datetime import timedelta
-from django.test import Client
+from django.test import Client, override_settings
 from django.test import TestCase
 from main.models import Board,ToDoList,Task
 from main.serializers import TaskSerializer
 from http import HTTPStatus
 from django.utils import timezone
 from main.views import week_utils
+from todoapp import settings
+
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -28,9 +30,9 @@ class WeekUtilsTest(TestCase):
         board = self.board
         backlog = board.todolist_set.get(name="backlog")
         task = backlog.task_set.create()
-        board.hex()
+        board.hex(timezone.localdate())
 
-        week_utils(board,timezone.now()+timedelta(weeks=1))
+        week_utils(board,timezone.now()+timedelta(days=1))
 
         self.assertEquals(self.user.profile.hex_streak,0)
         self.assertFalse(task.hex)
@@ -38,6 +40,11 @@ class WeekUtilsTest(TestCase):
         self.assertFalse(task.complete)
         self.assertIn(task,backlog.task_set.all())
 
+
+@override_settings(
+    MIDDLEWARE=[mc for mc in settings.MIDDLEWARE
+                        if mc != "mobiledetect.middleware.DetectMiddleware"]
+    )
 class TasksViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):       

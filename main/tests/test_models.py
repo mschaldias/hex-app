@@ -33,7 +33,6 @@ class TaskModelTest(TestCase):
         cls.week_board = cls.user.board_set.get(category='week')
         cls.futurelog = cls.week_board.todolist_set.get(name = 'futurelog')
         cls.archive = cls.week_board.todolist_set.get(name = 'archive')
-        cls.hexlog = cls.week_board.todolist_set.get(name = 'hexlog')
 
     def test_set_recurring(self):
         kwargs = {'months':2}
@@ -136,7 +135,7 @@ class BoardModelTest(TestCase):
         for todolist in todolists:
             todolist.task_set.create(text=f"task in {todolist}",complete=True)
             count +=1
-        self.assertEqual(todolists.count(),10)
+        self.assertEqual(todolists.count(),9)
         self.week_board.archive(todolists)
         self.assertEqual(archive.task_set.count(),count)
 
@@ -215,16 +214,16 @@ class BoardModelTest(TestCase):
 
     def test_hex(self):
         backlog = self.week_board.todolist_set.get(name='backlog')
-        hexlog = self.week_board.todolist_set.get(name='hexlog')
+        today_todolist = self.week_board.todolist_set.get(date=timezone.localdate())
 
         task1 = backlog.task_set.create(text='task1')
         task2 = backlog.task_set.create(text='task2')
 
         expected_backlog_count = backlog.task_set.count()-1
-        expected_hexlog_count = hexlog.task_set.count()+1
+        expected_today_todolist_count = today_todolist.task_set.count()+1
 
-        self.assertTrue(self.week_board.hex())
+        self.assertTrue(self.week_board.hex(timezone.localdate()))
         self.assertEquals(backlog.task_set.count(),expected_backlog_count)
-        self.assertEquals(hexlog.task_set.count(),expected_hexlog_count)
+        self.assertEquals(today_todolist.task_set.count(),expected_today_todolist_count)
         
 
