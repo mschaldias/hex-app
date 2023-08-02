@@ -1,0 +1,41 @@
+{% load crispy_forms_tags %}
+<div id="task-modal-content"   class="modal-content bg-dark">
+    <div class="modal-header">
+        <form id="item-edit" method="dialog" action="#" onsubmit="edit('{{items}}','{{item.id}}',this.text.value)" class = "d-flex flex-column flex-grow-1 justify-content-center">
+            {% csrf_token %}
+            <textarea name="text" id="input" rows="1" class = "form-control bg-transparent text-white" maxlength=300>{{item.text}}</textarea>
+            <div class = "d-flex justify-content-end mt-1">
+                <button type = "submit" class = "btn btn-success text-white">
+                    Save
+                </button>
+            </div>
+        </form>                           
+        <button type="button" class="btn-close btn-close-white d-flex align-self-start" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <div class = "h5 b"><i class="fa-solid fa-calendar"></i>  Due Date</div>
+        <div id="date" class = "d-flex justify-content-center">
+            <div class="date" id="datepicker"></div>
+            <script>set_datepicker('{{item.id}}',"{{item.due_date|date:'c'}}")</script>
+        </div> 
+        {% if week%}
+        <div id = "repeat mt-2">
+            <div class = "mb-4 h5 b"><i class="fa-solid fa-repeat"></i>  Repeat</div>
+            <div class="input-group mx-auto">
+                <label class="input-group-text bg-transparent text-white">Every</label>
+                <input onchange="set_task_repeat('{{item.id}}')" value="{{item.interval_value}}" type="number" min="1" class = "form-control bg-transparent text-white" id="interval_value">
+                <select onchange="set_task_repeat('{{item.id}}')" class="form-select bg-dark text-white" id="interval_type">
+                    {% for option in interval_type_options %}
+                        {% if item.interval_type == option %}
+                        <option selected value="{{option}}">{{option}}</option> 
+                        {% else %}
+                        <option value="{{option}}">{{option}}</option>
+                        {% endif %}
+                    {% endfor %}                                              
+                </select>
+                <button class = "btn bg-transparent btn-hex mx-1" onclick="set_task_repeat('{{item.id}}',clear=true)"><b>Clear</b></button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>

@@ -1,54 +1,67 @@
+{% if cols %}
+<div class="{{cols}}" id = "card{{resource.id}}">
+{%else%}
 <div class="col-xl-3 col-md-6" id = "card{{resource.id}}">
-    <div class="card weekday mb-3">
-        <div class="card-header {{style}} d-flex justify-content-between align-items-center">
+{% endif %}
+    {% if spacing %}
+    <div class="card {{style}} {{spacing}}  border-0">   
+    {% else %}
+    <div class="card {{style}} mb-3 border-0">
+    {% endif %}
+        <div class="card-header d-flex justify-content-between align-items-center gap-2">
             {% if not week %}
-            <a class = "btn btn-card btn-primary btn-sm"  href="/{{resource_name}}/{{resource.id}}" >
+            <a id = "header-link" class = "header-content btn btn-hex btn-card btn-sm"  href="/{{resource_category}}/{{resource.id}}" >
                 <h5 id = "header-text">{{resource}}</h5>
-            </a> 
-            <div>
-                <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{resource.id}}" aria-expanded="false" aria-controls="collapse{{resource.id}}">
-                    <i class="fa-solid fa-gear"></i>
+            </a>
+            <form id="card-header-form" method="dialog" action="#" onsubmit="edit('{{resource_category}}','{{resource.id}}',this.card_header_text.value),toggle('#card{{resource.id}} .header-content','#card{{resource.id}} #card-header-form')" class = "input-group hidden gap-1">
+                {% csrf_token %}
+                <div class = "d-flex flex-grow-1 gap-1">
+                    <input id = "header-text-input" name = "card_header_text" type = "text" class = "form-control bg-transparent text-white px-1" value="{{resource}}">
+                    <button type = "submit" class = "btn btn-success border-0 text-white">
+                    <i class="fa-solid fa-check"></i>
+                    </button>
+                    <button type="button" class = "btn btn-secondary border-0 text-white", onclick="toggle('#card{{resource.id}} .header-content','#card{{resource.id}} #card-header-form')">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </form> 
+            <div class = "header-buttons header-content">
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"  aria-expanded="false">
                 </button>
-                <button  id = "create_button" class="btn btn-success", onclick = "create_button('{{items}}','{{resource.id}}')">
-                    <i class="fa fa-plus"></i>
-                </button>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><a class="dropdown-item" href="#" onclick="toggle('#card{{resource.id}} .header-content','#card{{resource.id}} #card-header-form')"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+                    </li>
+                    <li><a class="dropdown-item text-danger" onclick = "delete_button('{{resource_category}}','{{resource.id}}',card=true)" href="#"><i class="fa-regular fa-square-minus"></i> Delete</a></li>
+                </ul>
             </div>
             {% else %}
-            <a class = "btn btn-card btn-sm {{style}}" >
-                <h5 id = "header-text" >{{resource.date|date:"l j" }}</h5>                                
+            <a class = "btn btn-card btn-sm bg-transparent text-white" style="cursor:default;">
+                <h5 id = "header-text" >
+                    {% if resource.date %}
+                    {{resource.date|date:"l j" }}   
+                    {% else %}
+                    {{resource.name}}
+                    {% endif %}
+                </h5>                                
             </a> 
-            <div>
-                <button  id = "create_button" class="btn btn-success", onclick = "create_button('{{items}}','{{resource.id}}',value='',card=false)">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </div>
             {% endif %}
         </div>
-        {% if not week %}
-        <div class="collapse" id="collapse{{resource.id}}">
-            <div class = "card-body">
-                    <button  id = "edit_button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{resource.id}}" aria-expanded="false" aria-controls="collapse_edit{{resource.id}}" ><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                    <button  id = "delete_button" class="btn btn-danger", onclick = "delete_button('{{resource_name}}','{{resource.id}}',card=true)"><i class="fa-regular fa-square-minus"></i> Delete</button>
-            </div>
-            <div class = "collapse" id="collapse_edit{{resource.id}}" >
-                <div>
-                    <form action="#" id = "edit-board-form" onsubmit="edit('{{resource_name}}','{{resource.id}}',$(`#resource-name{{resource.id}}`).val())" method="dialog">
-                    {% csrf_token %}
-                        <div class="card-body">
-                            <label for="resource-name">{{resource_name}} name:</label>
-                            <input type="text" name="boardName" id="resource-name{{resource.id}}" value= "{{resource}}" class = "form-control bg-hex-topnav border-0 text-white">                    
-                        </div>
-                        <div class="card-header">
-                            <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{resource.id}},#collapse{{resource.id}}">Close</button>
-                            <button type="submit" class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#collapse_edit{{resource.id}},#collapse{{resource.id}}">Submit</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        {% endif %}
         <div class="card-body">
             {% include 'main/list.html' with list=resource%}
+            {% if week and resource.name != 'hexlog' or not week%}
+            <form id="create-form" action="#" method="dialog" onsubmit="create_button('{{items}}','{{resource.id}}',value=this.item_input.value);this.item_input.value=''">
+                <div class = "d-flex gap-1">
+                    {% if items == 'tasks' %}
+                    <input name="item_input" type="text" class = "form-control bg-transparent text-white" maxlength=300>
+                    {% else %}
+                    <input name="item_input" type="text" class = "form-control bg-transparent text-white" maxlength=200>
+                    {% endif %}                
+                    <button  type="submit" class="btn btn-primary">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </div>
+            </form>
+            {%endif%}
         </div>
     </div>
 </div>

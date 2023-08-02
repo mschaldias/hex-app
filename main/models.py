@@ -13,6 +13,7 @@ User = get_user_model()
 class Profile(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE,primary_key=True)
     hex_streak = models.IntegerField(default=0,validators=[MinValueValidator(0)])
+    archive_limit = models.IntegerField(default=50)
 
     def __str__(self):
         return f"owner:{self.owner}, streak: {self.hex_streak}"
@@ -57,7 +58,6 @@ class Board(models.Model):
         week_todolists = self.todolist_set.exclude(date=None)
         futurelog = self.todolist_set.get(name="futurelog")
         backlog = self.todolist_set.get(name="backlog")
-        hexlog = self.todolist_set.get(name="hexlog")
         
         #board is in a future week and and we are migrating back to current week
         if (not forward) and self.start_date > now:
@@ -80,7 +80,7 @@ class Board(models.Model):
                 
         #board is in current week and and we are backlogging incomplete tasks up to today and archiving complete tasks
         elif not forward:
-            logs = self.todolist_set.filter(name__in=['backlog','futurelog','hexlog'])
+            logs = self.todolist_set.filter(name__in=['backlog','futurelog'])
             self.archive(logs)
             self.archive(week_todolists,datetime=dt)
             self.hexable = True
@@ -91,7 +91,6 @@ class Board(models.Model):
             #all complete tasks in board are moved to archive, 
             #tasks with due date up to datetime are moved to backlog
             self.archive(week_todolists,datetime=dt)
-            backlog.task_set.filter(hex=True).update(todolist=hexlog)
             week_todolists.delete()
             if next_week: self.initialize_week(next_week=next_week,given_datetime=self.start_date) 
             else: self.initialize_week(given_datetime=now) 
@@ -118,22 +117,24 @@ class Board(models.Model):
         for todolist in todolists:
             for task in todolist.task_set.all():
                 if task.complete:
+                    if archive.task_set.count() >= self.owner.profile.archive_limit :
+                        archive.task_set.all().delete()
                     task.todolist = archive
                 elif datetime:
                     if task.due_date and task.due_date.astimezone(tz=timezone.get_current_timezone()) <= datetime.astimezone(tz=timezone.get_current_timezone()):
                         task.todolist = backlog
                 task.save()
 
-    def hex(self):
+    def hex(self,date):
         if self.category != 'week': raise IncorrectBoardCategoryError
         backlog = self.todolist_set.get(name="backlog")
-        hexlog = self.todolist_set.get(name="hexlog")
         if self.hexable:
             tasks = list(backlog.task_set.filter(complete=False))
             if tasks:
+                todolist = self.todolist_set.get(date=date)
                 random_task = choice(tasks)
-                random_task.todolist = hexlog
-                random_task.due_date = self.due_date
+                random_task.todolist = todolist
+                random_task.due_date = (datetime.combine(date, datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())
                 random_task.hex = True
                 random_task.save()
                 return True
