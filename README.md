@@ -1,23 +1,34 @@
 # ToDoHex
 
-## New Features
-- Drag and drop week view functionality, move tasks between todolist in a board
-- Drag and drop reordering of todolist on boards and tasks in todolists
-- Datepicker for tasks in todolists
-- Week View with backlog, futurelog and a todolist for each day of the week
-- Migration to next week, automatically assigns tasks to backlog and new week days
-- REST API for viewing an authenticated user's board, todolist and task resources
+## **Web App**
+https://todohex.onrender.com/
+
+##  Features
+- Drag-and-Drop Interface: move tasks between todolists and todolists between boards.
+- Task Management: set due date and recurring task options.
+- Week View: plan your week with dedicated backlog, futurelog and weekly todolists.
+- Weekly Migration: move into the next week, tasks are automatically assigned to the backlog and week day todolists.
+- Hexed Tasks: pick a random task from the backlog and complete it by the end of the day to increase your hex score.
+- Account Management: register and activate account, reset password or delete account.
+- REST API: provides access to an authenticated user's board, todolist and task resources.
 
 
-### **How to run**
-Using the todo_env environment:
+### **Local setup**
+#### **Pip:**
+`pip install -r requirements.txt`
 
+#### **Conda:**
+`conda env create --name env --file=environment.yml`
+
+### **Database migrations**
+    python manage.py makemigrations
+    python manage.py migrate
+
+### **Run**
 `python manage.py runserver`
-
-
 ### **Technologies**:
- - Django
+ - Django, Django REST
  - Bootstrap5
  - Javscript, JQuery
- - SQLite3
+ - SQLite3, PostgreSQL 15
  
