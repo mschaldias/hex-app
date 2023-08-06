@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
+
+from main.decorators import activate_timezone
 from .forms import UserCreationForm
 from django.contrib import messages
 from django.template.loader import render_to_string
@@ -57,6 +59,7 @@ def deleteEmail(to_email):
     email.content_subtype = "html"
     email.send()
 
+@activate_timezone
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)

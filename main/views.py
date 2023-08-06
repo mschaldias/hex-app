@@ -13,6 +13,8 @@ from django.http import Http404
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import Q
+from functools import wraps
+from main.decorators import activate_timezone
 
 MAX_ITEMS = 10000
 CARD_STYLES = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark','weekday':'bg-hex-sidenav'}
@@ -184,6 +186,7 @@ def list(request,resource_category,id=None):
     raise Http404
 
 @login_required(login_url='/login/')
+@activate_timezone
 def week(request):
     
     #this board is created for each new user using a signal
@@ -213,6 +216,7 @@ def week(request):
 #API Views:
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
+@activate_timezone
 def todolists_api(request,id=None):
 
     data = request.data
@@ -249,6 +253,7 @@ def todolists_api(request,id=None):
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
+@activate_timezone
 def tasks_api(request,id=None):
 
     data = request.data
@@ -292,6 +297,7 @@ def tasks_api(request,id=None):
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
+@activate_timezone
 def boards_api(request,id=None):   
 
     data = request.data

@@ -110,9 +110,10 @@
 
         <!-- custom js -->
         <script>
-       
-            document.querySelector("#menu-btn").addEventListener("click", () => {toggleSidebar()});
             setTimeZone();
+            if (document.querySelector("#menu-btn")){
+                 document.querySelector("#menu-btn").addEventListener("click", () => {toggleSidebar()});
+            }
         </script>
 </body>
 
