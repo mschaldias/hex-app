@@ -19,9 +19,3 @@ def create_board(sender, instance, created, **kwargs):
 def create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.get_or_create(owner=instance)
-
-@receiver(post_save, sender=User)
-def set_username(sender, instance, created, **kwargs):
-    if created:
-        instance.username = instance.email
-        instance.save()
