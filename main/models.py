@@ -67,7 +67,7 @@ class Board(models.Model):
                 self.initialize_week()
                 board_start_date = self.start_date.astimezone(tz)
                 board_due_date = self.due_date.astimezone(tz)
-                for task in backlog.task_set.all():
+                for task in backlog.task_set.filter(due_date__gt=dt):
                     if task.due_date:
                         task_due_date = task.due_date.astimezone(tz)
                         if board_start_date <= task_due_date <= board_due_date :

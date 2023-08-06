@@ -69,22 +69,6 @@ def boards(request,id=None):
                                                       'card_styles':CARD_STYLES,
                                                       })           
 
-@login_required(login_url='/login/')
-def action(request):
-    if request.method == "POST":
-        board = request.user.board_set.get(category="week")
-        current_timezone = timezone.get_current_timezone()
-        if request.POST.get("migrate"):
-            board.migrate_week(forward=True,next_week=True,dt=board.due_date,tz=current_timezone)
-        elif request.POST.get("current_week"): 
-            dt = (datetime.combine(timezone.localtime()-timedelta(days=1), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())#datetime is 23:59 day before current day localtime
-            board.migrate_week(dt=dt,tz=current_timezone) 
-        elif request.POST.get("hex"):
-            today_date = timezone.localtime().date()
-            board.hex(today_date)
-                 
-    return redirect("/week/")
-
 
 def week_utils(board,now):
     if now > board.due_date:
@@ -323,7 +307,7 @@ def boards_api(request,id=None):
             return Response({},status=HTTPStatus.NO_CONTENT)   
 
         elif request.method == "PUT":
-                board_serializer = BoardSerializer(board, data = data,context={'user':request.user}, partial=True)
+                board_serializer = BoardSerializer(board, data = data, partial=True)
                 if board_serializer.is_valid():
                     board_serializer.save()
                     return Response(board_serializer.data,status=HTTPStatus.OK)  

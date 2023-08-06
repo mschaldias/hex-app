@@ -369,3 +369,23 @@ function set_height(ta) {
     ta.style.height = (ta.scrollHeight)+'px';
     ta.addEventListener('input',function(){autoresize(ta) })             
 }
+
+function actions(board_id,name){
+    data = {'action':name}
+    $.ajax({type: 'PUT',
+    url: `/api/boards/${board_id}`,
+    contentType: 'application/json',
+    headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+    data: JSON.stringify(data),
+    dataType: 'json',
+    success: (data,msg,xhr) => {
+                console.log(msg,xhr.status)
+                replace_element(document.URL,['board-header','board-buttons','board','logs'],scripts=true)
+            },
+    error: (error) =>{
+        console.log(error);
+    }
+});
+}
