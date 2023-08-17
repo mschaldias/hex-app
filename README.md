@@ -1,7 +1,7 @@
 # ToDoHex
 
 ## **Web App**
-https://todohex.onrender.com/
+https://todohex.vercel.app/
 
 ##  Features
 - Drag-and-Drop Interface: move tasks between todolists and todolists between boards.
