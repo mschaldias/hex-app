@@ -10,3 +10,5 @@ register/migrations/*
 launch.json
 settings.json
 .env
+.vercel
+package-lock.json
