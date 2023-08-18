@@ -33,23 +33,24 @@ class TaskSerializer(serializers.ModelSerializer):
             due_date = instance.due_date
             if due_date: due_date = due_date.astimezone(current_timezone)
             board_due_date = board.due_date.astimezone(current_timezone)
-            #if due_date is in data but is None then task date is being cleared and prev_date is also set to None
             if 'due_date' in validated_data_keys:
+                #if due_date is in data but is None then task date is being cleared and prev_date is also set to None
                 if todolist.name == 'backlog' and not due_date:
                     instance.prev_date=None
-            if due_date and not instance.complete:                
 
-                if due_date > board_due_date:
-                    futurelog = board.todolist_set.get(name='futurelog')
-                    instance.todolist = futurelog
+                elif due_date and not instance.complete:                
 
-                elif due_date.date() < current_date:
-                    backlog = board.todolist_set.get(name='backlog')
-                    instance.todolist = backlog
+                    if due_date > board_due_date:
+                        futurelog = board.todolist_set.get(name='futurelog')
+                        instance.todolist = futurelog
 
-                else:
-                    week_day_todolist = board.todolist_set.get(date=due_date.date())
-                    instance.todolist = week_day_todolist
+                    elif due_date.date() < current_date:
+                        backlog = board.todolist_set.get(name='backlog')
+                        instance.todolist = backlog
+
+                    else:
+                        week_day_todolist = board.todolist_set.get(date=due_date.date())
+                        instance.todolist = week_day_todolist
    
         instance.save()    
         return instance
