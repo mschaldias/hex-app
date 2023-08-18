@@ -2,7 +2,9 @@ from rest_framework import serializers
 from main.custom_exceptions import IncorrectBoardCategoryError
 from .models import Board,ToDoList,Task
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.core.validators import RegexValidator
+
 
 class TaskSerializer(serializers.ModelSerializer):
 
@@ -12,10 +14,10 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def update(self,instance,validated_data): 
         board = instance.todolist.board
-        current_datetime = self.context.get('current_datetime')
         super().update(instance, validated_data)  
         if board.category == 'week':
-            if not current_datetime: current_datetime = timezone.localtime()
+            current_timezone = self.context.get('current_timezone', timezone.get_current_timezone())
+            current_datetime = self.context.get('current_datetime', timezone.localtime())
             current_date = current_datetime.date()
             validated_data_keys = validated_data.keys()
 
@@ -29,31 +31,28 @@ class TaskSerializer(serializers.ModelSerializer):
 
             todolist = instance.todolist
             due_date = instance.due_date
+            if due_date: due_date = due_date.astimezone(current_timezone)
+            board_due_date = board.due_date.astimezone(current_timezone)
             #if due_date is in data but is None then task date is being cleared and prev_date is also set to None
             if 'due_date' in validated_data_keys:
                 if todolist.name == 'backlog' and not due_date:
                     instance.prev_date=None
             if due_date and not instance.complete:                
-                if todolist.name == 'backlog': 
-                    #if backlog task due_date is changed to after board due_date, task is assigned to futurelog
-                    if due_date > board.due_date:
-                        futurelog = board.todolist_set.get(name='futurelog')
-                        instance.todolist = futurelog
-                elif todolist.name == 'futurelog':
-                    #if futurelog task due_date is changed to be in the past, task is assigned to backlog
-                    if due_date.date() < current_date:
-                        backlog = board.todolist_set.get(name='backlog')
-                        instance.todolist = backlog
 
-                #if task due_date is between now and board.due_date then assign to week day
-                if current_date <= due_date.date() <= board.due_date.astimezone(timezone.get_current_timezone()).date():
-                    week_day_todolist = board.todolist_set.get(date=due_date.astimezone(timezone.get_current_timezone()).date())
+                if due_date > board_due_date:
+                    futurelog = board.todolist_set.get(name='futurelog')
+                    instance.todolist = futurelog
+
+                elif due_date.date() < current_date:
+                    backlog = board.todolist_set.get(name='backlog')
+                    instance.todolist = backlog
+
+                else:
+                    week_day_todolist = board.todolist_set.get(date=due_date.date())
                     instance.todolist = week_day_todolist
    
         instance.save()    
         return instance
-
-
 
 class ToDoListSerializer(serializers.ModelSerializer):
 
@@ -97,10 +96,12 @@ class BoardSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='user.username')
     todolist_set = serializers.PrimaryKeyRelatedField(queryset = ToDoList.objects.all(),many=True,required=False)
-    
+    valid_actions = RegexValidator(r'^(hex|current week|migrate)$', "Only 'hex','current week' or 'migrate' are allowed.")
+    action = serializers.CharField(validators=[valid_actions],required=False)
+       
     class Meta:
         model = Board
-        fields = ('id','owner','category','todolist_set','name')
+        fields = ('id','owner','category','todolist_set','name','action')
 
     def create(self, validated_data):
         category = validated_data.get('category')
@@ -110,16 +111,29 @@ class BoardSerializer(serializers.ModelSerializer):
             return super().create(validated_data)  
 
     def update(self,instance,validated_data):
-        user = self.context['user']
+        if instance.category == 'week':
+            current_timezone = self.context.get('current_timezone', timezone.get_current_timezone())
+            current_datetime = self.context.get('current_datetime', timezone.localtime())
+            action = validated_data.get('action')
+            if action:
+                if action == 'migrate':
+                    instance.migrate_week(forward=True,next_week=True,dt=instance.due_date,tz=current_timezone)
 
-        position = 0
-        for todolist in validated_data.get('todolist_set',[]):
-            if todolist.board in user.board_set.all():
-                todolist.position = position
-                todolist.board = instance
-                position+=1
-                todolist.save()
+                elif action == 'current week':
+                    dt = (datetime.combine(timezone.localtime()-timedelta(days=1), datetime.max.time())).replace(tzinfo=current_timezone)#datetime is 23:59 day before current day localtime
+                    instance.migrate_week(dt=dt,tz=current_timezone) 
+                elif action == 'hex':
+                    instance.hex(current_datetime.date())
 
-        instance.name = validated_data.get('name', instance.name)
+        else:
+            position = 0
+            for todolist in validated_data.get('todolist_set',[]):
+                if todolist.board in instance.owner.board_set.all():
+                    todolist.position = position
+                    todolist.board = instance
+                    position+=1
+                    todolist.save()
+
+            instance.name = validated_data.get('name', instance.name)
         instance.save()
         return instance

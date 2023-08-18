@@ -9,6 +9,7 @@ on:
 
 jobs:
   build:
+    name: django workflow
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4

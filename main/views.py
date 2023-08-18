@@ -13,6 +13,8 @@ from django.http import Http404
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import Q
+from functools import wraps
+from main.decorators import activate_timezone
 
 MAX_ITEMS = 10000
 CARD_STYLES = {'backlog':'bg-danger','futurelog':'bg-primary','hexlog':'bg-dark','weekday':'bg-hex-sidenav'}
@@ -66,22 +68,6 @@ def boards(request,id=None):
                                                       'item_styles':ITEM_STYLES,
                                                       'card_styles':CARD_STYLES,
                                                       })           
-
-@login_required(login_url='/login/')
-def action(request):
-    if request.method == "POST":
-        board = request.user.board_set.get(category="week")
-        current_timezone = timezone.get_current_timezone()
-        if request.POST.get("migrate"):
-            board.migrate_week(forward=True,next_week=True,dt=board.due_date,tz=current_timezone)
-        elif request.POST.get("current_week"): 
-            dt = (datetime.combine(timezone.localtime()-timedelta(days=1), datetime.max.time())).replace(tzinfo=timezone.get_current_timezone())#datetime is 23:59 day before current day localtime
-            board.migrate_week(dt=dt,tz=current_timezone) 
-        elif request.POST.get("hex"):
-            today_date = timezone.localtime().date()
-            board.hex(today_date)
-                 
-    return redirect("/week/")
 
 
 def week_utils(board,now):
@@ -184,6 +170,7 @@ def list(request,resource_category,id=None):
     raise Http404
 
 @login_required(login_url='/login/')
+@activate_timezone
 def week(request):
     
     #this board is created for each new user using a signal
@@ -213,6 +200,7 @@ def week(request):
 #API Views:
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
+@activate_timezone
 def todolists_api(request,id=None):
 
     data = request.data
@@ -249,6 +237,7 @@ def todolists_api(request,id=None):
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
+@activate_timezone
 def tasks_api(request,id=None):
 
     data = request.data
@@ -292,6 +281,7 @@ def tasks_api(request,id=None):
 
 @login_required(login_url='/login/')
 @api_view(['GET','POST','DELETE','PUT'])
+@activate_timezone
 def boards_api(request,id=None):   
 
     data = request.data
@@ -317,7 +307,7 @@ def boards_api(request,id=None):
             return Response({},status=HTTPStatus.NO_CONTENT)   
 
         elif request.method == "PUT":
-                board_serializer = BoardSerializer(board, data = data,context={'user':request.user}, partial=True)
+                board_serializer = BoardSerializer(board, data = data, partial=True)
                 if board_serializer.is_valid():
                     board_serializer.save()
                     return Response(board_serializer.data,status=HTTPStatus.OK)  
